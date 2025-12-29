@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <signal.h>
+#include <stdio.h>
+#include "server.h"
+
+#define NUM_INITIAL_CLIENTS 10
+#define TIMEOUT_SECS 2
+
+volatile sig_atomic_t keep_running = 1;
+Server *server = NULL;
+
+void signalHandler(int signum) {
+    keep_running = 0;
+    printf("\nSignal received, shutting down...\n");
+}
+
+int main() {
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+
+    server = createServer(8080, NUM_INITIAL_CLIENTS);
+    if (!server) {
+        fprintf(stderr, "Failed to create server!\n");
+        return 1;
+    }
+
+    if (!startServer(server)) {
+        fprintf(stderr, "Failed to start server!\n");
+        destroyServer(server);
+        return 1;
+    }
+
+    while (keep_running) {
+        pollServer(server, TIMEOUT_SECS);
+    }
+
+    stopServer(server);
+    destroyServer(server);
+
+    return 0;
+}
