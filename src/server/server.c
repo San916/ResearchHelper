@@ -107,25 +107,42 @@ void pollServer(Server *server, int timeout) {
 
         if (bytes <= 0) {
             closesocket(client_socket);
-
             server->clients[i] = server->clients[server->num_clients - 1];
             server->num_clients--;
             i--;
             printf("Client socket closed (now %d total clients)\n", server->num_clients);
         } else {
             buffer[bytes] = '\0';
-            const char *response =
-                "HTTP/1.0 200 OK\r\n"
+
+            bool keep_alive = true;
+            if (strstr(buffer, "Connection: close") || strstr(buffer, "Connection: Close")) {
+                keep_alive = false;
+            }
+
+            const char *response = keep_alive ?
+                "HTTP/1.1 200 OK\r\n"
                 "Content-Type: text/plain\r\n"
+                "Connection: keep-alive\r\n"
+                "Content-Length: 13\r\n"
+                "\r\n"
+                "Hello, world!" :
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/plain\r\n"
+                "Connection: close\r\n"
                 "Content-Length: 13\r\n"
                 "\r\n"
                 "Hello, world!";
+
             send(client_socket, response, (int)strlen(response), 0);
-            closesocket(client_socket);
-            server->clients[i] = server->clients[server->num_clients - 1];
-            server->num_clients--;
-            i--;
-            printf("Client socket closed (now %d total clients)\n", server->num_clients);
+            if (!keep_alive) {
+                closesocket(client_socket);
+                server->clients[i] = server->clients[server->num_clients - 1];
+                server->num_clients--;
+                i--;
+                printf("Client socket closed (now %d total clients)\n", server->num_clients);
+            } else {
+                printf("Client socket stays open (now %d total clients)\n", server->num_clients);
+            }
         }
     }
 }
