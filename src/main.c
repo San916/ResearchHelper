@@ -2,6 +2,8 @@
 #include <signal.h>
 #include <stdio.h>
 #include "server.h"
+#include "router.h"
+#include "handlers.h"
 
 #define NUM_INITIAL_CLIENTS 10
 #define TIMEOUT_SECS 2
@@ -18,7 +20,12 @@ int main() {
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
 
-    server = createServer(8080, NUM_INITIAL_CLIENTS);
+    Route routes[] = {
+        {"/", handle_home},
+    };
+    int num_routes = sizeof(routes) / sizeof(Route);
+
+    server = createServer(8080, NUM_INITIAL_CLIENTS, routes, num_routes);
     if (!server) {
         fprintf(stderr, "Failed to create server!\n");
         return 1;

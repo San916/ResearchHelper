@@ -1,10 +1,12 @@
 #include "server.h"
+#include "http.h"
+#include "http_errors.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <winsock2.h>
 
-Server* createServer(int port, int initial_capacity) {
+Server* createServer(int port, int initial_capacity, Route* routes, int num_routes) {
     Server *server = malloc(sizeof(Server));
     if (!server) return NULL;
     server->running = false;
@@ -13,6 +15,8 @@ Server* createServer(int port, int initial_capacity) {
     server->capacity = initial_capacity;
     server->socket = INVALID_SOCKET;
     server->clients = malloc(sizeof(SOCKET) * initial_capacity);
+    server->routes = routes;
+    server->num_routes = num_routes;
     if (!server->clients) {
         free(server);
         return NULL;
@@ -112,29 +116,29 @@ void pollServer(Server *server, int timeout) {
             i--;
             printf("Client socket closed (now %d total clients)\n", server->num_clients);
         } else {
+            bool build_http_request_failure = false;
             buffer[bytes] = '\0';
 
-            bool keep_alive = true;
-            if (strstr(buffer, "Connection: close") || strstr(buffer, "Connection: Close")) {
-                keep_alive = false;
+            HttpRequest* req = parse_http_request(buffer, bytes);
+            HttpResponse resp = {0};
+
+            if (!req) resp = handle_400(req);
+            else find_route(server->routes, server->num_routes, req, &resp);
+
+            char* response = build_http_response(&resp);
+            if (!response) {
+                build_http_request_failure = true;
+                send(client_socket, MINIMAL_500_RESPONSE, (int)strlen(MINIMAL_500_RESPONSE), 0);
+            } else {
+                send(client_socket, response, (int)strlen(response), 0);
+                free(response);
             }
 
-            const char *response = keep_alive ?
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/plain\r\n"
-                "Connection: keep-alive\r\n"
-                "Content-Length: 13\r\n"
-                "\r\n"
-                "Hello, world!" :
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/plain\r\n"
-                "Connection: close\r\n"
-                "Content-Length: 13\r\n"
-                "\r\n"
-                "Hello, world!";
-
-            send(client_socket, response, (int)strlen(response), 0);
-            if (!keep_alive) {
+            bool keep_alive = (req ? !req->keep_alive : false) || resp.close_connection || build_http_request_failure;
+            if (req) free(req);
+            free_http_response(&resp);
+            
+            if (keep_alive) {
                 closesocket(client_socket);
                 server->clients[i] = server->clients[server->num_clients - 1];
                 server->num_clients--;
