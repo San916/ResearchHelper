@@ -4,5 +4,6 @@
 #include "http.h"
 
 HttpResponse handle_home(HttpRequest* req);
+HttpResponse handle_about(HttpRequest* req);
 
 #endif

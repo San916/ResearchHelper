@@ -22,6 +22,7 @@ int main() {
 
     Route routes[] = {
         {"/", handle_home},
+        {"/about", handle_about},
     };
     int num_routes = sizeof(routes) / sizeof(Route);
 
