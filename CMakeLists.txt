@@ -1,23 +1,92 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(ResearchHelper C)
+project(ResearchHelper LANGUAGES C)
 
-# Set sources
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# ============== Reusable paths ==============
+set(UNITY_DIR tests/unity)
+set(TEST_DIR tests)
+set(TEST_UTILS_DIR tests/testutils)
+set(SOURCE_DIR src)
+set(INCLUDE_DIR include)
+
+# ============== Setup unity ==============
+add_library(unity STATIC ${UNITY_DIR}/src/unity.c)
+target_include_directories(unity PUBLIC ${UNITY_DIR}/src)
+
+# ============== Set sources ==============
 set(SOURCES
-    src/main.c
-    src/server/server.c
+    ${SOURCE_DIR}/main.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/router.c
+    ${SOURCE_DIR}/server/server.c
+    ${SOURCE_DIR}/utils/utils.c
 )
 
-# Set includes
+# ============== Set includes ==============
 set(INCLUDES
-    include/server
+    ${INCLUDE_DIR}/server
+    ${INCLUDE_DIR}/utils
 )
 
-# Create executable
+# ============== Main executable ==============
 add_executable(App ${SOURCES})
-
-# Get includes
 target_include_directories(App PRIVATE ${INCLUDES})
-
-# Libraries
 target_link_libraries(App Ws2_32)
+
+# ============== Tests with unity ==============
+
+add_compile_definitions(
+    UNITY_OUTPUT_COLOR
+)
+
+# ========== Unit test utils ==========
+add_executable(test_utils
+    ${TEST_DIR}/unit/test_utils.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_utils PRIVATE 
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_utils unity)
+
+# ========== Unit test http ==========
+add_executable(test_http
+    ${TEST_DIR}/unit/test_http.c
+    ${TEST_UTILS_DIR}/src/test_http_utils.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_http PRIVATE 
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_http unity)
+
+# ========== Unit test router ==========
+add_executable(test_router
+    ${TEST_DIR}/unit/test_router.c
+    ${SOURCE_DIR}/server/router.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_router PRIVATE 
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_router unity Ws2_32)
+
+# ========== Add tests ==========
+enable_testing()
+add_test(NAME test_utils COMMAND test_utils)
+add_test(NAME test_http COMMAND test_http)
+add_test(NAME test_router COMMAND test_router)
