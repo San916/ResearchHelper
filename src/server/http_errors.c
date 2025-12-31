@@ -8,7 +8,7 @@ HttpResponse handle_400(HttpRequest* req) {
     resp.status_code = 400;
     resp.status_text = "Bad Request";
 
-    if (set_header(&resp, "Content-Type", "text/plain") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/plain") != 0) {
         return handle_500();
     };
 
@@ -34,7 +34,7 @@ HttpResponse handle_404(HttpRequest* req) {
     resp.status_code = 404;
     resp.status_text = "Not Found";
 
-    if (set_header(&resp, "Content-Type", "text/plain") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/plain") != 0) {
         return handle_500();
     };
 

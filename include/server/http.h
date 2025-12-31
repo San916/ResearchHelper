@@ -13,6 +13,35 @@
 #define MAX_REQUEST_SIZE 4096
 #define HEADER_SIZE_ESTIMATE 1024
 
+static const char* VALID_HTTP_METHODS[] = {
+    "GET",
+};
+
+static const char* VALID_HTTP_VERSIONS[] = {
+    "HTTP/1.1",
+};
+
+typedef enum {
+    REQUEST_OK = 0,
+    MALLOC_ERROR = 10,
+    PARSE_REQUEST_TOO_BIG = 20,
+    REQUEST_BAD_FORMAT = 30,
+
+    PARSE_FIRST_LINE_OK = 100,
+    PARSE_FIRST_LINE_INVALID_FORMAT,
+    PARSE_FIRST_LINE_INVALID_METHOD,
+    PARSE_FIRST_LINE_INVALID_VERSION,
+    PARSE_FIRST_LINE_INVALID_PATH,
+
+    PARSE_HEADERS_OK = 200,
+    PARSE_HEADERS_INVALID_FORMAT,
+    PARSE_HEADER_ENTRY_TOO_LARGE,
+    PARSE_TOO_MANY_HEADERS,
+    PARSE_MULTIPLE_HOST_HEADERS,
+    PARSE_NO_HOST_HEADERS,
+
+} HttpRequestError;
+
 typedef struct HttpHeader {
     char key[MAX_KEY_LEN];
     char value[MAX_VALUE_LEN];
@@ -41,10 +70,10 @@ typedef struct HttpResponse {
 } HttpResponse;
 
 void free_http_response(HttpResponse* resp);
-int set_header(HttpResponse* resp, const char* key, const char* val);
+int set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
 int parse_request_line(char* line, HttpRequest* req);
 int parse_headers(HttpRequest* req, char** context);
-HttpRequest* parse_http_request(const char* buffer, int buffer_len);
+HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code);
 char* build_http_response(HttpResponse* resp);
 
 #endif

@@ -10,7 +10,7 @@ HttpResponse handle_home(HttpRequest* req) {
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(&resp, "Content-Type", "text/html") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html") != 0) {
         return handle_500();
     }
 

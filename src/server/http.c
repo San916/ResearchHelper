@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
+// MODIFIES/EFFECTS Frees every valid field in the given HttpResponse
 void free_http_response(HttpResponse* resp) {
     if (!resp) return;
 
@@ -15,96 +17,150 @@ void free_http_response(HttpResponse* resp) {
     // If we end up mallocing for status_text, make sure to update code here
 }
 
-int set_header(HttpResponse* resp, const char* key, const char* val) {
-    if (strlen(key) >= MAX_KEY_LEN - 1 || strlen(val) >= MAX_VALUE_LEN - 1) return -1;
+// REQUIRES: Pointer to start of HttpHeader array, number of headers, and key value pair
+// MODIFIES/EFFECTS: Sets header with key and value pair, and increments num_headers. Returns status code or 0
+int set_header(HttpHeader* headers, int* num_headers, const char* key, const char* val) {
+    if (*num_headers >= MAX_HEADER_COUNT) return PARSE_TOO_MANY_HEADERS;
+    if (strlen(key) >= MAX_KEY_LEN - 1 || strlen(val) >= MAX_VALUE_LEN - 1) return PARSE_HEADER_ENTRY_TOO_LARGE;
 
-    strcpy(resp->headers[resp->num_headers].key, key);
-    strcpy(resp->headers[resp->num_headers].value, val);
+    strcpy(headers[*num_headers].key, key);
+    strcpy(headers[*num_headers].value, val);
 
-    resp->num_headers++;
+    (*num_headers)++;
     return 0;
 }
 
+// REQUIRES: method as string
+// EFFECTS: REturns true if the method is a valid method (i.e "GET")
+bool is_valid_method(char* method) {
+    if (strlen(method) >= MAX_METHOD_LEN - 1) return false;
+    for (int i = 0; i < sizeof(VALID_HTTP_METHODS) / sizeof(VALID_HTTP_METHODS[0]); i++) {
+        if (strcmp(method, VALID_HTTP_METHODS[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// REQUIRES: version as string
+// EFFECTS: REturns true if the version is a valid version (i.e "HTTP/1.1")
+bool is_valid_version(char* version) {
+    if (strlen(version) >= MAX_VERSION_LEN - 1) return false;
+    for (int i = 0; i < sizeof(VALID_HTTP_VERSIONS) / sizeof(VALID_HTTP_VERSIONS[0]); i++) {
+        if (strcmp(version, VALID_HTTP_VERSIONS[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // REQUIRES: Takes a request line and request
 // MODIFIES: Modifies original string with '\0' in place of delimeter. Modifies request method, path, token
-// EFFECTS: Reads the line given into req->method, path, version
+// EFFECTS: Reads the line given into req->method, path, version. Returns status code
 int parse_request_line(char* line, HttpRequest* req) {
     char* context = NULL;
 
     char* token = strtok_s(line, " ", &context);
-    if (!token || strlen(token) >= MAX_METHOD_LEN - 1) return -1;
+    if (!token) return PARSE_FIRST_LINE_INVALID_FORMAT;
     strcpy(req->method, token);
+    if (!is_valid_method(req->method)) return PARSE_FIRST_LINE_INVALID_METHOD;
 
     token = strtok_s(NULL, " ", &context);
-    if (!token || strlen(token) >= MAX_PATH_LEN - 1) return -1;
+    if (!token || strlen(token) >= MAX_PATH_LEN - 1) return PARSE_FIRST_LINE_INVALID_PATH;
     strcpy(req->path, token);
 
     token = strtok_s(NULL, " ", &context);
-    if (!token || strlen(token) >= MAX_VERSION_LEN - 1) return -1;
+    if (!token) return PARSE_FIRST_LINE_INVALID_FORMAT;
     strcpy(req->version, token);
+    if (!is_valid_version(req->version)) return PARSE_FIRST_LINE_INVALID_VERSION;
 
-    return 0;
+    return PARSE_FIRST_LINE_OK;
 }
 
+// REQUIRES: HttpRequest, char** context pointing to the start of the headers section in the request
+// MODIFIES: char** context to the end of headers
+// EFFECTS: Parses through headers and adds them into the HttpRequest. Returns status code
 int parse_headers(HttpRequest* req, char** context) {
     char* line;
+    bool contains_host = false;
+    bool keep_alive = true;
 
     while ((line = strtok_s(NULL, "\r\n", context)) != NULL) {
         if (strlen(line) == 0) break; 
-        if (req->num_headers >= MAX_HEADER_COUNT) break;
+        if (req->num_headers >= MAX_HEADER_COUNT) return PARSE_TOO_MANY_HEADERS;
 
         char* key = line;
         char* val = strstr(line, ": ");
-        if (!val) return -1;
+        if (!val) return PARSE_HEADERS_INVALID_FORMAT;
         *val = '\0';
         val += 2;
 
         if (str_equals(key, "Connection", false)) {
-            if (str_equals(val, "keep-alive", false)) req->keep_alive = true;
-            else if (str_equals(val, "close", false)) req->keep_alive = false;
-            continue;
+            if (str_equals(val, "keep-alive", false)) keep_alive = true;
+            else if (str_equals(val, "close", false)) keep_alive = false;
         }
 
-        if (strlen(key) >= MAX_KEY_LEN - 1 || strlen(val) >= MAX_VALUE_LEN - 1) return -1;
-        strcpy(req->headers[req->num_headers].key, key);
-        strcpy(req->headers[req->num_headers].value, val);
+        if (str_equals(key, "Host", false)) {
+            if (contains_host) return PARSE_MULTIPLE_HOST_HEADERS;
+            contains_host = true;
+        }
 
-        req->num_headers++;
+        int status_code = set_header(req->headers, &req->num_headers, key, val);
+        if (status_code) return status_code;
     }
-    return 0;
+    
+    if (!contains_host) return PARSE_NO_HOST_HEADERS;
+    req->keep_alive = keep_alive;
+    return PARSE_HEADERS_OK;
 }
 
 // REQUIRES: Takes buffer with buffer_len = len of str without null terminator (aka strlen(buffer))
 // EFFECTS: Parses buffer into an HTTPRequest* and returns it, or return NULL on failure
 // Caller must free the HttpRequest*
-HttpRequest* parse_http_request(const char* buffer, int buffer_len) {
+HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code) {
     HttpRequest* req = calloc(1, sizeof(HttpRequest));
-    if (!req) return NULL;
-    if (buffer_len <= 0 || buffer_len > MAX_REQUEST_SIZE) {
+    if (!req) {
+        *status_code = MALLOC_ERROR;
+        return NULL;
+    }
+    if (buffer_len <= 0 || buffer_len >= MAX_REQUEST_SIZE - 1 || buffer_len > strlen(buffer)) {
         free(req);
+        *status_code = PARSE_REQUEST_TOO_BIG;
         return NULL;
     }
 
     char *temp = malloc(buffer_len + 1);
-    if (!temp) return NULL;
+    if (!temp) {
+        free(req);
+        *status_code = MALLOC_ERROR;
+        return NULL;
+    }
 
     memcpy(temp, buffer, buffer_len);
     temp[buffer_len] = '\0';
 
+    #define SET_STATUS_CODE_RETURN(code)  { *status_code = code; free(req); free(temp); return NULL; }
+
     char* context = NULL;
     char* first_line = strtok_s(temp, "\r\n", &context);
-    if (!first_line || parse_request_line(first_line, req) != 0 || parse_headers(req, &context) != 0)  {
-        free(req);
-        free(temp);
-        return NULL;
-    }
+    if (!first_line) SET_STATUS_CODE_RETURN(REQUEST_BAD_FORMAT);
 
+    int request_status = parse_request_line(first_line, req);
+    if (request_status != PARSE_FIRST_LINE_OK) SET_STATUS_CODE_RETURN(request_status);
+
+    int headers_status = parse_headers(req, &context);
+    if (headers_status != PARSE_HEADERS_OK) SET_STATUS_CODE_RETURN(headers_status);
+
+    *status_code = REQUEST_OK;
     free(temp);
     return req;
 }
 
 char* build_http_response(HttpResponse* resp) {
     if (!resp) return NULL;
+    if (resp->num_headers > MAX_HEADER_COUNT || (resp->body && resp->num_headers > MAX_HEADER_COUNT - 1)) return NULL;
+    if (resp->body && strlen(resp->body) != resp->body_length) return NULL;
 
     int total_size = HEADER_SIZE_ESTIMATE + resp->body_length;
 
@@ -129,15 +185,13 @@ char* build_http_response(HttpResponse* resp) {
     }
 
     // Add content-length
-    offset += snprintf(output + offset, total_size - offset,
-        "Content-Length: %d\r\n", resp->body_length);
-    VERIFY_OFFSET() 
+    if (resp->body_length > 0 && resp->body) {
+        offset += snprintf(output + offset, total_size - offset,
+            "Content-Length: %d\r\n", resp->body_length);
+        resp->num_headers++;
+    }
 
-    // Add connection (close or keep-alive)
-    const char* connection_val = resp->close_connection ? "close" : "keep-alive";
-    offset += snprintf(output + offset, total_size - offset,
-        "Connection: %s\r\n", connection_val);
-    VERIFY_OFFSET()
+    VERIFY_OFFSET() 
 
     // One more \r\n to end headers
     offset += snprintf(output + offset, total_size - offset, "\r\n");

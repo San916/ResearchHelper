@@ -87,6 +87,7 @@ target_link_libraries(test_router unity Ws2_32)
 
 # ========== Add tests ==========
 enable_testing()
+
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_http COMMAND test_http)
 add_test(NAME test_router COMMAND test_router)

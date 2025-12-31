@@ -4,6 +4,7 @@
 #include "handlers.h"
 #include "router.h"
 #include <string.h>
+#include <stdlib.h>
 
 // Define all variables here
 

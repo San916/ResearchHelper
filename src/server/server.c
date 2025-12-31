@@ -118,8 +118,9 @@ void pollServer(Server *server, int timeout) {
         } else {
             bool build_http_request_failure = false;
             buffer[bytes] = '\0';
+            int status_code = 0;
 
-            HttpRequest* req = parse_http_request(buffer, bytes);
+            HttpRequest* req = parse_http_request(buffer, bytes, &status_code);
             HttpResponse resp = {0};
 
             if (!req) resp = handle_400(req);
