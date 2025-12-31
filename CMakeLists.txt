@@ -7,7 +7,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # ============== Reusable paths ==============
 set(UNITY_DIR tests/unity)
-set(TESTS_DIR tests)
+set(TEST_DIR tests)
+set(TEST_UTILS_DIR tests/testutils)
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 
@@ -39,9 +40,13 @@ target_link_libraries(App Ws2_32)
 
 # ============== Tests with unity ==============
 
+add_compile_definitions(
+    UNITY_OUTPUT_COLOR
+)
+
 # ========== Unit test utils ==========
 add_executable(test_utils
-    ${TESTS_DIR}/unit/test_utils.c
+    ${TEST_DIR}/unit/test_utils.c
     ${SOURCE_DIR}/utils/utils.c
 )
 target_include_directories(test_utils PRIVATE 
@@ -52,20 +57,22 @@ target_link_libraries(test_utils unity)
 
 # ========== Unit test http ==========
 add_executable(test_http
-    ${TESTS_DIR}/unit/test_http.c
+    ${TEST_DIR}/unit/test_http.c
+    ${TEST_UTILS_DIR}/src/test_http_utils.c
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/http_errors.c
     ${SOURCE_DIR}/utils/utils.c
 )
 target_include_directories(test_http PRIVATE 
     ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
     ${UNITY_DIR}/src
 )
 target_link_libraries(test_http unity)
 
 # ========== Unit test router ==========
 add_executable(test_router
-    ${TESTS_DIR}/unit/test_router.c
+    ${TEST_DIR}/unit/test_router.c
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/http_errors.c

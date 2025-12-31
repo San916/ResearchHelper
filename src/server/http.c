@@ -1,5 +1,4 @@
 #include "http.h"
-#include "router.h"
 #include "utils.h"
 #include <string.h>
 #include <stdio.h>
@@ -26,7 +25,10 @@ int set_header(HttpResponse* resp, const char* key, const char* val) {
     return 0;
 }
 
-static int parse_request_line(char* line, HttpRequest* req) {
+// REQUIRES: Takes a request line and request
+// MODIFIES: Modifies original string with '\0' in place of delimeter. Modifies request method, path, token
+// EFFECTS: Reads the line given into req->method, path, version
+int parse_request_line(char* line, HttpRequest* req) {
     char* context = NULL;
 
     char* token = strtok_s(line, " ", &context);
@@ -44,7 +46,7 @@ static int parse_request_line(char* line, HttpRequest* req) {
     return 0;
 }
 
-static int parse_headers(HttpRequest* req, char** context) {
+int parse_headers(HttpRequest* req, char** context) {
     char* line;
 
     while ((line = strtok_s(NULL, "\r\n", context)) != NULL) {
@@ -72,6 +74,9 @@ static int parse_headers(HttpRequest* req, char** context) {
     return 0;
 }
 
+// REQUIRES: Takes buffer with buffer_len = len of str without null terminator (aka strlen(buffer))
+// EFFECTS: Parses buffer into an HTTPRequest* and returns it, or return NULL on failure
+// Caller must free the HttpRequest*
 HttpRequest* parse_http_request(const char* buffer, int buffer_len) {
     HttpRequest* req = calloc(1, sizeof(HttpRequest));
     if (!req) return NULL;

@@ -42,6 +42,8 @@ typedef struct HttpResponse {
 
 void free_http_response(HttpResponse* resp);
 int set_header(HttpResponse* resp, const char* key, const char* val);
+int parse_request_line(char* line, HttpRequest* req);
+int parse_headers(HttpRequest* req, char** context);
 HttpRequest* parse_http_request(const char* buffer, int buffer_len);
 char* build_http_response(HttpResponse* resp);
 
