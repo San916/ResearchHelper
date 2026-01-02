@@ -9,6 +9,5 @@ void display_http_request(HttpRequest* req) {
         HttpHeader cur_header = req->headers[i];
         printf("%s : %s\n", cur_header.key, cur_header.value);
     }
-    printf("Connection : %s\n", req->keep_alive ? "keep-alive" : "close");
     printf("--------------------------------------\n");
 }
