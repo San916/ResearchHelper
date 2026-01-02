@@ -28,6 +28,9 @@ static const char* resp_str =
 static HttpRequest* req = NULL;
 
 void setUp(void) {
+    req = calloc(1, sizeof(HttpRequest));
+    if (!req) return;
+
     resp.close_connection = false;
     resp.status_code = 200;
     strcpy(resp.headers[0].key, "Host");
@@ -44,16 +47,13 @@ void setUp(void) {
 
 void tearDown(void) {
     if (req) free(req);
-    req = NULL; // Avoid dangling pointer
+    req = NULL;
 }
 
 // ==================================
 // set_header
 // ==================================
 void test_set_header_working(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char* key = "Host";
     char* value = "www.example.com";
 
@@ -63,9 +63,6 @@ void test_set_header_working(void) {
 }
 
 void test_set_header_key_too_large(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char* key = malloc(MAX_KEY_LEN + 1);
     if (!key) return;
     memset(key, 'A', MAX_KEY_LEN);
@@ -79,9 +76,6 @@ void test_set_header_key_too_large(void) {
 }
 
 void test_set_header_value_too_large(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char* key = "Host";
     char* value = malloc(MAX_VALUE_LEN + 1);
     if (!value) return;
@@ -95,9 +89,6 @@ void test_set_header_value_too_large(void) {
 }
 
 void test_set_header_too_many_headers(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char* key = "Host";
     char* value = "www.example.com";
 
@@ -115,9 +106,6 @@ void test_set_header_too_many_headers(void) {
 // ==================================
 // We don't dependency inject the requirements, such as max size for fields, and available fields, so we may run into issues in the future
 void test_parse_request_line(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] = "GET /index.html HTTP/1.1";
     TEST_ASSERT_EQUAL_INT(parse_request_line(line, req), PARSE_FIRST_LINE_OK);
     TEST_ASSERT_EQUAL_INT(strcmp(req->method, "GET"), 0);    
@@ -144,9 +132,6 @@ void test_parse_request_line(void) {
 // parse_headers
 // ==================================
 void test_parse_headers_working(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
@@ -162,9 +147,6 @@ void test_parse_headers_working(void) {
 }
 
 void test_parse_headers_connection_close(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "Host: www.example.com\r\n"
         "Connection: CLOSE\r\n";
@@ -175,9 +157,6 @@ void test_parse_headers_connection_close(void) {
 }
 
 void test_parse_headers_connection_not_properly_defined(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "Host: www.example.com\r\n"
         "Connection: KEEP-ME-ALIVE\r\n";
@@ -188,9 +167,6 @@ void test_parse_headers_connection_not_properly_defined(void) {
 }
 
 void test_parse_headers_invalid_format(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "Host:www.example.com\r\n";
 
@@ -199,9 +175,8 @@ void test_parse_headers_invalid_format(void) {
 }
 
 void test_parse_headers_too_many_headers(void) {
-    req = calloc(1, sizeof(HttpRequest));
+
     req->num_headers = MAX_HEADER_COUNT;
-    if (!req) return;
 
     char line[] =         
         "Host: www.example.com\r\n";
@@ -211,9 +186,6 @@ void test_parse_headers_too_many_headers(void) {
 }
 
 void test_parse_headers_two_hosts(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "Host: www.example.com\r\n"
         "Host: www.example.com\r\n";
@@ -223,9 +195,6 @@ void test_parse_headers_two_hosts(void) {
 }
 
 void test_parse_headers_no_hosts(void) {
-    req = calloc(1, sizeof(HttpRequest));
-    if (!req) return;
-
     char line[] =         
         "User-Agent: Mozilla/5.0\r\n"
         "Connection: keep-alive\r\n";
