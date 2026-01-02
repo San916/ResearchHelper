@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static int add_content_length(HttpResponse* resp) {
+    char body_length_str[32];
+    sprintf(body_length_str, "%d", resp->body_length);
+    return set_header(resp->headers, &resp->num_headers, "Content-Length", body_length_str);
+}
+
 HttpResponse handle_home_html(HttpRequest* req) {
     HttpResponse resp = {0};
     resp.status_code = 200;
@@ -14,18 +20,36 @@ HttpResponse handle_home_html(HttpRequest* req) {
         return handle_500();
     }
 
-    const char* html = "<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"main.css\"></head><body><h1>Hello world!</h1></body></html>";
-    int len = (int)strlen(html);
+    FILE *fp = fopen("./../frontend/index.html", "rb");
+    if (!fp) return handle_500();
 
-    resp.body = malloc(len + 1);
-    if (!resp.body) {
+    fseek(fp, 0, SEEK_END);
+    long file_len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (file_len <= 0 || file_len > MAX_RESPONSE_BODY_LEN - 1) {
+        fclose(fp);
         return handle_500();
     }
 
-    strcpy(resp.body, html);
-    resp.body_length = len;
+    resp.body = malloc((int)file_len + 1);
+    if (!resp.body) {
+        fclose(fp);
+        return handle_500();
+    }
+    size_t bytes_read = fread(resp.body, 1, file_len, fp);
+    fclose(fp);
+    if ((long)bytes_read != file_len) {
+        free(resp.body);
+        return handle_500();
+    }
+
+    resp.body[bytes_read] = '\0';
+    resp.body_length = bytes_read;
+    if (add_content_length(&resp) != 0) { 
+        free(resp.body);
+        return handle_500();
+    }
     resp.close_connection = !req->keep_alive;
-    
     return resp;
 }
 
@@ -38,18 +62,36 @@ HttpResponse handle_home_css(HttpRequest* req) {
         return handle_500();
     }
 
-    const char* css = "h1 {\nbackground-color: #ff0000\n}";
-    int len = (int)strlen(css);
+    FILE *fp = fopen("./../frontend/css/main.css", "rb");
+    if (!fp) return handle_500();
 
-    resp.body = malloc(len + 1);
-    if (!resp.body) {
+    fseek(fp, 0, SEEK_END);
+    long file_len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (file_len <= 0 || file_len > MAX_RESPONSE_BODY_LEN - 1) {
+        fclose(fp);
         return handle_500();
     }
 
-    strcpy(resp.body, css);
-    resp.body_length = len;
+    resp.body = malloc((int)file_len + 1);
+    if (!resp.body) {
+        fclose(fp);
+        return handle_500();
+    }
+    size_t bytes_read = fread(resp.body, 1, file_len, fp);
+    fclose(fp);
+    if ((long)bytes_read != file_len) {
+        free(resp.body);
+        return handle_500();
+    }
+
+    resp.body[bytes_read] = '\0';
+    resp.body_length = bytes_read;
+    if (add_content_length(&resp) != 0) { 
+        free(resp.body);
+        return handle_500();
+    }
     resp.close_connection = !req->keep_alive;
-    
     return resp;
 }
 
@@ -62,17 +104,35 @@ HttpResponse handle_about(HttpRequest* req) {
         return handle_500();
     }
 
-    const char* html = "<html><body><h1>About me</h1></body></html>";
-    int len = (int)strlen(html);
+    FILE *fp = fopen("./../frontend/about.html", "rb");
+    if (!fp) return handle_500();
 
-    resp.body = malloc(len + 1);
-    if (!resp.body) {
+    fseek(fp, 0, SEEK_END);
+    long file_len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (file_len <= 0 || file_len > MAX_RESPONSE_BODY_LEN - 1) {
+        fclose(fp);
         return handle_500();
     }
 
-    strcpy(resp.body, html);
-    resp.body_length = len;
+    resp.body = malloc((int)file_len + 1);
+    if (!resp.body) {
+        fclose(fp);
+        return handle_500();
+    }
+    size_t bytes_read = fread(resp.body, 1, file_len, fp);
+    fclose(fp);
+    if ((long)bytes_read != file_len) {
+        free(resp.body);
+        return handle_500();
+    }
+
+    resp.body[bytes_read] = '\0';
+    resp.body_length = bytes_read;
+    if (add_content_length(&resp) != 0) { 
+        free(resp.body);
+        return handle_500();
+    }
     resp.close_connection = !req->keep_alive;
-    
     return resp;
 }

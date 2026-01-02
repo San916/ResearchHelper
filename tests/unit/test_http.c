@@ -39,8 +39,10 @@ void setUp(void) {
     strcpy(resp.headers[1].value, "text/html");
     strcpy(resp.headers[2].key, "Connection");
     strcpy(resp.headers[2].value, "keep-alive");
+    strcpy(resp.headers[3].key, "Content-Length");
+    strcpy(resp.headers[3].value, "48");
     resp.status_text = "OK";
-    resp.num_headers = 3;
+    resp.num_headers = 4;
     resp.body = "<html><body><h1>Hello, World!</h1></body></html>";
     resp.body_length = strlen(resp.body);
 }
@@ -235,23 +237,24 @@ void test_build_http_response_working(void) {
     TEST_ASSERT_EQUAL_INT(strcmp(resp_str, our_resp_str), 0);
 }
 
-void test_build_http_response_body_length_disparity(void) {
-    resp.body_length++;
-    TEST_ASSERT_NULL(build_http_response(&resp));
-    resp.body_length--;
-}
-
 void test_build_http_response_too_many_headers(void) {
-    resp.num_headers = MAX_HEADER_COUNT;
+    resp.num_headers = MAX_HEADER_COUNT + 1;
     TEST_ASSERT_GREATER_THAN_INT(0, resp.body_length);
     TEST_ASSERT_NOT_NULL(resp.body);
     TEST_ASSERT_NULL(build_http_response(&resp));
+}
 
-    resp.num_headers = MAX_HEADER_COUNT + 1;
-    resp.body_length = 0;
-    resp.body = NULL;
-    TEST_ASSERT_EQUAL_INT(0, resp.body_length);
-    TEST_ASSERT_NULL(resp.body);
+void test_build_http_response_body_too_big(void) {
+    char* body = malloc(MAX_RESPONSE_BODY_LEN + 1);
+    if (!body) return;
+    memset(body, 'A', MAX_RESPONSE_BODY_LEN);
+    body[MAX_RESPONSE_BODY_LEN] = '\0';
+
+    resp.num_headers = MAX_HEADER_COUNT;
+    resp.body = body;
+    resp.body_length = strlen(body);
+    TEST_ASSERT_EQUAL_INT(MAX_RESPONSE_BODY_LEN, resp.body_length);
+    TEST_ASSERT_NOT_NULL(resp.body);
     TEST_ASSERT_NULL(build_http_response(&resp));
 }
 
@@ -277,8 +280,8 @@ int main() {
     RUN_TEST(test_parse_headers_no_hosts);
 
     RUN_TEST(test_build_http_response_working);
-    RUN_TEST(test_build_http_response_body_length_disparity);
     RUN_TEST(test_build_http_response_too_many_headers);
+    RUN_TEST(test_build_http_response_body_too_big);
 
     return UNITY_END();
 }

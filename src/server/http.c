@@ -157,10 +157,12 @@ HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_
     return req;
 }
 
+// REQUIRES: Http response
+// EFFECTS: Returns a stringified response made using the given HttpResponse. Returns NULL on fail
 char* build_http_response(HttpResponse* resp) {
     if (!resp) return NULL;
-    if (resp->num_headers > MAX_HEADER_COUNT || (resp->body && resp->num_headers > MAX_HEADER_COUNT - 1)) return NULL;
-    if (resp->body && strlen(resp->body) != resp->body_length) return NULL;
+    if (resp->num_headers > MAX_HEADER_COUNT) return NULL;
+    if (resp->body_length >= MAX_RESPONSE_BODY_LEN - 1) return NULL;
 
     int total_size = HEADER_SIZE_ESTIMATE + resp->body_length;
 
@@ -170,12 +172,10 @@ char* build_http_response(HttpResponse* resp) {
 
     #define VERIFY_OFFSET() if (offset >= total_size) { free(output); return NULL; }
 
-    // Add first line
     offset += snprintf(output + offset, total_size - offset, "%s %d %s\r\n",
         HTTP_VERSION, resp->status_code, resp->status_text);
     VERIFY_OFFSET()
 
-    // Add headers
     for (int i = 0; i < resp->num_headers; i++) {
         offset += snprintf(output + offset, total_size - offset,
             "%s: %s\r\n",
@@ -184,21 +184,10 @@ char* build_http_response(HttpResponse* resp) {
         VERIFY_OFFSET()
     }
 
-    // Add content-length
-    if (resp->body_length > 0 && resp->body) {
-        offset += snprintf(output + offset, total_size - offset,
-            "Content-Length: %d\r\n", resp->body_length);
-        resp->num_headers++;
-    }
-
-    VERIFY_OFFSET() 
-
-    // One more \r\n to end headers
     offset += snprintf(output + offset, total_size - offset, "\r\n");
     VERIFY_OFFSET()
 
-    // Response body
-    if (resp->body_length > 0 && resp->body) {
+    if (resp->body) {
         if (offset + resp->body_length > total_size) {
             free(output);
             return NULL;
