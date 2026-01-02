@@ -3,7 +3,8 @@
 
 #include "http.h"
 
-HttpResponse handle_home(HttpRequest* req);
+HttpResponse handle_home_html(HttpRequest* req);
+HttpResponse handle_home_css(HttpRequest* req);
 HttpResponse handle_about(HttpRequest* req);
 
 #endif
