@@ -54,7 +54,6 @@ bool is_valid_version(char* version) {
     return false;
 }
 
-
 // REQUIRES: Takes a request line and request
 // MODIFIES: Modifies original string with '\0' in place of delimeter. Modifies request method, path, token
 // EFFECTS: Reads the line given into req->method, path, version. Returns status code

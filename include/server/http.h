@@ -16,6 +16,7 @@
 
 static const char* VALID_HTTP_METHODS[] = {
     "GET",
+    "POST",
 };
 
 static const char* VALID_HTTP_VERSIONS[] = {

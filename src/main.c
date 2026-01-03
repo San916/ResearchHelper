@@ -24,6 +24,7 @@ int main() {
         {"/", handle_home_html},
         {"/css/main.css", handle_home_css},
         {"/js/main.js", handle_home_js},
+        {"/submit", handle_submit},
         {"/about", handle_about},
     };
     int num_routes = sizeof(routes) / sizeof(Route);

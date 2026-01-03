@@ -1,6 +1,7 @@
 #include "http.h"
 #include "http_errors.h"
 #include "handlers.h"
+#include "utils.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -133,6 +134,60 @@ HttpResponse handle_home_js(HttpRequest* req) {
         free(resp.body);
         return handle_500();
     }
+    resp.close_connection = !req->keep_alive;
+    return resp;
+}
+
+HttpResponse handle_submit(HttpRequest* req) {
+    HttpResponse resp = {0};
+    
+    if (strcmp(req->method, "POST") != 0) {
+        return handle_405(req);
+    }
+    
+    if (!req->body || strlen(req->body) == 0) {
+        return handle_400(req);
+    }
+    
+    char* input = strstr(req->body, "user_input=");
+    if (!input) {
+        return handle_400(req);
+    }
+    input = req->body + 11;
+
+    int decoded_input_len = url_decoded_str_len(input);
+    char *decoded_input = malloc(url_decoded_str_len(input) + 1);
+    if (!decoded_input) return handle_500();
+    decoded_input[decoded_input_len] = '\0';
+    decode_url(decoded_input, input, decoded_input_len);
+    input = decoded_input;
+    
+    resp.status_code = 200;
+    resp.status_text = "OK";
+    
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/plain") != 0) {
+        free(decoded_input);
+        return handle_500();
+    }
+    
+    char response_msg[256];
+    snprintf(response_msg, sizeof(response_msg), "You entered: %s", input);
+
+    resp.body = malloc(strlen(response_msg) + 1);
+    if (!resp.body) {
+        free(decoded_input);
+        return handle_500();   
+    } 
+    strcpy(resp.body, response_msg);
+    resp.body_length = (int)strlen(response_msg);
+    
+    if (add_content_length(&resp) != 0) {
+        free(resp.body);
+        free(decoded_input);
+        return handle_500();
+    }
+    
+    free(decoded_input);
     resp.close_connection = !req->keep_alive;
     return resp;
 }
