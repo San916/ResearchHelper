@@ -3,3 +3,9 @@ h1 {
     background-color: pink;
     padding: 2em;
 }
+
+#response {
+    background-color: aqua;
+    padding: 2em;
+    width: 10em;
+}
