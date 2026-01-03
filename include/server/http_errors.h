@@ -7,6 +7,7 @@
 
 HttpResponse handle_400(HttpRequest* req);
 HttpResponse handle_404(HttpRequest* req);
+HttpResponse handle_405(HttpRequest* req);
 HttpResponse handle_500();
 
 #endif

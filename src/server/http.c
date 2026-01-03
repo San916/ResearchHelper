@@ -43,7 +43,7 @@ bool is_valid_method(char* method) {
 }
 
 // REQUIRES: version as string
-// EFFECTS: REturns true if the version is a valid version (i.e "HTTP/1.1")
+// EFFECTS: Returns true if the version is a valid version (i.e "HTTP/1.1")
 bool is_valid_version(char* version) {
     if (strlen(version) >= MAX_VERSION_LEN - 1) return false;
     for (int i = 0; i < sizeof(VALID_HTTP_VERSIONS) / sizeof(VALID_HTTP_VERSIONS[0]); i++) {
@@ -53,7 +53,6 @@ bool is_valid_version(char* version) {
     }
     return false;
 }
-
 
 // REQUIRES: Takes a request line and request
 // MODIFIES: Modifies original string with '\0' in place of delimeter. Modifies request method, path, token
