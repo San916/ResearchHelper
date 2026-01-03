@@ -40,9 +40,6 @@ typedef enum {
     PARSE_TOO_MANY_HEADERS,
     PARSE_MULTIPLE_HOST_HEADERS,
     PARSE_NO_HOST_HEADERS,
-    PARSE_NO_EMPTY_LINE_HEADERS,
-
-    PARSE_BODY_OK = 300,
 
 } HttpRequestError;
 
@@ -57,7 +54,6 @@ typedef struct HttpRequest {
     char path[MAX_PATH_LEN];
 
     HttpHeader headers[MAX_HEADER_COUNT];
-    char* body;
     int num_headers;
     bool keep_alive;
 } HttpRequest;
@@ -78,7 +74,6 @@ void free_http_response(HttpResponse* resp);
 int set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
 int parse_request_line(char* line, HttpRequest* req);
 int parse_headers(HttpRequest* req, char** context);
-int parse_body(HttpRequest* req, char** context);
 HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code);
 char* build_http_response(HttpResponse* resp);
 
