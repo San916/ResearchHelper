@@ -9,11 +9,20 @@
 #define UNITY_OUTPUT_COLOR 1
 
 // Define all variables here
-static char workingRequest[] =
+static char working_request[] =
         "GET /index.html HTTP/1.1\r\n"
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
-        "Connection: keep-alive\r\n";
+        "Connection: keep-alive\r\n"
+        "\r\n";
+
+static char working_request_body[] =
+        "GET /index.html HTTP/1.1\r\n"
+        "Host: www.example.com\r\n"
+        "User-Agent: Mozilla/5.0\r\n"
+        "Connection: keep-alive\r\n"
+        "\r\n"
+        "Hello world!";
 
 static HttpResponse resp = {0};
 static const char* resp_str =
@@ -137,7 +146,8 @@ void test_parse_headers_working(void) {
     char line[] =         
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
-        "Connection: keep-alive\r\n";
+        "Connection: keep-alive\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_HEADERS_OK);
@@ -151,7 +161,8 @@ void test_parse_headers_working(void) {
 void test_parse_headers_connection_close(void) {
     char line[] =         
         "Host: www.example.com\r\n"
-        "Connection: CLOSE\r\n";
+        "Connection: CLOSE\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_HEADERS_OK);
@@ -161,7 +172,8 @@ void test_parse_headers_connection_close(void) {
 void test_parse_headers_connection_not_properly_defined(void) {
     char line[] =         
         "Host: www.example.com\r\n"
-        "Connection: KEEP-ME-ALIVE\r\n";
+        "Connection: KEEP-ME-ALIVE\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_HEADERS_OK);
@@ -170,7 +182,8 @@ void test_parse_headers_connection_not_properly_defined(void) {
 
 void test_parse_headers_invalid_format(void) {
     char line[] =         
-        "Host:www.example.com\r\n";
+        "Host:www.example.com\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_HEADERS_INVALID_FORMAT);
@@ -181,7 +194,8 @@ void test_parse_headers_too_many_headers(void) {
     req->num_headers = MAX_HEADER_COUNT;
 
     char line[] =         
-        "Host: www.example.com\r\n";
+        "Host: www.example.com\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_TOO_MANY_HEADERS);
@@ -190,7 +204,8 @@ void test_parse_headers_too_many_headers(void) {
 void test_parse_headers_two_hosts(void) {
     char line[] =         
         "Host: www.example.com\r\n"
-        "Host: www.example.com\r\n";
+        "Host: www.example.com\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_MULTIPLE_HOST_HEADERS);
@@ -199,10 +214,32 @@ void test_parse_headers_two_hosts(void) {
 void test_parse_headers_no_hosts(void) {
     char line[] =         
         "User-Agent: Mozilla/5.0\r\n"
-        "Connection: keep-alive\r\n";
+        "Connection: keep-alive\r\n"
+        "\r\n";
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_NO_HOST_HEADERS);
+}
+
+void test_parse_headers_no_end_of_headers(void) {
+    char line[] =         
+        "User-Agent: Mozilla/5.0\r\n"
+        "Connection: keep-alive\r\n";
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_headers(req, &context), PARSE_NO_EMPTY_LINE_HEADERS);
+}
+
+// ==================================
+// parse_body
+// ==================================
+void test_parse_body_working(void) {
+    char line[] =         
+        "ASDF\r\nQWERTY";
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_body(req, &context), PARSE_BODY_OK);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->body, "ASDF\r\nQWERTY"), 0);
 }
 
 // ==================================
@@ -210,14 +247,14 @@ void test_parse_headers_no_hosts(void) {
 // ==================================
 void test_parse_http_request(void) {
     int status_code = 0;
-    TEST_ASSERT_NULL(parse_http_request(workingRequest, 0, &status_code));
+    TEST_ASSERT_NULL(parse_http_request(working_request, 0, &status_code));
     TEST_ASSERT_EQUAL_INT(status_code, PARSE_REQUEST_TOO_BIG);
-    TEST_ASSERT_NULL(parse_http_request(workingRequest, MAX_REQUEST_SIZE - 1, &status_code));
+    TEST_ASSERT_NULL(parse_http_request(working_request, MAX_REQUEST_SIZE - 1, &status_code));
     TEST_ASSERT_EQUAL_INT(status_code, PARSE_REQUEST_TOO_BIG);
     TEST_ASSERT_NULL(parse_http_request("HII", 100, &status_code));
     TEST_ASSERT_EQUAL_INT(status_code, PARSE_REQUEST_TOO_BIG);
 
-    req = parse_http_request(workingRequest, strlen(workingRequest), &status_code);
+    req = parse_http_request(working_request, strlen(working_request), &status_code);
     TEST_ASSERT_EQUAL_INT(strcmp(req->method, "GET"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->path, "/index.html"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->version, "HTTP/1.1"), 0);
@@ -225,6 +262,22 @@ void test_parse_http_request(void) {
     TEST_ASSERT_EQUAL_INT(strcmp(req->headers[0].value, "www.example.com"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->headers[1].key, "User-Agent"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->headers[1].value, "Mozilla/5.0"), 0);
+    TEST_ASSERT_TRUE(req->keep_alive);
+}
+
+void test_parse_http_request_body(void) {
+    int status_code = 0;
+
+    req = parse_http_request(working_request_body, strlen(working_request_body), &status_code);
+    display_http_request(req);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->method, "GET"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->path, "/index.html"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->version, "HTTP/1.1"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->headers[0].key, "Host"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->headers[0].value, "www.example.com"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->headers[1].key, "User-Agent"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->headers[1].value, "Mozilla/5.0"), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->body, "Hello world!"), 0);
     TEST_ASSERT_TRUE(req->keep_alive);
 }
 
@@ -262,15 +315,16 @@ int main() {
     UNITY_BEGIN();
 
     // Tests
+    // set_header
     RUN_TEST(test_set_header_working);
     RUN_TEST(test_set_header_key_too_large);
     RUN_TEST(test_set_header_value_too_large);
     RUN_TEST(test_set_header_too_many_headers);
 
+    // parse_request_line
     RUN_TEST(test_parse_request_line);
 
-    RUN_TEST(test_parse_http_request);
-
+    // parse_headers
     RUN_TEST(test_parse_headers_working);
     RUN_TEST(test_parse_headers_connection_close);
     RUN_TEST(test_parse_headers_connection_not_properly_defined);
@@ -278,7 +332,16 @@ int main() {
     RUN_TEST(test_parse_headers_too_many_headers);
     RUN_TEST(test_parse_headers_two_hosts);
     RUN_TEST(test_parse_headers_no_hosts);
+    RUN_TEST(test_parse_headers_no_end_of_headers);
 
+    // parse_body
+    RUN_TEST(test_parse_body_working);
+
+    // parse_http_request
+    RUN_TEST(test_parse_http_request);
+    RUN_TEST(test_parse_http_request_body);
+
+    // build_http_response
     RUN_TEST(test_build_http_response_working);
     RUN_TEST(test_build_http_response_too_many_headers);
     RUN_TEST(test_build_http_response_body_too_big);
