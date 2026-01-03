@@ -43,7 +43,7 @@ bool is_valid_method(char* method) {
 }
 
 // REQUIRES: version as string
-// EFFECTS: Returns true if the version is a valid version (i.e "HTTP/1.1")
+// EFFECTS: REturns true if the version is a valid version (i.e "HTTP/1.1")
 bool is_valid_version(char* version) {
     if (strlen(version) >= MAX_VERSION_LEN - 1) return false;
     for (int i = 0; i < sizeof(VALID_HTTP_VERSIONS) / sizeof(VALID_HTTP_VERSIONS[0]); i++) {
@@ -86,8 +86,13 @@ int parse_headers(HttpRequest* req, char** context) {
     bool contains_host = false;
     bool keep_alive = true;
 
+    char *end_of_headers = strstr(*context, "\r\n\r\n");
+    if (!end_of_headers) return PARSE_NO_EMPTY_LINE_HEADERS;
+
+    char saved_char = end_of_headers[4];
+    end_of_headers[4] = '\0';
+
     while ((line = strtok_s(NULL, "\r\n", context)) != NULL) {
-        if (strlen(line) == 0) break; 
         if (req->num_headers >= MAX_HEADER_COUNT) return PARSE_TOO_MANY_HEADERS;
 
         char* key = line;
@@ -109,10 +114,22 @@ int parse_headers(HttpRequest* req, char** context) {
         int status_code = set_header(req->headers, &req->num_headers, key, val);
         if (status_code) return status_code;
     }
-    
+
+    end_of_headers[4] = saved_char;
+    *context = end_of_headers + 4;
     if (!contains_host) return PARSE_NO_HOST_HEADERS;
     req->keep_alive = keep_alive;
     return PARSE_HEADERS_OK;
+}
+
+// REQUIRES: HttpRequest, char** context pointing to the start of the body section in the request
+// EFFECTS: Parses through body and adds it into the HttpRequest. Returns status code
+int parse_body(HttpRequest* req, char** context) {
+    if (context == NULL || *context == NULL || **context == '\0') return PARSE_BODY_OK;
+    req->body = calloc(1, strlen(*context) + 1);
+    if (!req->body) return MALLOC_ERROR;
+    strcpy(req->body, *context);
+    return PARSE_BODY_OK;
 }
 
 // REQUIRES: Takes buffer with buffer_len = len of str without null terminator (aka strlen(buffer))
@@ -151,6 +168,10 @@ HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_
 
     int headers_status = parse_headers(req, &context);
     if (headers_status != PARSE_HEADERS_OK) SET_STATUS_CODE_RETURN(headers_status);
+
+    req->body = NULL;
+    int body_status = parse_body(req, &context);
+    if (body_status != PARSE_BODY_OK) SET_STATUS_CODE_RETURN(body_status);
 
     *status_code = REQUEST_OK;
     free(temp);
