@@ -18,7 +18,7 @@ add_library(unity STATIC ${UNITY_DIR}/src/unity.c)
 target_include_directories(unity PUBLIC ${UNITY_DIR}/src)
 
 # ============== Setup curl ==============
-find_package(CURL REQUIRED)
+find_package(CURL CONFIG REQUIRED)
 
 # ============== Set sources ==============
 set(SOURCES
@@ -35,6 +35,7 @@ set(SOURCES
 # ============== Set includes ==============
 set(INCLUDES
     ${INCLUDE_DIR}/server
+    ${INCLUDE_DIR}/backend
     ${INCLUDE_DIR}/utils
 )
 
