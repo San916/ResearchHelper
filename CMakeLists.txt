@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
+set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 project(ResearchHelper LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
@@ -16,6 +17,9 @@ set(INCLUDE_DIR include)
 add_library(unity STATIC ${UNITY_DIR}/src/unity.c)
 target_include_directories(unity PUBLIC ${UNITY_DIR}/src)
 
+# ============== Setup curl ==============
+find_package(CURL REQUIRED)
+
 # ============== Set sources ==============
 set(SOURCES
     ${SOURCE_DIR}/main.c
@@ -24,6 +28,7 @@ set(SOURCES
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
+    ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/utils/utils.c
 )
 
@@ -36,7 +41,7 @@ set(INCLUDES
 # ============== Main executable ==============
 add_executable(App ${SOURCES})
 target_include_directories(App PRIVATE ${INCLUDES})
-target_link_libraries(App Ws2_32)
+target_link_libraries(App Ws2_32 CURL::libcurl)
 
 # ============== Tests with unity ==============
 
