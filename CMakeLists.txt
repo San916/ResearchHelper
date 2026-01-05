@@ -91,9 +91,24 @@ target_include_directories(test_router PRIVATE
 )
 target_link_libraries(test_router unity Ws2_32)
 
+# ========== Unit test web crawler ==========
+add_executable(test_web_crawler
+    ${TEST_DIR}/unit/test_web_crawler.c
+    ${TEST_UTILS_DIR}/src/test_http_utils.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_web_crawler PRIVATE 
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_web_crawler unity CURL::libcurl)
+
 # ========== Add tests ==========
 enable_testing()
 
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_http COMMAND test_http)
 add_test(NAME test_router COMMAND test_router)
+add_test(NAME test_web_crawler COMMAND test_web_crawler)

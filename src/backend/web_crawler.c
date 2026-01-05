@@ -2,12 +2,17 @@
 #include <curl/curl.h>
 
 // Stub function
-size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+size_t write_memory_callback(char* contents, size_t size, size_t nmemb, void* userp) {
+    printf("Adding string: %.*s\n", (int)nmemb, contents);
+    printf("Size(%d) | nmemb(%d)", (int)size, (int)nmemb);
+    // size_t size_to_add = size * nmemb;
+    // size_t total_size = size_to_add + strlen(contents);
+
     return 0;
 }
 
 QueryResponse* input_query(char* input, int* status_code) {
-    char* response = malloc(1024); // This'll be changed later
+    char* response = malloc(CURL_MAX_WRITE_SIZE);
     CURL* curl_handle;
     CURLcode response_code;
 
@@ -36,4 +41,5 @@ QueryResponse* input_query(char* input, int* status_code) {
     }
     curl_easy_cleanup(curl_handle);
     free(response);
+    return NULL;
 }
