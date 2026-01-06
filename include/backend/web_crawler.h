@@ -6,6 +6,11 @@
 #define MAX_RESPONSE_URL_LEN 256
 #define MAX_RESPONSE_WEB_CONTENT_LEN 1024
 
+typedef struct WritebackData {
+    char* data;
+    size_t size;
+} WritebackData;
+
 typedef struct SingleResponse {
     char url[MAX_RESPONSE_URL_LEN];
     char title[MAX_RESPONSE_TITLE_LEN];
