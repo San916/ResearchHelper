@@ -13,7 +13,7 @@ void tearDown(void) {
 
 void test_web_crawler_basic(void) {
     int status_code = 0;
-    char *input = "what is 9 + 10";
+    char *input = "What is C?";
     input_query(input, &status_code);
 }
 

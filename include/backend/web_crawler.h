@@ -21,7 +21,8 @@ typedef struct QueryResponse {
     SingleResponse responses[1];
 } QueryResponse;
 
-size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp);
+size_t write_memory_callback(void *content, size_t size, size_t nmemb, void *data_ptr);
+QueryResponse* structure_query_response(char* input);
 QueryResponse* input_query(char* input, int* status_code);
 
 #endif
