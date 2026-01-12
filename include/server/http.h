@@ -64,13 +64,13 @@ typedef struct HttpRequest {
 } HttpRequest;
 
 typedef struct HttpResponse {
-    char *status_text;
+    char* status_text;
     int status_code;
 
     HttpHeader headers[MAX_HEADER_COUNT];
     int num_headers;
 
-    char *body;
+    char* body;
     int body_length;
     bool close_connection;
 } HttpResponse;

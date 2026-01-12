@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 
+// Skips whitespace in string
+char* skip_whitespace(char* src);
+
 // Returns len of url-decoded string
 int url_decoded_str_len(char* src);
 
