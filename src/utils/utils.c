@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+// REQUIRES: string pointer
+// EFFECTS: Returns pointer to end of whitespace
+char* skip_whitespace(char* src) {
+    char* end = src;
+    while (*end && isspace(*end)) {
+        end++;
+    }
+    return end;
+}
+
 // REQUIRES: url encoded src string
 // EFFECTS: Returns the length of the decoded string
 int url_decoded_str_len(char* src) {
