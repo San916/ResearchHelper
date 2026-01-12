@@ -156,7 +156,7 @@ HttpResponse handle_submit(HttpRequest* req) {
     input = req->body + 11;
 
     int decoded_input_len = url_decoded_str_len(input);
-    char *decoded_input = malloc(url_decoded_str_len(input) + 1);
+    char* decoded_input = malloc(url_decoded_str_len(input) + 1);
     if (!decoded_input) return handle_500();
     decoded_input[decoded_input_len] = '\0';
     decode_url(decoded_input, input, decoded_input_len);

@@ -10,6 +10,12 @@ void setUp(void) {
 void tearDown(void) {
 }
 
+void test_skip_whitespace(void) {
+    char* start = " \n\t\r\v\fHi";
+    char* end = start + 6;
+    TEST_ASSERT_EQUAL_INT(strcmp(skip_whitespace(start), end), 0);
+}
+
 void test_url_decoded_str_len(void) {
     char input1[] = "hihihi";
     TEST_ASSERT_EQUAL_INT(url_decoded_str_len(input1), 6);
@@ -51,6 +57,8 @@ int main(void) {
     UNITY_BEGIN();
 
     // Tests
+    RUN_TEST(test_skip_whitespace);
+
     RUN_TEST(test_url_decoded_str_len);
     RUN_TEST(test_decode_url);
 

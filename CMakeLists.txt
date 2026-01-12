@@ -98,12 +98,23 @@ add_executable(test_web_crawler
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/utils/utils.c
 )
-target_include_directories(test_web_crawler PRIVATE 
+target_include_directories(test_web_crawler PRIVATE
     ${INCLUDES}
-    ${TEST_UTILS_DIR}/include
     ${UNITY_DIR}/src
 )
 target_link_libraries(test_web_crawler unity CURL::libcurl)
+
+# ========== Unit test json ==========
+add_executable(test_json
+    ${TEST_DIR}/unit/test_json.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_json PRIVATE 
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_json unity)
 
 # ========== Add tests ==========
 enable_testing()
@@ -112,3 +123,4 @@ add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_http COMMAND test_http)
 add_test(NAME test_router COMMAND test_router)
 add_test(NAME test_web_crawler COMMAND test_web_crawler)
+add_test(NAME test_json COMMAND test_json)
