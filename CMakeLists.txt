@@ -94,7 +94,6 @@ target_link_libraries(test_router unity Ws2_32)
 # ========== Unit test web crawler ==========
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
-    ${TEST_UTILS_DIR}/src/test_http_utils.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/utils/utils.c
 )
