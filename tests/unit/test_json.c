@@ -30,7 +30,6 @@ void test_get_json_value_bool(void) {
     const char* json_bool_false = "\"key\": false";
 
     char* result = get_json_value(json_bool, "key");
-    printf("RESULT: %s\n", result);
     TEST_ASSERT_EQUAL_INT(strcmp(result, "true"), 0);
     free(result);
 
@@ -152,7 +151,8 @@ void test_separate_array(void) {
         "    {\"gh\": 78}"
         "]"
     };
-    char** result = separate_array(json_array);
+    int num_elems = 0;
+    char** result = separate_array(json_array, &num_elems, 2);
     TEST_ASSERT_EQUAL_INT(strcmp(result[0], json_array_separated[0]), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(result[1], json_array_separated[1]), 0);
     free(result[0]);

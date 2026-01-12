@@ -1,4 +1,5 @@
 #include "web_crawler.h"
+#include "json.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,12 +41,43 @@ size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* dat
     memcpy(&(chunk->data[old_strlen]), content, size_to_add);
     chunk->size = new_size;
     chunk->data[new_strlen] = '\0';
-    fflush(stdout);
     return size_to_add;
 }
 
-QueryResponse* structure_query_response(char* input) {
-    return NULL;
+QueryResponse* structure_query_response(const char* input) {
+    QueryResponse* response = malloc(sizeof(QueryResponse));
+    if (!response) return NULL;
+
+    int num_elems = 0;
+    char* items = get_json_value(input, "items");
+    if (!items) {
+        free(response);
+        return NULL;
+    }
+    char** items_array = separate_array(items, &num_elems, MAX_NUM_RESPONSES);
+    if (!items_array) {
+        free(items);
+        free(response);
+        return NULL;
+    }
+
+    for (int i = 0; i < num_elems; i++) {
+        char* link = get_json_value(items_array[i], "link");
+        char* title = get_json_value(items_array[i], "title");
+        struct SingleResponse current_response = {0};
+        strncpy(current_response.link, link, MAX_RESPONSE_LINK_LEN - 1);
+        strncpy(current_response.title, title, MAX_RESPONSE_TITLE_LEN - 1);
+        free(link);
+        free(title);
+        response->responses[i] = current_response;
+    }
+
+    free(items);
+    for (int i = 0; i < num_elems; i++) {
+        free(items_array[i]);
+    }
+    free(items_array);
+    return response;
 }
 
 QueryResponse* input_query(char* input, int* status_code) {
@@ -67,9 +99,7 @@ QueryResponse* input_query(char* input, int* status_code) {
     char* encoded_input = curl_easy_escape(curl_handle, input, strlen(input));
     if (!encoded_input) return NULL;
     char url[512];
-    fflush(stdout);
     snprintf(url, sizeof(url), "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s", api_key, search_engine_id, encoded_input);
-    printf("URL: %s\n", api_key);
     curl_free(encoded_input);
 
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, (long)1);
@@ -88,7 +118,7 @@ QueryResponse* input_query(char* input, int* status_code) {
         return NULL;
     }
     
-    printf(writeback.data);
+    QueryResponse* response = structure_query_response(writeback.data);
 
     free(writeback.data);
     curl_easy_cleanup(curl_handle);

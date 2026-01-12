@@ -29,6 +29,7 @@ set(SOURCES
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
     ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
 
@@ -95,6 +96,7 @@ target_link_libraries(test_router unity Ws2_32)
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
     ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
 target_include_directories(test_web_crawler PRIVATE
