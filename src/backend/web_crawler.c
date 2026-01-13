@@ -44,6 +44,8 @@ size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* dat
     return size_to_add;
 }
 
+// REQUIRES: Query response in JSON format with key "items"
+// EFFECTS: Structures query response items and returns
 QueryResponse* structure_query_response(const char* input) {
     QueryResponse* response = malloc(sizeof(QueryResponse));
     if (!response) return NULL;
@@ -61,6 +63,7 @@ QueryResponse* structure_query_response(const char* input) {
         return NULL;
     }
 
+    response->num_responses = 0;
     for (int i = 0; i < num_elems; i++) {
         char* link = get_json_value(items_array[i], "link");
         char* title = get_json_value(items_array[i], "title");
@@ -70,6 +73,7 @@ QueryResponse* structure_query_response(const char* input) {
         free(link);
         free(title);
         response->responses[i] = current_response;
+        response->num_responses++;
     }
 
     free(items);
@@ -119,8 +123,7 @@ QueryResponse* input_query(char* input, int* status_code) {
     }
     
     QueryResponse* response = structure_query_response(writeback.data);
-
     free(writeback.data);
     curl_easy_cleanup(curl_handle);
-    return NULL;
+    return response;
 }

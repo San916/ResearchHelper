@@ -19,6 +19,7 @@ typedef struct SingleResponse {
 
 typedef struct QueryResponse {
     SingleResponse responses[MAX_NUM_RESPONSES];
+    int num_responses;
 } QueryResponse;
 
 size_t write_memory_callback(void *content, size_t size, size_t nmemb, void *data_ptr);

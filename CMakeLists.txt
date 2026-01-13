@@ -84,13 +84,15 @@ add_executable(test_router
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/http_errors.c
     ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
 target_include_directories(test_router PRIVATE 
     ${INCLUDES}
     ${UNITY_DIR}/src
 )
-target_link_libraries(test_router unity Ws2_32)
+target_link_libraries(test_router unity Ws2_32 CURL::libcurl)
 
 # ========== Unit test web crawler ==========
 add_executable(test_web_crawler
