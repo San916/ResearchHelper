@@ -1,11 +1,86 @@
-h1 {
-    color:blue;
-    background-color: pink;
-    padding: 2em;
+body {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: white;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial';
+}
+
+container {
+    box-sizing: border-box;
+    display: flex;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.left-panel {
+    box-sizing: border-box;
+    background-color: white;
+    border-color: #242424;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2em;
+    width: 41%;
+    margin: 10% 2%;
+    padding: 10em 2em;
+    text-align: center;
+}
+
+.left-panel input {
+    box-sizing: border-box;
+    padding: 0 20px;
+    font-size: 1.2rem;
+}
+
+.left-panel h1 {
+    font-size: 3rem;
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    color:#242424;
+}
+.left-panel p {
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    color:#242424;
+}
+
+form {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+form input {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 4em;
+    border-radius: 2em;
+    box-shadow: none;
+    outline: none;
+}
+
+.right-panel {
+    box-sizing: border-box;
+    width: 58%;
+    padding: 0;
+    margin: 1%;
 }
 
 #response {
-    background-color: aqua;
-    padding: 2em;
-    width: 10em;
+    background-color: #242424;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    border-color: #242424;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2em;
 }
