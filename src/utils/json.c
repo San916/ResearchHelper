@@ -47,10 +47,6 @@ static char* find_end_of_json_object_or_array(char* src) {
         }
         else if (*end == '"') {
             end = find_end_of_json_str(end);
-            end++;
-            if (!*end) {
-                break;
-            }
         }
         end++;
     }
@@ -85,7 +81,7 @@ char* get_json_value(const char* src, const char* key) {
     if (!src || !key || !*src || !*key) {
         return NULL;
     }
-    fflush(stdout);
+
     char key_json[32];
     int pattern_len = snprintf(key_json, sizeof(key_json), "\"%s\":", key);
     if (pattern_len >= sizeof(key_json)) {
@@ -110,16 +106,15 @@ char* get_json_value(const char* src, const char* key) {
     return result;
 }
 
-// REQUIRES: JSON array as string
-// EFFECTS: Returns an array of JSON objects
-char** separate_array(char* src) {
-    int capacity = 10;
+// REQUIRES: JSON array as string, capacity
+// EFFECTS: Returns an array of JSON objects below capacity, changes num_elems to number of objects in array
+char** separate_array(char* src, int* num_elems, int capacity) {
     char** result = malloc(capacity * sizeof(char*));
     if (!result) return NULL;
-    int num_elems = 0;
+    *num_elems = 0;
 
     src++;
-    while (*src && *src != ']') {
+    while (*src && *src != ']' && *num_elems < capacity) {
         src = skip_whitespace(src);
         char* value_start = src;
 
@@ -128,53 +123,38 @@ char** separate_array(char* src) {
         size_t value_len = value_end - value_start + 1;
         char* element = malloc(value_len + 1);
         if (!element) {
-            for (int i = 0; i < num_elems; i++) {
-                free(result[i]);
-            }
-            free(result);
-            return NULL;
+            goto cleanup_return;
         }
 
         memcpy(element, value_start, value_len);
         element[value_len] = '\0';
-        result[num_elems] = element;
-        num_elems++;
-
+        result[*num_elems] = element;
+        (*num_elems)++;
 
         src = value_end + 1; // Move past the last char of current JSON element
-
         src = skip_whitespace(src);
         if (!*src) {
-            for (int i = 0; i < num_elems; i++) {
-                free(result[i]);
-            }
-            free(result);
-            return NULL;
+            goto cleanup_return;
         }
         if (*src == ',') {
             src++;
             src = skip_whitespace(src);
             if (!*src || *src == '}') {
-                for (int i = 0; i < num_elems; i++) {
-                    free(result[i]);
-                }
-                free(result);
-                return NULL;
+                goto cleanup_return;
             }
         }
-
-        if (num_elems >= capacity) {
-            capacity++;
-            char** new_result = realloc(result, capacity * sizeof(char*));
-            if (!new_result) {
-                for (int i = 0; i < num_elems; i++) {
-                    free(result[i]);
-                }
-                free(result);
-                return NULL;
-            }
-            result = new_result;
+        
+        if (*num_elems >= capacity) {
+            break;
         }
     }
     return result;
+
+cleanup_return:
+    for (int i = 0; i < *num_elems; i++) {
+        free(result[i]);
+    }
+    free(result);
+    *num_elems = 0;
+    return NULL;
 }

@@ -30,7 +30,6 @@ void test_get_json_value_bool(void) {
     const char* json_bool_false = "\"key\": false";
 
     char* result = get_json_value(json_bool, "key");
-    printf("RESULT: %s\n", result);
     TEST_ASSERT_EQUAL_INT(strcmp(result, "true"), 0);
     free(result);
 
@@ -64,13 +63,13 @@ void test_get_json_value_array(void) {
         "{"
         "   \"array\": ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ]"
         "}";
     const char* json_array_contents = 
         "["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ]";
     char* result = get_json_value(json_array, "array");
     TEST_ASSERT_EQUAL_INT(strcmp(result, json_array_contents), 0);
@@ -84,11 +83,11 @@ void test_get_json_value_array_bad(void) {
         "["
         "   ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ],"
         "   ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   "
         "]"
         "}";
@@ -102,14 +101,14 @@ void test_get_json_value_object(void) {
         "{"
         "   \"array\": ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ]"
         "}";
     const char* json_object_contents = 
         "{"
         "   \"array\": ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ]"
         "}";
     char* result = get_json_value(json_object, "object");
@@ -123,7 +122,7 @@ void test_get_json_value_object_bad(void) {
         "{"
         "   \"array\": ["
         "       {\"key\": 123123},"
-        "       {\"key\": qweqwe}"
+        "       {\"key\": \"qweqwe\"}"
         "   ]"
         "";
     char* result = get_json_value(json_object, "object");
@@ -152,7 +151,8 @@ void test_separate_array(void) {
         "    {\"gh\": 78}"
         "]"
     };
-    char** result = separate_array(json_array);
+    int num_elems = 0;
+    char** result = separate_array(json_array, &num_elems, 2);
     TEST_ASSERT_EQUAL_INT(strcmp(result[0], json_array_separated[0]), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(result[1], json_array_separated[1]), 0);
     free(result[0]);
