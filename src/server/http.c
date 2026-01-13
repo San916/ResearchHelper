@@ -85,7 +85,7 @@ int parse_headers(HttpRequest* req, char** context) {
     bool contains_host = false;
     bool keep_alive = true;
 
-    char *end_of_headers = strstr(*context, "\r\n\r\n");
+    char* end_of_headers = strstr(*context, "\r\n\r\n");
     if (!end_of_headers) return PARSE_NO_EMPTY_LINE_HEADERS;
 
     char saved_char = end_of_headers[4];
@@ -146,7 +146,7 @@ HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_
         return NULL;
     }
 
-    char *temp = malloc(buffer_len + 1);
+    char* temp = malloc(buffer_len + 1);
     if (!temp) {
         free(req);
         *status_code = MALLOC_ERROR;

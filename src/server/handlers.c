@@ -2,6 +2,7 @@
 #include "http_errors.h"
 #include "handlers.h"
 #include "utils.h"
+#include "web_crawler.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -156,38 +157,70 @@ HttpResponse handle_submit(HttpRequest* req) {
     input = req->body + 11;
 
     int decoded_input_len = url_decoded_str_len(input);
-    char *decoded_input = malloc(url_decoded_str_len(input) + 1);
+    int encoded_input_len = strlen(input);
+    char* decoded_input = malloc(decoded_input_len + 1);
     if (!decoded_input) return handle_500();
     decoded_input[decoded_input_len] = '\0';
-    decode_url(decoded_input, input, decoded_input_len);
-    input = decoded_input;
+    decode_url(decoded_input, input, encoded_input_len);
+
+    int status_code = 0;
+    QueryResponse* query_response = input_query(decoded_input, &status_code);
+    free(decoded_input);
+    if (status_code != 0 || !query_response) {
+        if (query_response) free(query_response);
+        return handle_500();
+    }
+
+    char response_msg[MAX_RESPONSE_BODY_LEN];
+    int offset = 0;
+    int remaining = MAX_RESPONSE_BODY_LEN;
+    
+    offset += snprintf(response_msg + offset, remaining - offset, "{\"results\":[");
+    for (int i = 0 ; i < query_response->num_responses; i++) {
+        if (i > 0) {
+            offset += snprintf(response_msg + offset, remaining - offset, ",");
+        }
+        offset += snprintf(response_msg + offset, remaining - offset, 
+            "{\"title\":%s,\"link\":%s}", 
+            query_response->responses[i].title,
+            query_response->responses[i].link);
+        
+        if (offset >= remaining - 10) {
+            break;
+        }
+    }
+    offset += snprintf(response_msg + offset, remaining - offset, "]}");
+    if (offset + 1 >= remaining) {
+        free(query_response);
+        return handle_500();
+    }
+    response_msg[offset] = '\0';
     
     resp.status_code = 200;
     resp.status_text = "OK";
+
+    printf("RESPONSE: %s\n", response_msg);
     
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/plain") != 0) {
-        free(decoded_input);
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json") != 0) {
+        free(query_response);
         return handle_500();
     }
-    
-    char response_msg[256];
-    snprintf(response_msg, sizeof(response_msg), "You entered: %s", input);
 
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
-        free(decoded_input);
+        free(query_response);
         return handle_500();   
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);
     
     if (add_content_length(&resp) != 0) {
+        free(query_response);
         free(resp.body);
-        free(decoded_input);
         return handle_500();
     }
     
-    free(decoded_input);
+    free(query_response);
     resp.close_connection = !req->keep_alive;
     return resp;
 }

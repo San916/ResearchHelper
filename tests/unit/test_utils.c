@@ -10,12 +10,21 @@ void setUp(void) {
 void tearDown(void) {
 }
 
+void test_skip_whitespace(void) {
+    char* start = " \n\t\r\v\fHi";
+    char* end = start + 6;
+    TEST_ASSERT_EQUAL_INT(strcmp(skip_whitespace(start), end), 0);
+}
+
 void test_url_decoded_str_len(void) {
     char input1[] = "hihihi";
     TEST_ASSERT_EQUAL_INT(url_decoded_str_len(input1), 6);
 
-    char input2[] = "Hello+world%3F";
+    char input2[] = "Hello%20world%3F";
     TEST_ASSERT_EQUAL_INT(url_decoded_str_len(input2), 12);
+
+    char input3[] = "How+do+i+eat+food+with+chopsticks%3F";
+    TEST_ASSERT_EQUAL_INT(url_decoded_str_len(input3), 34);
 }
 
 void test_decode_url(void) {
@@ -25,14 +34,21 @@ void test_decode_url(void) {
     decode_url(output1, input1, 6);
     TEST_ASSERT_EQUAL_INT(strcmp(output1, "hihihi"), 0);
 
-    char input2[] = "Hello+world%3F";
+    char input2[] = "Hello%20world%3F";
     char* output2 = malloc(strlen(input2) + 1);
     if (!output2) return;
-    decode_url(output2, input2, 13);
+    decode_url(output2, input2, 16);
     TEST_ASSERT_EQUAL_INT(strcmp(output2, "Hello world?"), 0);
+
+    char input3[] = "How+do+i+eat+food+with+chopsticks%3F";
+    char* output3 = malloc(strlen(input3) + 1);
+    if (!output3) return;
+    decode_url(output3, input3, 36);
+    TEST_ASSERT_EQUAL_INT(strcmp(output3, "How do i eat food with chopsticks?"), 0);
 
     free(output1);
     free(output2);
+    free(output3);
 }
 
 
@@ -51,6 +67,8 @@ int main(void) {
     UNITY_BEGIN();
 
     // Tests
+    RUN_TEST(test_skip_whitespace);
+
     RUN_TEST(test_url_decoded_str_len);
     RUN_TEST(test_decode_url);
 
