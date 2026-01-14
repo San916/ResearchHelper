@@ -2,14 +2,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const user_input_form = document.getElementById('user_input_form');
     const responseDiv = document.getElementById('response');
 
-    const example_results = "{\"results\":[{\"title\":\"How does a bird fly? : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/askscience\/comments\/1hu74a8\/how_does_a_bird_fly\/\"},{\"title\":\"How birds fly \u2014 Science Learning Hub\",\"link\":\"https:\/\/www.sciencelearn.org.nz\/resources\/303-how-birds-fly\"},{\"title\":\"The Physics of Flight - Schlitz Audubon\",\"link\":\"https:\/\/www.schlitzaudubon.org\/2022\/09\/19\/the-physics-of-flight\/\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\"}]}"; 
-    // display_results(JSON.parse(example_results), "Example query");
+    // const example_results = "{\"results\":[{\"title\":\"How does a bird fly? : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/askscience\/comments\/1hu74a8\/how_does_a_bird_fly\/\"},{\"title\":\"How birds fly \u2014 Science Learning Hub\",\"link\":\"https:\/\/www.sciencelearn.org.nz\/resources\/303-how-birds-fly\"},{\"title\":\"The Physics of Flight - Schlitz Audubon\",\"link\":\"https:\/\/www.schlitzaudubon.org\/2022\/09\/19\/the-physics-of-flight\/\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\"}]}"; 
 
     user_input_form.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        display_results(JSON.parse(example_results), "Example query");
-        return;
+        // display_results(JSON.parse(example_results), "Example query");
+        // return;
 
         const user_input = document.getElementById('user_input').value;
 
