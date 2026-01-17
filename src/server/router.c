@@ -10,8 +10,16 @@ void find_route(Route* routes, int num_routes, HttpRequest* req, HttpResponse* r
         *resp = temp_resp;
         return;
     }
+
+    char clean_path[MAX_PATH_LEN];
+    strcpy(clean_path, req->path);
+    char* query_start = strchr(clean_path, '?');
+    if (query_start) {
+        *query_start = '\0';
+    }
+
     for (int i = 0; i < num_routes; i++) {
-        if (strcmp(req->path, routes[i].path) == 0) {
+        if (strcmp(clean_path, routes[i].path) == 0) {
             HttpResponse temp_resp = routes[i].handler(req);
             *resp = temp_resp;
 

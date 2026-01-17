@@ -18,7 +18,7 @@ HttpResponse handle_home_html(HttpRequest* req) {
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html; charset=utf-8") != 0) {
         return handle_500();
     }
 
@@ -60,7 +60,7 @@ HttpResponse handle_home_css(HttpRequest* req) {
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/css") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/css; charset=utf-8") != 0) {
         return handle_500();
     }
 
@@ -102,7 +102,7 @@ HttpResponse handle_home_js(HttpRequest* req) {
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/javascript") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/javascript; charset=utf-8") != 0) {
         return handle_500();
     }
 
@@ -201,7 +201,7 @@ HttpResponse handle_submit(HttpRequest* req) {
 
     printf("RESPONSE: %s\n", response_msg);
     
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
         free(query_response);
         return handle_500();
     }
@@ -225,12 +225,83 @@ HttpResponse handle_submit(HttpRequest* req) {
     return resp;
 }
 
+HttpResponse handle_content_request(HttpRequest* req) {
+    HttpResponse resp = {0};
+    
+    if (strcmp(req->method, "GET") != 0) {
+        return handle_405(req);
+    }
+    
+    // if (req->body) {
+    //     return handle_400(req);
+    // }
+    
+    printf("REQ->PATH: %s\n", req->path);
+
+    char* encoded_url = strstr(req->path, "?url=");
+    if (!encoded_url) {
+        return handle_400(req);
+    }
+    encoded_url = encoded_url + 5;
+
+
+    int decoded_url_len = url_decoded_str_len(encoded_url);
+    int encoded_url_len = strlen(encoded_url);
+    char* url = malloc(decoded_url_len + 1);
+    if (!url) return handle_500();
+    url[decoded_url_len] = '\0';
+    decode_url(url, encoded_url, encoded_url_len);
+
+    // TODO: Implement content fetching
+    // int status_code = 0;
+    // char* html_content = fetch_webpage_content(url, &status_code);
+    
+    // if (!html_content) {
+    //     free(url);
+    //     return handle_500();
+    // }
+
+    // char* json_content = parse_webpage_content(url, &status_code);
+    // Yadda Yadda
+
+    resp.status_code = 200;
+    resp.status_text = "OK";
+    
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
+        free(url);
+        return handle_500();
+    }
+
+    char response_msg[MAX_RESPONSE_BODY_LEN];
+    snprintf(response_msg, sizeof(response_msg), 
+             "{\"content\":\"%s\"}", 
+             "ASDASDASD"); // Just send back some stub for now
+    free(url);
+
+    printf("RESPONSE_MSG: %s\n", response_msg);
+
+    resp.body = malloc(strlen(response_msg) + 1);
+    if (!resp.body) {
+        return handle_500();   
+    } 
+    strcpy(resp.body, response_msg);
+    resp.body_length = (int)strlen(response_msg);
+    
+    if (add_content_length(&resp) != 0) {
+        free(resp.body);
+        return handle_500();
+    }
+
+    resp.close_connection = !req->keep_alive;
+    return resp;
+}
+
 HttpResponse handle_about(HttpRequest* req) {
     HttpResponse resp = {0};
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html; charset=utf-8") != 0) {
         return handle_500();
     }
 

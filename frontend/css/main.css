@@ -85,7 +85,7 @@ form input {
     border-radius: 2em;
 }
 
-.result_item {
+.result-item .result-header {
     background-color: #f8f8f8;
     width: 100%;
     border-color: #242424;
@@ -97,15 +97,21 @@ form input {
     align-items: center;
 }
 
-.result_item .result_content a {
+.result-item .result-header a {
     color:#242424;
     text-decoration: none;
 }
 
-.result_item .result_expander {
+.result-item .result-header .result-expander {
     width: 20px;
     height: 20px;
     padding: 15px;
     margin: 10px;
     background-color: #f0f0f0;
+}
+
+.result-item .result-content {
+    height: 100px;
+    width: 100%;
+    background-color: red;
 }
