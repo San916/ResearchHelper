@@ -12,9 +12,12 @@ void tearDown(void) {
 }
 
 void test_web_crawler_basic(void) {
-    int status_code = 0;
-    char *input = "What is C?";
-    input_query(input, &status_code);
+    // int status_code = 0;
+    // char* input = get_google_search_url("What%20is%20C%3F");
+    // char* content = fetch_webpage_content(input, &status_code);
+    // printf("CONTENT: %s\n", content);
+    // free(input);
+    // free(content);
 }
 
 void test_structure_query_response(void) {
@@ -42,7 +45,7 @@ int main(void) {
     UNITY_BEGIN();
 
     // Tests
-    // RUN_TEST(test_web_crawler_basic);
+    RUN_TEST(test_web_crawler_basic);
     RUN_TEST(test_structure_query_response);
 
     return UNITY_END();
