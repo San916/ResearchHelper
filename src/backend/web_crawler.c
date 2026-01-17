@@ -6,6 +6,13 @@
 #include <windows.h>
 #include <curl/curl.h>
 
+typedef enum {
+    WEBSITE_UNKNOWN,
+    WEBSITE_REDDIT,
+    WEBSITE_STACKOVERFLOW,
+    WEBSITE_GITHUB,
+} WebsiteType;
+
 // REQUIRES: Path to .env starting at root/build/
 // EFFECTS: Loads .env files to be accessed with getenv()
 static void load_env(const char *file_name) {
@@ -26,7 +33,7 @@ static void load_env(const char *file_name) {
 // REQUIRES: Non null-terminated content stream, size = 1 always, size of content stream nmemb, pointer to our WritebackData data_ptr
 // MODIFIES: data pointed to by data_ptr. This data is assigned during curl_easy_setopt() with flag CURLOPT_WRITEDATA
 // EFFECTS: Callback to curl_easy_perform. Adds nmemb bytes of content onto the data referenced in data_ptr
-size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* data_ptr) {
+static size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* data_ptr) {
     struct WritebackData *chunk = (struct WritebackData *)data_ptr;
     size_t size_to_add = nmemb;
     size_t new_size = size_to_add + chunk->size;
@@ -42,6 +49,32 @@ size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* dat
     chunk->size = new_size;
     chunk->data[new_strlen] = '\0';
     return size_to_add;
+}
+
+// REQUIRES: Valud URL
+// EFFECTS: Returns the type of url
+static WebsiteType detect_website_type(const char* url) {
+    if (strstr(url, "reddit.com")) return WEBSITE_REDDIT;
+    if (strstr(url, "stackoverflow.com") || strstr(url, "stackexchange.com")) return WEBSITE_STACKOVERFLOW;
+    if (strstr(url, "github.com")) return WEBSITE_GITHUB;
+    return WEBSITE_UNKNOWN;
+}
+
+// REQUIRES: URL encoded input query
+// EFFECTS: Returns input query in google search api format
+char* get_google_search_url(char* input) {
+    const char* api_key = getenv("GOOGLE_SEARCH_API_KEY");
+    const char* search_engine_id = getenv("GOOGLE_SEARCH_ENGINE");
+    if (!api_key || !search_engine_id) {
+        load_env("..\\.env");
+        api_key = getenv("GOOGLE_SEARCH_API_KEY");
+        search_engine_id = getenv("GOOGLE_SEARCH_ENGINE");
+    }
+    char* url = calloc(1, MAX_CURL_URL_LEN);
+    if (!url) return NULL;
+    snprintf(url, MAX_CURL_URL_LEN, "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s", api_key, search_engine_id, input);
+    printf("URL: %s\n", url);
+    return url;
 }
 
 // REQUIRES: Query response in JSON format with key "items"
@@ -84,10 +117,16 @@ QueryResponse* structure_query_response(const char* input) {
     return response;
 }
 
-QueryResponse* input_query(char* input, int* status_code) {
+// REQUIRES: Valid url
+// EFEFCTS: Returns webpage content as string
+char* fetch_webpage_content(const char* url, int* status_code) {
+    if (strlen(url) >= MAX_CURL_URL_LEN) {
+        return NULL;
+    }
     CURL* curl_handle;
     CURLcode response_code;
     WritebackData writeback = {0};
+
     writeback.data = malloc(1);
     if (!writeback.data) return NULL;
     writeback.size = 1;
@@ -96,15 +135,6 @@ QueryResponse* input_query(char* input, int* status_code) {
     if (!curl_handle) {
         return NULL;
     }
-
-    load_env("..\\.env");
-    const char* api_key = getenv("GOOGLE_SEARCH_API_KEY");
-    const char* search_engine_id = getenv("GOOGLE_SEARCH_ENGINE");
-    char* encoded_input = curl_easy_escape(curl_handle, input, strlen(input));
-    if (!encoded_input) return NULL;
-    char url[512];
-    snprintf(url, sizeof(url), "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s", api_key, search_engine_id, encoded_input);
-    curl_free(encoded_input);
 
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, (long)1);
     curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, (long)5);
@@ -115,6 +145,7 @@ QueryResponse* input_query(char* input, int* status_code) {
 
     response_code = curl_easy_perform(curl_handle);
 
+    printf("URL: %s\n", url);
     if(response_code != CURLE_OK) {
         fprintf(stderr, "error: %s\n", curl_easy_strerror(response_code));
         free(writeback.data);
@@ -122,8 +153,32 @@ QueryResponse* input_query(char* input, int* status_code) {
         return NULL;
     }
     
-    QueryResponse* response = structure_query_response(writeback.data);
-    free(writeback.data);
     curl_easy_cleanup(curl_handle);
-    return response;
+    return writeback.data;
+}
+
+ContentList* parse_webpage_content(const char* html_content, const char* url, int* status_code) {
+    ContentList* content_list = malloc(sizeof(ContentList));
+    if (!content_list) {
+        return NULL;
+    }
+    content_list->num_items = 0;
+    
+    WebsiteType site_type = detect_website_type(url);
+    
+    switch (site_type) {
+        case WEBSITE_REDDIT:
+            // parse_reddit_content(html_content, content_list);
+            break;
+        default:
+            // parse_generic_content(html_content, content_list);
+            break;
+    }
+
+    // Return a stub
+    content_list->num_items++;
+    strcpy(content_list->items[0].code, "\"```int i = 0;```\"");
+    strcpy(content_list->items[0].discussion, "\"Blubbah\"");
+    content_list->items[0].score = 10;
+    return content_list;
 }
