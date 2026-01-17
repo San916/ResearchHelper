@@ -5,6 +5,10 @@
 #define MAX_RESPONSE_TITLE_LEN 128
 #define MAX_RESPONSE_LINK_LEN 256
 #define MAX_RESPONSE_WEB_CONTENT_LEN 1024
+#define MAX_CONTENT_ITEMS 5
+#define MAX_CODE_LEN 512
+#define MAX_DISCUSSION_LEN 512
+#define MAX_CURL_URL_LEN 512
 
 typedef struct WritebackData {
     char* data;
@@ -22,8 +26,20 @@ typedef struct QueryResponse {
     int num_responses;
 } QueryResponse;
 
-size_t write_memory_callback(void *content, size_t size, size_t nmemb, void *data_ptr);
+typedef struct ContentItem {
+    char code[MAX_CODE_LEN];
+    char discussion[MAX_DISCUSSION_LEN];
+    int score;
+} ContentItem;
+
+typedef struct ContentList {
+    ContentItem items[MAX_CONTENT_ITEMS];
+    int num_items;
+} ContentList;
+
+char* get_google_search_url(char* input);
 QueryResponse* structure_query_response(const char* input);
-QueryResponse* input_query(char* input, int* status_code);
+char* fetch_webpage_content(const char* url, int* status_code);
+ContentList* parse_webpage_content(const char* html_content, const char* url, int* status_code);
 
 #endif

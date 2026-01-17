@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     resultExpander.textContent = "▲";
                     
                     if (!resultContent.dataset.loaded) {
-                        await fetchAndDisplayContent(result.id, resultContent);
+                        await fetchAndDisplayContent(result.link, resultContent);
                     }
                 }
             });

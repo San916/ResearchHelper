@@ -156,16 +156,16 @@ HttpResponse handle_submit(HttpRequest* req) {
     }
     input = req->body + 11;
 
-    int decoded_input_len = url_decoded_str_len(input);
-    int encoded_input_len = strlen(input);
-    char* decoded_input = malloc(decoded_input_len + 1);
-    if (!decoded_input) return handle_500();
-    decoded_input[decoded_input_len] = '\0';
-    decode_url(decoded_input, input, encoded_input_len);
-
     int status_code = 0;
-    QueryResponse* query_response = input_query(decoded_input, &status_code);
-    free(decoded_input);
+    char* search_url = get_google_search_url(input);
+    if (!search_url) {
+        return handle_500();
+    }
+    char* webpage_content = fetch_webpage_content(search_url, &status_code);
+    free(search_url);
+    QueryResponse* query_response = structure_query_response(webpage_content);
+    free(webpage_content);
+
     if (status_code != 0 || !query_response) {
         if (query_response) free(query_response);
         return handle_500();
@@ -198,8 +198,6 @@ HttpResponse handle_submit(HttpRequest* req) {
     
     resp.status_code = 200;
     resp.status_text = "OK";
-
-    printf("RESPONSE: %s\n", response_msg);
     
     if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
         free(query_response);
@@ -232,61 +230,75 @@ HttpResponse handle_content_request(HttpRequest* req) {
         return handle_405(req);
     }
     
-    // if (req->body) {
-    //     return handle_400(req);
-    // }
-    
-    printf("REQ->PATH: %s\n", req->path);
-
     char* encoded_url = strstr(req->path, "?url=");
     if (!encoded_url) {
         return handle_400(req);
     }
     encoded_url = encoded_url + 5;
 
-
     int decoded_url_len = url_decoded_str_len(encoded_url);
     int encoded_url_len = strlen(encoded_url);
-    char* url = malloc(decoded_url_len + 1);
-    if (!url) return handle_500();
-    url[decoded_url_len] = '\0';
-    decode_url(url, encoded_url, encoded_url_len);
+    char* decoded_url = malloc(decoded_url_len + 1);
+    if (!decoded_url) return handle_500();
+    decoded_url[decoded_url_len] = '\0';
+    decode_url(decoded_url, encoded_url, encoded_url_len);
 
-    // TODO: Implement content fetching
-    // int status_code = 0;
-    // char* html_content = fetch_webpage_content(url, &status_code);
-    
-    // if (!html_content) {
-    //     free(url);
-    //     return handle_500();
-    // }
-
-    // char* json_content = parse_webpage_content(url, &status_code);
-    // Yadda Yadda
-
-    resp.status_code = 200;
-    resp.status_text = "OK";
-    
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
-        free(url);
+    int status_code = 0;
+    char* html_content = fetch_webpage_content(decoded_url, &status_code);
+    if (!html_content) {
         return handle_500();
     }
 
+    ContentList* json_content = parse_webpage_content(html_content, encoded_url, &status_code);
+    free(html_content);
+    if (!json_content) {
+        return handle_500();
+    }
+    resp.status_code = 200;
+    resp.status_text = "OK";
+    
     char response_msg[MAX_RESPONSE_BODY_LEN];
-    snprintf(response_msg, sizeof(response_msg), 
-             "{\"content\":\"%s\"}", 
-             "ASDASDASD"); // Just send back some stub for now
-    free(url);
+    int offset = 0;
+    int remaining = MAX_RESPONSE_BODY_LEN;
 
-    printf("RESPONSE_MSG: %s\n", response_msg);
+    offset += snprintf(response_msg + offset, remaining - offset, "{\"content\":[");
+    for (int i = 0 ; i < json_content->num_items; i++) {
+        if (i > 0) {
+            offset += snprintf(response_msg + offset, remaining - offset, ",");
+        }
+        offset += snprintf(response_msg + offset, remaining - offset, 
+            "{\"code\":%s,\"discussion\":%s,\"score\":%d}", 
+            json_content->items[i].code,
+            json_content->items[i].discussion,
+            json_content->items[i].score
+        );
+        
+        if (offset >= remaining - 10) {
+            break;
+        }
+    }
+    offset += snprintf(response_msg + offset, remaining - offset, 
+        "],\"count\":%d}",
+        json_content->num_items
+    );
+    if (offset + 1 >= remaining) {
+        free(json_content);
+        return handle_500();
+    }
+    response_msg[offset] = '\0';
 
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
+        return handle_500();
+    }
+
+    printf("RESPONSE BODY: %s\n", response_msg);
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
         return handle_500();   
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);
-    
+
     if (add_content_length(&resp) != 0) {
         free(resp.body);
         return handle_500();
