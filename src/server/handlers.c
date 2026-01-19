@@ -209,8 +209,6 @@ HttpResponse handle_content_request(HttpRequest* req) {
     if (!decoded_url) return handle_500();
     decoded_url[decoded_url_len] = '\0';
     decode_url(decoded_url, encoded_url, encoded_url_len);
-
-    printf("URL: %s\n", decoded_url);
     
     int status_code = 0;
     char* response_msg = get_content_item(decoded_url, &status_code, MAX_RESPONSE_BODY_LEN);
