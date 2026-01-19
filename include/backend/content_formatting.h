@@ -1,0 +1,45 @@
+#ifndef CONTENT_FORMATTING_H
+#define CONTENT_FORMATTING_H
+
+#include "web_utils.h"
+
+#define MAX_NUM_RESPONSES 5
+#define MAX_RESPONSE_TITLE_LEN 128
+#define MAX_RESPONSE_LINK_LEN 256
+#define MAX_RESPONSE_WEB_CONTENT_LEN 1024
+
+#define MAX_CONTENT_ITEMS 5
+#define MAX_DISCUSSION_LEN 512
+#define MAX_CODE_LEN 512
+
+typedef struct SingleResponse {
+    char link[MAX_RESPONSE_LINK_LEN];
+    char title[MAX_RESPONSE_TITLE_LEN];
+    char web_content[MAX_RESPONSE_WEB_CONTENT_LEN];
+} SingleResponse;
+
+typedef struct QueryResponse {
+    SingleResponse responses[MAX_NUM_RESPONSES];
+    int num_responses;
+} QueryResponse;
+
+typedef struct ContentItem {
+    char code[MAX_CODE_LEN];
+    char discussion[MAX_DISCUSSION_LEN];
+    int score;
+} ContentItem;
+
+typedef struct ContentList {
+    ContentItem items[MAX_CONTENT_ITEMS];
+    int num_items;
+} ContentList;
+
+QueryResponse* parse_google_query_response(const char* input);
+char* stringify_google_query_response(QueryResponse* query_response, size_t max_length);
+char* structure_google_query_response(const char* content, size_t max_length);
+
+ContentList* parse_webpage_content(const char* content, WebsiteType website_type);
+char* stringify_content_response(ContentList* content, size_t max_length);
+char* structure_webpage_content_response(const char* content, WebsiteType website_type, size_t max_length);
+
+#endif

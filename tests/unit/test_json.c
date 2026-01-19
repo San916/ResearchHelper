@@ -58,6 +58,25 @@ void test_get_json_value_string(void) {
     TEST_ASSERT_NULL(result);
 }
 
+void test_get_json_value_string_weird_whitespace(void) {
+    const char* json_string = "\n\t\"key\"\n\t: \"This is a string\"";
+    const char* json_string_2 = "\"key\": \n\t\"This is a string\"\n\t";
+    const char* json_string_3 = "\n\t\"key\"\n\t: \n\t\"This is a string\"\n\t";
+
+    char* result = get_json_value(json_string, "key");
+    TEST_ASSERT_EQUAL_INT(strcmp(result, "\"This is a string\""), 0);
+    free(result);
+
+    result = get_json_value(json_string_2, "key");
+    TEST_ASSERT_EQUAL_INT(strcmp(result, "\"This is a string\""), 0);
+    free(result);
+
+    result = get_json_value(json_string_3, "key");
+    TEST_ASSERT_EQUAL_INT(strcmp(result, "\"This is a string\""), 0);
+    free(result);
+}
+
+
 void test_get_json_value_array(void) {
     const char* json_array = 
         "{"
@@ -168,6 +187,7 @@ int main(void) {
     RUN_TEST(test_get_json_value_null);
     RUN_TEST(test_get_json_value_number);
     RUN_TEST(test_get_json_value_string);
+    RUN_TEST(test_get_json_value_string_weird_whitespace);
 
     RUN_TEST(test_get_json_value_array);
     RUN_TEST(test_get_json_value_array_bad);

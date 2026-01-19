@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <curl/curl.h>
 
 static int add_content_length(HttpResponse* resp) {
     char body_length_str[32];
@@ -157,68 +158,34 @@ HttpResponse handle_submit(HttpRequest* req) {
     input = req->body + 11;
 
     int status_code = 0;
-    char* search_url = get_google_search_url(input);
-    if (!search_url) {
+    char* response_msg = get_content_list(input, &status_code, MAX_RESPONSE_BODY_LEN);
+    if (!response_msg) {
         return handle_500();
     }
-    char* webpage_content = fetch_webpage_content(search_url, &status_code);
-    free(search_url);
-    QueryResponse* query_response = structure_query_response(webpage_content);
-    free(webpage_content);
-
-    if (status_code != 0 || !query_response) {
-        if (query_response) free(query_response);
-        return handle_500();
-    }
-
-    char response_msg[MAX_RESPONSE_BODY_LEN];
-    int offset = 0;
-    int remaining = MAX_RESPONSE_BODY_LEN;
-    
-    offset += snprintf(response_msg + offset, remaining - offset, "{\"results\":[");
-    for (int i = 0 ; i < query_response->num_responses; i++) {
-        if (i > 0) {
-            offset += snprintf(response_msg + offset, remaining - offset, ",");
-        }
-        offset += snprintf(response_msg + offset, remaining - offset, 
-            "{\"title\":%s,\"link\":%s}", 
-            query_response->responses[i].title,
-            query_response->responses[i].link);
-        
-        if (offset >= remaining - 10) {
-            break;
-        }
-    }
-    offset += snprintf(response_msg + offset, remaining - offset, "]}");
-    if (offset + 1 >= remaining) {
-        free(query_response);
-        return handle_500();
-    }
-    response_msg[offset] = '\0';
     
     resp.status_code = 200;
     resp.status_text = "OK";
-    
+
     if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
-        free(query_response);
+        free(response_msg);
         return handle_500();
     }
 
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
-        free(query_response);
+        free(response_msg);
         return handle_500();   
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);
     
     if (add_content_length(&resp) != 0) {
-        free(query_response);
+        free(response_msg);
         free(resp.body);
         return handle_500();
     }
     
-    free(query_response);
+    free(response_msg);
     resp.close_connection = !req->keep_alive;
     return resp;
 }
@@ -243,49 +210,16 @@ HttpResponse handle_content_request(HttpRequest* req) {
     decoded_url[decoded_url_len] = '\0';
     decode_url(decoded_url, encoded_url, encoded_url_len);
 
+    printf("URL: %s\n", decoded_url);
+    
     int status_code = 0;
-    char* html_content = fetch_webpage_content(decoded_url, &status_code);
-    if (!html_content) {
+    char* response_msg = get_content_item(decoded_url, &status_code, MAX_RESPONSE_BODY_LEN);
+    if (!response_msg) {
         return handle_500();
     }
 
-    ContentList* json_content = parse_webpage_content(html_content, encoded_url, &status_code);
-    free(html_content);
-    if (!json_content) {
-        return handle_500();
-    }
     resp.status_code = 200;
     resp.status_text = "OK";
-    
-    char response_msg[MAX_RESPONSE_BODY_LEN];
-    int offset = 0;
-    int remaining = MAX_RESPONSE_BODY_LEN;
-
-    offset += snprintf(response_msg + offset, remaining - offset, "{\"content\":[");
-    for (int i = 0 ; i < json_content->num_items; i++) {
-        if (i > 0) {
-            offset += snprintf(response_msg + offset, remaining - offset, ",");
-        }
-        offset += snprintf(response_msg + offset, remaining - offset, 
-            "{\"code\":%s,\"discussion\":%s,\"score\":%d}", 
-            json_content->items[i].code,
-            json_content->items[i].discussion,
-            json_content->items[i].score
-        );
-        
-        if (offset >= remaining - 10) {
-            break;
-        }
-    }
-    offset += snprintf(response_msg + offset, remaining - offset, 
-        "],\"count\":%d}",
-        json_content->num_items
-    );
-    if (offset + 1 >= remaining) {
-        free(json_content);
-        return handle_500();
-    }
-    response_msg[offset] = '\0';
 
     if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
         return handle_500();
