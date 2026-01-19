@@ -83,7 +83,7 @@ char* get_json_value(const char* src, const char* key) {
     }
 
     char key_json[32];
-    int pattern_len = snprintf(key_json, sizeof(key_json), "\"%s\":", key);
+    int pattern_len = snprintf(key_json, sizeof(key_json), "\"%s\"", key);
     if (pattern_len >= sizeof(key_json)) {
         return NULL;
     }
@@ -92,6 +92,8 @@ char* get_json_value(const char* src, const char* key) {
     if (!value_start) return NULL;
 
     value_start = value_start + pattern_len;
+    value_start = skip_whitespace(value_start);
+    value_start++;
     value_start = skip_whitespace(value_start);
 
     char* value_end = find_end_of_json_value(value_start);

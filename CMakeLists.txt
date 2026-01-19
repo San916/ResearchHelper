@@ -28,7 +28,10 @@ set(SOURCES
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
+    ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
@@ -51,16 +54,19 @@ add_compile_definitions(
     UNITY_OUTPUT_COLOR
 )
 
-# ========== Unit test utils ==========
-add_executable(test_utils
-    ${TEST_DIR}/unit/test_utils.c
+# ========== Unit test content formatting ==========
+add_executable(test_content_formatting
+    ${TEST_DIR}/unit/test_content_formatting.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
-target_include_directories(test_utils PRIVATE 
+target_include_directories(test_content_formatting PRIVATE
     ${INCLUDES}
     ${UNITY_DIR}/src
 )
-target_link_libraries(test_utils unity)
+target_link_libraries(test_content_formatting unity CURL::libcurl)
 
 # ========== Unit test http ==========
 add_executable(test_http
@@ -77,36 +83,6 @@ target_include_directories(test_http PRIVATE
 )
 target_link_libraries(test_http unity)
 
-# ========== Unit test router ==========
-add_executable(test_router
-    ${TEST_DIR}/unit/test_router.c
-    ${SOURCE_DIR}/server/router.c
-    ${SOURCE_DIR}/server/http.c
-    ${SOURCE_DIR}/server/http_errors.c
-    ${SOURCE_DIR}/server/handlers.c
-    ${SOURCE_DIR}/backend/web_crawler.c
-    ${SOURCE_DIR}/utils/json.c
-    ${SOURCE_DIR}/utils/utils.c
-)
-target_include_directories(test_router PRIVATE 
-    ${INCLUDES}
-    ${UNITY_DIR}/src
-)
-target_link_libraries(test_router unity Ws2_32 CURL::libcurl)
-
-# ========== Unit test web crawler ==========
-add_executable(test_web_crawler
-    ${TEST_DIR}/unit/test_web_crawler.c
-    ${SOURCE_DIR}/backend/web_crawler.c
-    ${SOURCE_DIR}/utils/json.c
-    ${SOURCE_DIR}/utils/utils.c
-)
-target_include_directories(test_web_crawler PRIVATE
-    ${INCLUDES}
-    ${UNITY_DIR}/src
-)
-target_link_libraries(test_web_crawler unity CURL::libcurl)
-
 # ========== Unit test json ==========
 add_executable(test_json
     ${TEST_DIR}/unit/test_json.c
@@ -119,11 +95,72 @@ target_include_directories(test_json PRIVATE
 )
 target_link_libraries(test_json unity)
 
+# ========== Unit test router ==========
+add_executable(test_router
+    ${TEST_DIR}/unit/test_router.c
+    ${SOURCE_DIR}/server/router.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_router PRIVATE 
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_router unity Ws2_32 CURL::libcurl)
+
+# ========== Unit test utils ==========
+add_executable(test_utils
+    ${TEST_DIR}/unit/test_utils.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_utils PRIVATE 
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_utils unity)
+
+# ========== Unit test web crawler ==========
+add_executable(test_web_crawler
+    ${TEST_DIR}/unit/test_web_crawler.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_web_crawler PRIVATE
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_web_crawler unity CURL::libcurl)
+
+# ========== Unit test web utils ==========
+add_executable(test_web_utils
+    ${TEST_DIR}/unit/test_web_utils.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_web_utils PRIVATE
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_web_utils unity CURL::libcurl)
+
 # ========== Add tests ==========
 enable_testing()
 
-add_test(NAME test_utils COMMAND test_utils)
+add_test(NAME test_content_formatting COMMAND test_content_formatting)
 add_test(NAME test_http COMMAND test_http)
+add_test(NAME test_json COMMAND test_json)
 add_test(NAME test_router COMMAND test_router)
 add_test(NAME test_web_crawler COMMAND test_web_crawler)
-add_test(NAME test_json COMMAND test_json)
+add_test(NAME test_utils COMMAND test_utils)
+add_test(NAME test_web_utils COMMAND test_web_utils)

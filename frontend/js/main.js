@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const data = await response.json();
                 contentArea.innerHTML = `
                     <div class="content-display">
-                        <div class="content-text">${data.content}</div>
+                        <div class="content-text">${data.count}</div>
                     </div>
                 `;
                 contentArea.dataset.loaded = true;
