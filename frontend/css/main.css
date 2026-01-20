@@ -85,6 +85,13 @@ form input {
     border-radius: 2em;
 }
 
+#response .response-content {
+    height: 100%;
+    overflow: scroll;
+    scrollbar-width: none;
+    font-family: 'Arial';
+}
+
 .result-item .result-header {
     background-color: #f8f8f8;
     width: 100%;
@@ -111,7 +118,25 @@ form input {
 }
 
 .result-item .result-content {
-    height: 100px;
+    height: 400px;
     width: 100%;
-    background-color: red;
+    overflow: scroll;
+    scrollbar-width: none;
+    background-color: white;
+}
+
+code {
+    background-color: #f0f0f0;
+}
+
+pre {
+    width: 100%;
+    background-color: #f0f0f0;
+}
+
+blockquote {
+    border-left-style: solid;
+    border-width: 10;
+    border-color: #242424;
+    
 }

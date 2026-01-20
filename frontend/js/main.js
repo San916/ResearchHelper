@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const userInputForm = document.getElementById("user-input-form");
     const responseDiv = document.getElementById("response");
 
-    const exampleResults = "{\"results\":[{\"title\":\"How does a bird fly? : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/askscience\/comments\/1hu74a8\/how_does_a_bird_fly\/\", \"id\":\"result_1\"},{\"title\":\"How birds fly \u2014 Science Learning Hub\",\"link\":\"https:\/\/www.sciencelearn.org.nz\/resources\/303-how-birds-fly\", \"id\":\"result_2\"},{\"title\":\"The Physics of Flight - Schlitz Audubon\",\"link\":\"https:\/\/www.schlitzaudubon.org\/2022\/09\/19\/the-physics-of-flight\/\", \"id\":\"result_3\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\", \"id\":\"result_4\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
+    const exampleResults = "{\"results\":[{\"title\":\"How does a bird fly? : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/askscience\/comments\/1hu74a8\/how_does_a_bird_fly\/\", \"id\":\"result_1\"},{\"title\":\"Proper usage of realloc()\",\"link\":\"https:\/\/stackoverflow.com/questions\/21006707\/proper-usage-of-realloc\", \"id\":\"result_2\"},{\"title\":\"OpenGL - Picking (fastest way)\",\"link\":\"https:\/\/stackoverflow.com\/questions\/28032910\/opengl-picking-fastest-way\", \"id\":\"result_3\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\", \"id\":\"result_4\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
 
     userInputForm.addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const resultExpander = resultElement.querySelector(".result-expander");
             const resultContent = resultElement.querySelector(".result-content");
             resultExpander.textContent = "▼";
+            resultContent.style.display = "none";
             resultExpander.addEventListener("click", async function() {
                 const visible = resultContent.style.display !== "none";
                 resultContent.style.display = "none";
@@ -99,12 +100,17 @@ document.addEventListener("DOMContentLoaded", function() {
             const response = await fetch(`/content?url=${encodeURIComponent(resultId)}`);
             
             if (response.ok) {
-                const data = await response.json();
-                contentArea.innerHTML = `
-                    <div class="content-display">
-                        <div class="content-text">${data.count}</div>
-                    </div>
-                `;
+                const data = await response.text();
+                const jsonData = JSON.parse(data);
+                contentArea.innerHTML += `<div class="content-display">`;
+                jsonData.content.forEach((item) => {
+                    contentArea.innerHTML += `
+                        <div class="content-text">
+                            ${item.content_body}
+                        </div>
+                    `;
+                });
+                contentArea.innerHTML += `</div>`;
                 contentArea.dataset.loaded = true;
             } else {
                 contentArea.textContent = `Error: ${response.status}`;

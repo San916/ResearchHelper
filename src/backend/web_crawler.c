@@ -24,7 +24,7 @@ char* get_content_list(const char* query, int* status_code, size_t max_content_l
         goto destroy_curl_return;
     }
 
-    char* webpage_content = fetch_webpage_content(search_url, curl_handle, status_code);
+    char* webpage_content = fetch_webpage_content(search_url, status_code, curl_handle, NULL);
     free(search_url);
     if (!webpage_content) {
         goto destroy_curl_return;
@@ -46,14 +46,15 @@ char* get_content_item(const char* url, int* status_code, size_t max_content_len
     if (!curl_handle) {
         goto destroy_curl_return;
     }
+    struct curl_slist* headers = create_curl_headers();
 
     WebsiteType website_type = detect_website_type(url);
-    char* new_url = web_specific_setup(url, website_type, curl_handle);
+    char* new_url = web_specific_setup(url, website_type, curl_handle, &headers);
     if (!new_url) {
         goto destroy_curl_return;
     }
 
-    char* webpage_content = fetch_webpage_content(new_url, curl_handle, status_code);
+    char* webpage_content = fetch_webpage_content(new_url, status_code, curl_handle, headers);
     free(new_url);
     if (!webpage_content) {
         goto destroy_curl_return;

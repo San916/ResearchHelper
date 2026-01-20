@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 // Define all variables here
-#define MAX_RESPONSE_LENGTH 1024
+static int MAX_RESPONSE_LENGTH = 1024;
 
 static char google_query_response[] = 
     "{\"items\": ["
@@ -36,17 +36,11 @@ static char expected_json_content_response[] =
     "{\"content\":"
         "["
             "{"
-                "\"code\":\"```int i = 0;```\","
-                "\"discussion\":\"This is a variable.\","
+                "\"content_body\":\"<code>int i = 0;</code>\","
                 "\"score\":10"
-            "},"
-            "{"
-                "\"code\":\"\","
-                "\"discussion\":\"There is no code, and no score.\","
-                "\"score\":0"
             "}"
         "],"
-        "\"count\":2"
+        "\"count\":1"
     "}";
 
 
@@ -86,12 +80,8 @@ void test_structure_google_query_response(void) {
 void test_parse_webpage_content(void) {
     ContentList* response = parse_webpage_content("", WEBSITE_STUB);
     TEST_ASSERT_NOT_NULL(response);
-    TEST_ASSERT_EQUAL_INT(strcmp(response->items[0].code, "\"```int i = 0;```\""), 0);
-    TEST_ASSERT_EQUAL_INT(strcmp(response->items[0].discussion, "\"This is a variable.\""), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(response->items[0].content_body, "\"<code>int i = 0;</code>\""), 0);
     TEST_ASSERT_EQUAL_INT(response->items[0].score, 10);
-    TEST_ASSERT_EQUAL_INT(strcmp(response->items[1].code, "\"\""), 0);
-    TEST_ASSERT_EQUAL_INT(strcmp(response->items[1].discussion, "\"There is no code, and no score.\""), 0);
-    TEST_ASSERT_EQUAL_INT(response->items[1].score, 0);
     free(response);
 }
 

@@ -8,9 +8,8 @@
 #define MAX_RESPONSE_LINK_LEN 256
 #define MAX_RESPONSE_WEB_CONTENT_LEN 1024
 
-#define MAX_CONTENT_ITEMS 5
-#define MAX_DISCUSSION_LEN 512
-#define MAX_CODE_LEN 512
+#define MAX_CONTENT_ITEMS 3
+#define MAX_CONTENT_BODY_LEN 4096
 
 typedef struct SingleResponse {
     char link[MAX_RESPONSE_LINK_LEN];
@@ -24,8 +23,7 @@ typedef struct QueryResponse {
 } QueryResponse;
 
 typedef struct ContentItem {
-    char code[MAX_CODE_LEN];
-    char discussion[MAX_DISCUSSION_LEN];
+    char content_body[MAX_CONTENT_BODY_LEN];
     int score;
 } ContentItem;
 

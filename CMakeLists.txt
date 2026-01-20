@@ -59,6 +59,7 @@ add_executable(test_content_formatting
     ${TEST_DIR}/unit/test_content_formatting.c
     ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
@@ -154,6 +155,24 @@ target_include_directories(test_web_utils PRIVATE
 )
 target_link_libraries(test_web_utils unity CURL::libcurl)
 
+# ========== Unit test webpage parsing ==========
+add_executable(test_webpage_parsing
+    ${TEST_DIR}/unit/test_webpage_parsing.c
+    ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_webpage_parsing PRIVATE
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_webpage_parsing unity CURL::libcurl)
+
 # ========== Add tests ==========
 enable_testing()
 
@@ -164,3 +183,4 @@ add_test(NAME test_router COMMAND test_router)
 add_test(NAME test_web_crawler COMMAND test_web_crawler)
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_web_utils COMMAND test_web_utils)
+add_test(NAME test_webpage_parsing COMMAND test_webpage_parsing)

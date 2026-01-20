@@ -108,25 +108,28 @@ ContentList* parse_webpage_content(const char* content, WebsiteType website_type
         case WEBSITE_REDDIT:
             break;
         case WEBSITE_STACKOVERFLOW:
+            int status_code = parse_stackoverflow_content(content, content_list);
+            if (status_code) {
+                goto free_return_null;
+            }
             break;
         case WEBSITE_GITHUB:
             break;
         case WEBSITE_STUB:
             // Return a stub
             content_list->num_items++;
-            strcpy(content_list->items[0].code, "\"```int i = 0;```\"");
-            strcpy(content_list->items[0].discussion, "\"This is a variable.\"");
+            strcpy(content_list->items[0].content_body, "\"<code>int i = 0;</code>\"");
             content_list->items[0].score = 10;
-
-            content_list->num_items++;
-            strcpy(content_list->items[1].code, "\"\"");
-            strcpy(content_list->items[1].discussion, "\"There is no code, and no score.\"");
             break;
         default:
             break;
     }
 
     return content_list;
+
+free_return_null:
+    free(content_list);
+    return NULL;
 }
 
 // REQUIRES: Structured webpage content, max response length
@@ -146,9 +149,8 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
         current_position += snprintf(response_msg + current_position, remaining - current_position, 
-            "{\"code\":%s,\"discussion\":%s,\"score\":%d}", 
-            content->items[i].code,
-            content->items[i].discussion,
+            "{\"content_body\":%s,\"score\":%d}", 
+            content->items[i].content_body,
             content->items[i].score
         );
         
@@ -175,6 +177,11 @@ char* structure_webpage_content_response(const char* content, WebsiteType websit
     if (!content_list) {
         return NULL;
     }
+    printf("PRINTING CONTENT_LIST:\n");
+    for (int i = 0; i < content_list->num_items; i++) {
+        printf("CONTENT_LIST->ITEMS[%d].CONTENT_BODY: %s\n", i, content_list->items[i].content_body);
+    }
+
     char* response_msg = stringify_content_response(content_list, max_length);
     free(content_list);
     if (!response_msg) {

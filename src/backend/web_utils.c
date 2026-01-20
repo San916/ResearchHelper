@@ -1,4 +1,5 @@
 #include "web_utils.h"
+#include "webpage_parsing.h"
 #include <stdio.h>
 
 // REQUIRES: Path to .env starting at root/build/
@@ -55,15 +56,27 @@ CURL* create_curl_handle() {
     return curl_handle;
 }
 
+// EFFECTS: Creates and returns curl headers after basic setup
+struct curl_slist* create_curl_headers() {
+    struct curl_slist* headers = NULL;
+    return headers;
+}
+
 // EFFECTS: Cleans up curl handle
 void destroy_curl_handle(CURL* curl_handle) {
     if (!curl_handle) return;
     curl_easy_cleanup(curl_handle);
 }
 
+// EFFECTS: Cleans up curl headers
+void destroy_curl_headers(struct curl_slist* headers) {
+    if (!headers) return;
+    curl_slist_free_all(headers);
+}
+
 // REQUIRES: Url and curl handle
 // EFEFCTS: Returns webpage content as string
-char* fetch_webpage_content(const char* url, CURL* curl_handle, int* status_code) {
+char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle, struct curl_slist* headers) {
     if (strlen(url) >= MAX_CURL_URL_LEN || !curl_handle) {
         return NULL;
     }
@@ -77,6 +90,7 @@ char* fetch_webpage_content(const char* url, CURL* curl_handle, int* status_code
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&writeback);
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
 
     response_code = curl_easy_perform(curl_handle);
 
@@ -86,6 +100,8 @@ char* fetch_webpage_content(const char* url, CURL* curl_handle, int* status_code
         return NULL;
     }
     
+    printf("DATA: %s\n", writeback.data);
+
     return writeback.data;
 }
 
@@ -114,10 +130,27 @@ WebsiteType detect_website_type(const char* url) {
     return WEBSITE_UNKNOWN;
 }
 
+char* extract_stackoverflow_question_id(const char* url) {
+    const char* pattern = "questions/";
+    char* first_slash = strstr(url, pattern);
+    if (!first_slash) {
+        return NULL;
+    }
+    first_slash = first_slash + strlen(pattern);
+    char* second_slash = strchr(first_slash, '/');
+    size_t question_id_length = second_slash - first_slash;
+    if (question_id_length > 12) {
+        return NULL;
+    }
+    char* question_id = calloc(1, question_id_length + 1);
+    strncpy(question_id, first_slash, question_id_length);
+    return question_id;
+}
+
 // REQUIRES: Valid url and WebsiteType
 // EFFECTS: Executes different curl_handle setups according to the website type
 // new url to curl (some websites may want us to append .json, add .api, etc)
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle) {
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers) {
     char* new_url = calloc(1, strlen(url) + 1);
     strcpy(new_url, url);
 
@@ -125,6 +158,27 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle) {
         case WEBSITE_REDDIT:
             break;
         case WEBSITE_STACKOVERFLOW:
+            char* question_id = extract_stackoverflow_question_id(url);
+            if (!question_id) {
+                return NULL;
+            }
+            const char* stackoverflow_url_start = "https://api.stackexchange.com/2.3/questions/";
+            const char* stackoverflow_url_end = "/answers?site=stackoverflow&filter=withbody";
+            size_t new_url_length = strlen(stackoverflow_url_start) + strlen(stackoverflow_url_end) + strlen(question_id);
+            char* temp_new_url = realloc(new_url, new_url_length + 1);
+            if (!temp_new_url) {
+                free(question_id);
+                return NULL;
+            }
+            new_url = temp_new_url;
+            snprintf(new_url, new_url_length + 1, "%s%s%s", stackoverflow_url_start, question_id, stackoverflow_url_end);
+            new_url[new_url_length] = '\0';
+            free(question_id);
+
+            *headers = curl_slist_append(*headers, "Accept: application/json");
+            curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
+            curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+
             break;
         case WEBSITE_GITHUB:
             break;

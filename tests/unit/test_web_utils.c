@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 // Define all variables here
-#define TEST_ENV_FILENAME "..\\tests\\data\\test_env.env"
+static const char TEST_ENV_FILENAME[] = "..\\tests\\data\\test_env.env";
 
 void setUp(void) {
 }
