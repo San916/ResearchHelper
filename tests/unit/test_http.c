@@ -5,18 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define UNITY_PRINT_TEST_CONTEXT
-#define UNITY_OUTPUT_COLOR 1
-
 // Define all variables here
-static char working_request[] =
+static const char working_request[] =
         "GET /index.html HTTP/1.1\r\n"
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
         "Connection: keep-alive\r\n"
         "\r\n";
 
-static char working_request_body[] =
+static const char working_request_body[] =
         "GET /index.html HTTP/1.1\r\n"
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
@@ -25,7 +22,7 @@ static char working_request_body[] =
         "Hello world!";
 
 static HttpResponse resp = {0};
-static const char* resp_str =
+static const char resp_str[] =
     "HTTP/1.1 200 OK\r\n"
     "Host: www.example.com\r\n"
     "Content-Type: text/html\r\n"

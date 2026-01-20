@@ -11,7 +11,7 @@
 #define MAX_VALUE_LEN 256
 #define MAX_HEADER_COUNT 32
 #define MAX_REQUEST_SIZE 4096
-#define MAX_RESPONSE_BODY_LEN 8192
+#define MAX_RESPONSE_BODY_LEN 16384
 #define HEADER_SIZE_ESTIMATE 1024
 
 static const char* VALID_HTTP_METHODS[] = {
@@ -76,10 +76,10 @@ typedef struct HttpResponse {
 } HttpResponse;
 
 void free_http_response(HttpResponse* resp);
-int set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
-int parse_request_line(char* line, HttpRequest* req);
-int parse_headers(HttpRequest* req, char** context);
-int parse_body(HttpRequest* req, char** context);
+HttpRequestError set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
+HttpRequestError parse_request_line(char* line, HttpRequest* req);
+HttpRequestError parse_headers(HttpRequest* req, char** context);
+HttpRequestError parse_body(HttpRequest* req, char** context);
 HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code);
 char* build_http_response(HttpResponse* resp);
 

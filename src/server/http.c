@@ -19,7 +19,7 @@ void free_http_response(HttpResponse* resp) {
 
 // REQUIRES: Pointer to start of HttpHeader array, number of headers, and key value pair
 // MODIFIES/EFFECTS: Sets header with key and value pair, and increments num_headers. Returns status code or 0
-int set_header(HttpHeader* headers, int* num_headers, const char* key, const char* val) {
+HttpRequestError set_header(HttpHeader* headers, int* num_headers, const char* key, const char* val) {
     if (*num_headers >= MAX_HEADER_COUNT) return PARSE_TOO_MANY_HEADERS;
     if (strlen(key) >= MAX_KEY_LEN - 1 || strlen(val) >= MAX_VALUE_LEN - 1) return PARSE_HEADER_ENTRY_TOO_LARGE;
 
@@ -57,7 +57,7 @@ bool is_valid_version(char* version) {
 // REQUIRES: Takes a request line and request
 // MODIFIES: Modifies original string with '\0' in place of delimeter. Modifies request method, path, token
 // EFFECTS: Reads the line given into req->method, path, version. Returns status code
-int parse_request_line(char* line, HttpRequest* req) {
+HttpRequestError parse_request_line(char* line, HttpRequest* req) {
     char* context = NULL;
 
     char* token = strtok_s(line, " ", &context);
@@ -80,7 +80,7 @@ int parse_request_line(char* line, HttpRequest* req) {
 // REQUIRES: HttpRequest, char** context pointing to the start of the headers section in the request
 // MODIFIES: char** context to the end of headers
 // EFFECTS: Parses through headers and adds them into the HttpRequest. Returns status code
-int parse_headers(HttpRequest* req, char** context) {
+HttpRequestError parse_headers(HttpRequest* req, char** context) {
     char* line;
     bool contains_host = false;
     bool keep_alive = true;
@@ -123,7 +123,7 @@ int parse_headers(HttpRequest* req, char** context) {
 
 // REQUIRES: HttpRequest, char** context pointing to the start of the body section in the request
 // EFFECTS: Parses through body and adds it into the HttpRequest. Returns status code
-int parse_body(HttpRequest* req, char** context) {
+HttpRequestError parse_body(HttpRequest* req, char** context) {
     if (context == NULL || *context == NULL || **context == '\0') return PARSE_BODY_OK;
     req->body = calloc(1, strlen(*context) + 1);
     if (!req->body) return MALLOC_ERROR;

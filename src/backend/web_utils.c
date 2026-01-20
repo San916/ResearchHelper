@@ -1,4 +1,5 @@
 #include "web_utils.h"
+#include "webpage_parsing.h"
 #include <stdio.h>
 
 // REQUIRES: Path to .env starting at root/build/
@@ -98,8 +99,9 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
         free(writeback.data);
         return NULL;
     }
-    printf("WRITEBACK_DATA: %s\n", writeback.data);
     
+    printf("DATA: %s\n", writeback.data);
+
     return writeback.data;
 }
 
