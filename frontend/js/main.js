@@ -100,13 +100,21 @@ document.addEventListener("DOMContentLoaded", function() {
             const response = await fetch(`/content?url=${encodeURIComponent(resultId)}`);
 
             if (response.ok) {
+                const escaped = response.headers.get("Html-Escaped") === "true";
                 const data = await response.text();
                 const jsonData = JSON.parse(data);
                 contentArea.innerHTML += `<div class="content-display">`;
                 jsonData.content.forEach((item) => {
+                    let html = item.content_body;
+
+                    if (escaped) {
+                        const txt = document.createElement("textarea");
+                        txt.innerHTML = html;
+                        html = txt.value;
+                    }
                     contentArea.innerHTML += `
                         <div class="content-text">
-                            ${item.content_body}
+                            ${html}
                         </div>
                     `;
                 });

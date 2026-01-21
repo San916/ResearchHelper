@@ -171,7 +171,7 @@ char* extract_reddit_question_id(const char* url) {
 // REQUIRES: Valid url and WebsiteType
 // EFFECTS: Executes different curl_handle setups according to the website type
 // new url to curl (some websites may want us to append .json, add .api, etc)
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers) {
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
     char* new_url = calloc(1, MAX_CURL_URL_LEN);
     if (!new_url) {
         return NULL;
@@ -199,6 +199,8 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
             curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
             curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
             printf("URL: %s\n", new_url);
+
+            *escaped = 1;
             break;
         } case WEBSITE_STACKOVERFLOW: {
             char* question_id = extract_stackoverflow_question_id(url);

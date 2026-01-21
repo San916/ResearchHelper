@@ -33,6 +33,6 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
 
 char* get_google_search_url(const char* input);
 WebsiteType detect_website_type(const char* url);
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers);
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped);
 
 #endif

@@ -17,6 +17,9 @@ void test_parse_reddit_content(void) {
 
     int response_code = parse_reddit_content(api_response, content_list);
     TEST_ASSERT_EQUAL_INT(response_code, PARSE_WEBPAGE_CONTENT_OK);
+    TEST_ASSERT_EQUAL_INT(content_list->num_items, 1);
+    TEST_ASSERT_EQUAL_INT(strcmp(content_list->items[0].content_body, "\"&lt;pre&gt;&lt;code&gt;int i = 0&lt;/code&gt;&lt;/pre&gt;\""), 0);
+    TEST_ASSERT_EQUAL_INT(content_list->items[0].score, 9);
 }
 
 void test_parse_stackoverflow_content(void) {

@@ -9,8 +9,6 @@ typedef enum {
 } ParseWebpageContentError;
 
 ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList* content_list);
-
-char** get_reddit_comments(char* content, int* num_elements);
 ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list);
 
 #endif

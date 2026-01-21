@@ -46,13 +46,12 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
 // REQUIRES: Reddit JSON response
 // EFFECTS: Parses response and returns 
 // TODO: Improve after implementing get_ith_element() in json.c
-char** get_reddit_comments(char* content, int* num_elements) {
+static char** get_reddit_comments(char* content, int* num_elements) {
     *num_elements = 0;
     char** items_array = separate_array(content, num_elements, NUM_BYTES_TO_READ_REDDIT);
     if (!items_array || *num_elements < 2) {
         return NULL;
     }
-
 
     char* children = get_json_value(items_array[1], "children");
     for (int i = 0; i < *num_elements; i++) {
@@ -67,8 +66,6 @@ char** get_reddit_comments(char* content, int* num_elements) {
     char** children_array = separate_array(children, num_elements, NUM_BYTES_TO_READ_REDDIT);
     free(children);
 
-    printf("NUM_ELEMENTS: %d\n", *num_elements);
-
     return children_array;
 }
 
@@ -80,7 +77,11 @@ ParseWebpageContentError parse_reddit_content(char* content, ContentList* conten
     }
 
     for (int i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
-        char* item_body = get_json_value(comments[i], "body");
+        char* kind = get_json_value(comments[i], "kind");
+        if (strcmp(kind, "\"t1\"")) {
+            continue;
+        }
+        char* item_body = get_json_value(comments[i], "body_html");
         printf("ITEM[%d]_BODY: %s\n", i, item_body);
 
         if (strlen(item_body) >= MAX_CONTENT_BODY_LEN) {
