@@ -182,10 +182,6 @@ char* structure_webpage_content_response(char* content, WebsiteType website_type
     if (!content_list) {
         return NULL;
     }
-    printf("PRINTING CONTENT_LIST:\n");
-    for (int i = 0; i < content_list->num_items; i++) {
-        printf("CONTENT_LIST->ITEMS[%d].CONTENT_BODY: %s\n", i, content_list->items[i].content_body);
-    }
 
     char* response_msg = stringify_content_response(content_list, max_length);
     free(content_list);

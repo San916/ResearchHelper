@@ -5,19 +5,25 @@
 </head>
 <body>
     <script src="js/main.js"></script>
-    <container>
-        <section class="left-panel">
-            <h1>ResearchHelper</h1>
-            <p>A web crawler that finds relevant code snippets to any of your coding related problems. Try it below!</p>
-            <form id="user-input-form">
-                <input type="text" id="user-input" name="user-input" size="20" maxlength="100">
-                <input type="submit" hidden />
-            </form>
-        </section>
-        <section class="right-panel">
+    <div id="title-page">
+        <h1>ResearchHelper</h1>
+        <p>A web crawler that finds human-written answers for any of your coding related problems.</p>
+        <form class="user-input-form">
+            <input type="text" class="user-input" size="20" maxlength="100" placeholder="Write here!" >
+            <input type="submit" hidden />
+        </form>
+    </div>
+    <div id="main-page">
+        <section id="main-panel">
             <div id = "response">
             </div>
         </section>
-    </container>
+    </div>
+    <div id="footer">
+        <form class="user-input-form">
+            <input type="text" class="user-input" size="20" maxlength="100" placeholder="Write here!" >
+            <input type="submit" hidden />
+        </form>
+    </div>
 </body>
 </html>

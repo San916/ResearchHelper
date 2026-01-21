@@ -1,42 +1,63 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const userInputForm = document.getElementById("user-input-form");
+    const mainPage = document.getElementById("main-page");
+    const footer = document.getElementById("footer");
+    mainPage.style.display = "none";
+    footer.style.display = "none";
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const userInputForms = document.querySelectorAll(".user-input-form");
     const responseDiv = document.getElementById("response");
+    const mainPage = document.getElementById("main-page");
+    const titlePage = document.getElementById("title-page");
+    const footer = document.getElementById("footer");
 
-    const exampleResults = "{\"results\":[{\"title\":\"Question about realloc : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/cprogramming\/comments\/1lrkzjb\/question_about_realloc\/\", \"id\":\"result_1\"},{\"title\":\"Proper usage of realloc()\",\"link\":\"https:\/\/stackoverflow.com/questions\/21006707\/proper-usage-of-realloc\", \"id\":\"result_2\"},{\"title\":\"OpenGL - Picking (fastest way)\",\"link\":\"https:\/\/stackoverflow.com\/questions\/28032910\/opengl-picking-fastest-way\", \"id\":\"result_3\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\", \"id\":\"result_4\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
+    const exampleResults = "{\"results\":[{\"title\":\"Question about realloc : r\/cprogramming\",\"link\":\"https:\/\/www.reddit.com\/r\/cprogramming\/comments\/1lrkzjb\/question_about_realloc\/\", \"id\":\"result_1\"},{\"title\":\"Proper usage of realloc()\",\"link\":\"https:\/\/stackoverflow.com/questions\/21006707\/proper-usage-of-realloc\", \"id\":\"result_2\"},{\"title\":\"OpenGL - Picking (fastest way)\",\"link\":\"https:\/\/stackoverflow.com\/questions\/28032910\/opengl-picking-fastest-way\", \"id\":\"result_3\"},{\"title\":\"How to handle realloc when it fails due to memory?\",\"link\":\"https:\/\/stackoverflow.com\/questions\/1986538\/how-to-handle-realloc-when-it-fails-due-to-memory\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
+    console.log("ASDSADAS");
 
-    userInputForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
+    userInputForms.forEach((userInputForm) => {
+        console.log("ASDSADAS");
+        userInputForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            console.log("ASDSADAS");
 
-        displayResults(JSON.parse(exampleResults), "Example query");
-        return;
-
-        const userInput = document.getElementById("user-input").value;
-
-        if (!userInput.trim()) {
-            return;
-        }
-
-        try {
-            const response = await fetch("/submit", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `user_input=${encodeURIComponent(userInput)}`
-            });
-            
-            if (response.ok) {
-                const data = await response.text();
-                displayResults(JSON.parse(data), userInput);
-            } else {
-                responseDiv.textContent = `Error: ${response.status}`;
+            if (mainPage.style.display === "none") {
+                console.log("CHANGING");
+                titlePage.style.display = "none";
+                mainPage.style.display = "block";
+                footer.style.display = "block";
             }
-        } catch (error) {
-            responseDiv.textContent = `Error: ${error.message}`;
-            console.error("Error:", error);
-        }
+            displayResults(JSON.parse(exampleResults), "Example query");
+            return;
 
-        document.getElementById("user-input").value = "";
+            // const userInput = document.getElementById("user-input").value;
+
+            // if (!userInput.trim()) {
+            //     return;
+            // }
+
+            // try {
+            //     const response = await fetch("/submit", {
+            //         method: "POST",
+            //         headers: {
+            //             "Content-Type": "application/x-www-form-urlencoded",
+            //         },
+            //         body: `user_input=${encodeURIComponent(userInput)}`
+            //     });
+                
+            //     if (response.ok) {
+            //         const data = await response.text();
+            //         displayResults(JSON.parse(data), userInput);
+            //     } else {
+            //         responseDiv.textContent = `Error: ${response.status}`;
+            //     }
+            // } catch (error) {
+            //     responseDiv.textContent = `Error: ${error.message}`;
+            //     console.error("Error:", error);
+            // }
+
+            // document.querySelectorAll(".user-input").forEach((user_input) => {user_input.value = ""});
+        });
     });
 
     function displayResults(data, query) {
@@ -98,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function() {
     async function fetchAndDisplayContent(resultId, contentArea) {
         try {
             const response = await fetch(`/content?url=${encodeURIComponent(resultId)}`);
-
+            
             if (response.ok) {
                 const escaped = response.headers.get("Html-Escaped") === "true";
                 const data = await response.text();

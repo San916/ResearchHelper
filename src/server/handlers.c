@@ -225,7 +225,6 @@ HttpResponse handle_content_request(HttpRequest* req) {
         return handle_500();
     }
 
-    printf("RESPONSE BODY: %s\n", response_msg);
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
         return handle_500();   
