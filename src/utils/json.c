@@ -75,8 +75,9 @@ static char* find_end_of_json_value(char* value_start) {
     return value_end;
 }
 
-// REQUIRES: JSON string, key must exist in the highest level
-// EFFECTS: Returns JSON object from key as string, return NULL on fail
+// REQUIRES: JSON string, key can be in any level
+// EFFECTS: Returns first JSON object from key as string, return NULL on fail
+// Doesn't only check top value, returns first one found in the string matching the key
 char* get_json_value(const char* src, const char* key) {
     if (!src || !key || !*src || !*key) {
         return NULL;

@@ -40,7 +40,7 @@ destroy_curl_return:
 
 // REQUIRES: url, status code address
 // EFFECTS: Looks through webpage in the url, returns relevant information as JSON formatted string
-char* get_content_item(const char* url, int* status_code, size_t max_content_length) {
+char* get_content_item(const char* url, int* status_code, int* escaped, size_t max_content_length) {
     char* content_json = NULL;
     CURL* curl_handle = create_curl_handle();
     if (!curl_handle) {
@@ -49,7 +49,7 @@ char* get_content_item(const char* url, int* status_code, size_t max_content_len
     struct curl_slist* headers = create_curl_headers();
 
     WebsiteType website_type = detect_website_type(url);
-    char* new_url = web_specific_setup(url, website_type, curl_handle, &headers);
+    char* new_url = web_specific_setup(url, website_type, curl_handle, &headers, escaped);
     if (!new_url) {
         goto destroy_curl_return;
     }
