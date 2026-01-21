@@ -5,6 +5,10 @@
 #include <curl/curl.h>
 
 #define MAX_CURL_URL_LEN 512
+#define MAX_USER_AGENT_LEN 512
+
+#define REDDIT_API_DEPTH 1
+#define REDDIT_API_LIMIT 5
 
 typedef struct WritebackData {
     char* data;

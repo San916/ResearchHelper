@@ -11,6 +11,14 @@ void setUp(void) {
 void tearDown(void) {
 }
 
+void test_parse_reddit_content(void) {
+    char* api_response = read_file("..\\tests\\data\\reddit_dummy_response.txt");
+    ContentList* content_list = calloc(1, sizeof(ContentList));
+
+    int response_code = parse_reddit_content(api_response, content_list);
+    TEST_ASSERT_EQUAL_INT(response_code, PARSE_WEBPAGE_CONTENT_OK);
+}
+
 void test_parse_stackoverflow_content(void) {
     char* api_response = read_file("..\\tests\\data\\stackoverflow_dummy_response.txt");
     ContentList* content_list = calloc(1, sizeof(ContentList));
@@ -31,6 +39,7 @@ int main(void) {
 
     // Tests
     RUN_TEST(test_parse_stackoverflow_content);
+    RUN_TEST(test_parse_reddit_content);
 
     return UNITY_END();
 }
