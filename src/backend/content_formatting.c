@@ -97,7 +97,7 @@ char* structure_google_query_response(const char* content, size_t max_length) {
 
 // REQUIRES: Webpage content, website type
 // EFFECTS: Structures content and returns
-ContentList* parse_webpage_content(const char* content, WebsiteType website_type) {
+ContentList* parse_webpage_content(char* content, WebsiteType website_type) {
     ContentList* content_list = calloc(1, sizeof(ContentList));
     if (!content_list) {
         return NULL;
@@ -105,24 +105,29 @@ ContentList* parse_webpage_content(const char* content, WebsiteType website_type
     content_list->num_items = 0;
 
     switch (website_type) {
-        case WEBSITE_REDDIT:
+        case WEBSITE_REDDIT: {
+            int status_code = parse_reddit_content(content, content_list);
+            if (status_code) {
+                goto free_return_null;
+            }
             break;
-        case WEBSITE_STACKOVERFLOW:
+        } case WEBSITE_STACKOVERFLOW: {
             int status_code = parse_stackoverflow_content(content, content_list);
             if (status_code) {
                 goto free_return_null;
             }
             break;
-        case WEBSITE_GITHUB:
+        } case WEBSITE_GITHUB: {
             break;
-        case WEBSITE_STUB:
+        } case WEBSITE_STUB: {
             // Return a stub
             content_list->num_items++;
             strcpy(content_list->items[0].content_body, "\"<code>int i = 0;</code>\"");
             content_list->items[0].score = 10;
             break;
-        default:
+        } default: {
             break;
+        }
     }
 
     return content_list;
@@ -172,7 +177,7 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     return response_msg;
 }
 
-char* structure_webpage_content_response(const char* content, WebsiteType website_type, size_t max_length) {
+char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length) {
     ContentList* content_list = parse_webpage_content(content, website_type);
     if (!content_list) {
         return NULL;

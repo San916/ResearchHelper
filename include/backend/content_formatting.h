@@ -36,8 +36,8 @@ QueryResponse* parse_google_query_response(const char* input);
 char* stringify_google_query_response(QueryResponse* query_response, size_t max_length);
 char* structure_google_query_response(const char* content, size_t max_length);
 
-ContentList* parse_webpage_content(const char* content, WebsiteType website_type);
+ContentList* parse_webpage_content(char* content, WebsiteType website_type);
 char* stringify_content_response(ContentList* content, size_t max_length);
-char* structure_webpage_content_response(const char* content, WebsiteType website_type, size_t max_length);
+char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length);
 
 #endif

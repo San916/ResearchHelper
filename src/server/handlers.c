@@ -211,7 +211,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     decode_url(decoded_url, encoded_url, encoded_url_len);
     
     int status_code = 0;
-    char* response_msg = get_content_item(decoded_url, &status_code, MAX_RESPONSE_BODY_LEN);
+    int escaped = 0;
+    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN);
     if (!response_msg) {
         return handle_500();
     }
@@ -219,7 +220,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     resp.status_code = 200;
     resp.status_text = "OK";
 
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0) {
+    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0 ||
+        set_header(resp.headers, &resp.num_headers, "Html-Escaped", escaped ? "true" : "false") != 0) {
         return handle_500();
     }
 

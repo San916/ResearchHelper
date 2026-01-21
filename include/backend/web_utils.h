@@ -5,6 +5,10 @@
 #include <curl/curl.h>
 
 #define MAX_CURL_URL_LEN 512
+#define MAX_USER_AGENT_LEN 512
+
+#define REDDIT_API_DEPTH 1
+#define REDDIT_API_LIMIT 5
 
 typedef struct WritebackData {
     char* data;
@@ -29,6 +33,6 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
 
 char* get_google_search_url(const char* input);
 WebsiteType detect_website_type(const char* url);
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers);
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped);
 
 #endif

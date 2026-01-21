@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const userInputForm = document.getElementById("user-input-form");
     const responseDiv = document.getElementById("response");
 
-    const exampleResults = "{\"results\":[{\"title\":\"How does a bird fly? : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/askscience\/comments\/1hu74a8\/how_does_a_bird_fly\/\", \"id\":\"result_1\"},{\"title\":\"Proper usage of realloc()\",\"link\":\"https:\/\/stackoverflow.com/questions\/21006707\/proper-usage-of-realloc\", \"id\":\"result_2\"},{\"title\":\"OpenGL - Picking (fastest way)\",\"link\":\"https:\/\/stackoverflow.com\/questions\/28032910\/opengl-picking-fastest-way\", \"id\":\"result_3\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\", \"id\":\"result_4\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
+    const exampleResults = "{\"results\":[{\"title\":\"Question about realloc : r\/askscience\",\"link\":\"https:\/\/www.reddit.com\/r\/cprogramming\/comments\/1lrkzjb\/question_about_realloc\/\", \"id\":\"result_1\"},{\"title\":\"Proper usage of realloc()\",\"link\":\"https:\/\/stackoverflow.com/questions\/21006707\/proper-usage-of-realloc\", \"id\":\"result_2\"},{\"title\":\"OpenGL - Picking (fastest way)\",\"link\":\"https:\/\/stackoverflow.com\/questions\/28032910\/opengl-picking-fastest-way\", \"id\":\"result_3\"},{\"title\":\"Do birds fly around just for \\\"fun\\\"? : r\/ecology\",\"link\":\"https:\/\/www.reddit.com\/r\/ecology\/comments\/px70ok\/do_birds_fly_around_just_for_fun\/\", \"id\":\"result_4\"},{\"title\":\"How do birds fly? We explain how they get - and stay - airborne ...\",\"link\":\"https:\/\/www.discoverwildlife.com\/animal-facts\/birds\/how-do-birds-fly\", \"id\":\"result_5\"}]}"; 
 
     userInputForm.addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -98,15 +98,23 @@ document.addEventListener("DOMContentLoaded", function() {
     async function fetchAndDisplayContent(resultId, contentArea) {
         try {
             const response = await fetch(`/content?url=${encodeURIComponent(resultId)}`);
-            
+
             if (response.ok) {
+                const escaped = response.headers.get("Html-Escaped") === "true";
                 const data = await response.text();
                 const jsonData = JSON.parse(data);
                 contentArea.innerHTML += `<div class="content-display">`;
                 jsonData.content.forEach((item) => {
+                    let html = item.content_body;
+
+                    if (escaped) {
+                        const txt = document.createElement("textarea");
+                        txt.innerHTML = html;
+                        html = txt.value;
+                    }
                     contentArea.innerHTML += `
                         <div class="content-text">
-                            ${item.content_body}
+                            ${html}
                         </div>
                     `;
                 });
