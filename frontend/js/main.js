@@ -2,6 +2,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const mainPage = document.getElementById("main-page");
     const footer = document.getElementById("footer");
     mainPage.style.display = "none";
+
+    const mainPanel = document.getElementById("main-panel");
+    mainPanel.addEventListener("wheel", function (event) {
+        const inner = event.target.closest(".result-content");
+        if (inner) return;
+
+        const response = document.getElementById("response");
+        const delta = event.deltaY * 0.5;
+        const maxScroll = response.scrollHeight - response.clientHeight;
+
+        response.scrollTop = Math.min(Math.max(response.scrollTop + delta, 0), maxScroll);
+        event.preventDefault();
+    }, { passive: false });
 });
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -62,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const queryElement = document.createElement("div");
         queryElement.className = "response-header";
-        queryElement.innerHTML = `<h2>Results for: "${query}"</h2>`;
+        queryElement.innerHTML = `<h1>Results for: "${query}"</h2>`;
         responseDiv.appendChild(queryElement);
         
         if (!data.results || data.results.length === 0) {
@@ -76,23 +89,25 @@ document.addEventListener("DOMContentLoaded", function() {
         data.results.forEach((result, index) => {
             const resultElement = document.createElement("div");
             resultElement.className = "result-item";
-            resultElement.id = `content_${result.id}`;
-            resultElement.innerHTML = `
-                <div class="result-header">
-                    <div class="result-expander">
-                    </div>
-                    <a href="${result.link}">
-                        <h3 class="result-title">${result.title}</h3>
-                    </a>
-                </div>
-                <div class="result-content">
-                </div>
-            `;
-            const resultExpander = resultElement.querySelector(".result-expander");
-            const resultContent = resultElement.querySelector(".result-content");
+            
+            const resultExpander = document.createElement("div");
+            resultExpander.className = "result-expander";
             resultExpander.textContent = "▼";
+
+            const resultHeader = document.createElement("div");
+            resultHeader.className = "result-header";
+            resultHeader.appendChild(resultExpander);
+            resultHeader.innerHTML += `
+                <a href="${result.link}" target="_blank" rel="noopener noreferrer">
+                    <h3 class="result-title">${result.title}</h3>
+                </a>
+            `;
+
+            const resultContent = document.createElement("div");
+            resultContent.className = "result-content";
             resultContent.style.display = "none";
-            resultExpander.addEventListener("click", async function() {
+            
+            resultHeader.addEventListener("click", async function() {
                 const visible = resultContent.style.display !== "none";
                 resultContent.style.display = "none";
                 if (visible) {
@@ -107,21 +122,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
             });
+
+            resultElement.appendChild(resultHeader);
+            resultElement.appendChild(resultContent);
             responseContent.appendChild(resultElement);
         });
         
         responseDiv.appendChild(responseContent);
     }
 
-    async function fetchAndDisplayContent(resultId, contentArea) {
+    async function fetchAndDisplayContent(resultLink, contentArea) {
         try {
-            const response = await fetch(`/content?url=${encodeURIComponent(resultId)}`);
+            const response = await fetch(`/content?url=${encodeURIComponent(resultLink)}`);
             
             if (response.ok) {
                 const escaped = response.headers.get("Html-Escaped") === "true";
                 const data = await response.text();
                 const jsonData = JSON.parse(data);
-                contentArea.innerHTML += `<div class="content-display">`;
                 jsonData.content.forEach((item) => {
                     let html = item.content_body;
 
@@ -130,13 +147,47 @@ document.addEventListener("DOMContentLoaded", function() {
                         txt.innerHTML = html;
                         html = txt.value;
                     }
-                    contentArea.innerHTML += `
-                        <div class="content-text">
-                            ${html}
-                        </div>
-                    `;
+                    console.log(item);
+
+                    const contentItem = document.createElement("div");
+                    contentItem.className = "content-item";
+
+                    const contentText = document.createElement("div");
+                    contentText.className = "content-text";
+                    contentText.innerHTML = html;
+
+                    const contentHeader = document.createElement("div");
+                    contentHeader.className = "content-header";
+                    contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
+
+                    const commentExpander = document.createElement("div");
+                    commentExpander.className = "comment-expander";
+                    commentExpander.textContent = "[close]";
+                    contentHeader.addEventListener("click", function() {
+                        const closing = commentExpander.textContent === "[close]";
+                        if (closing) {
+                            commentExpander.textContent = "[expand]";
+                            contentText.style.display = "none";
+                        } else {
+                            commentExpander.textContent = "[close]";
+                            contentText.style.display = "block";
+                        }
+                    });
+
+                    const invisibleBorder = document.createElement("div");
+                    invisibleBorder.className = "invisible-border";
+                    invisibleBorder.addEventListener("click", function() {
+                        contentHeader.click();
+                    })
+
+                    contentHeader.appendChild(commentExpander);
+
+                    contentItem.appendChild(contentHeader);
+                    contentItem.appendChild(contentText);
+                    contentItem.appendChild(invisibleBorder);
+
+                    contentArea.appendChild(contentItem);
                 });
-                contentArea.innerHTML += `</div>`;
                 contentArea.dataset.loaded = true;
             } else {
                 contentArea.textContent = `Error: ${response.status}`;
@@ -147,6 +198,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
+
+function expandComment() {
+    document.get
+}
 
 function onCloseMenuEnd(event) {
     document.getElementById("expand-button").style.display = "block";
