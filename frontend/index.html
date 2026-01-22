@@ -8,12 +8,28 @@
     <div id="title-page">
         <h1>ResearchHelper</h1>
         <p>A web crawler that finds human-written answers for any of your coding related problems.</p>
-        <form class="user-input-form">
-            <input type="text" class="user-input" size="20" maxlength="100" placeholder="Write here!" >
-            <input type="submit" hidden />
-        </form>
     </div>
     <div id="main-page">
+        <div id="expand-button" onclick="expandMenu()">O</div>
+        <section id="menu">
+            <div id="menu-top">
+                <div id="icon">
+                    <h1>Mmm... Bobby...</h1>
+                </div>
+                <div id="close-button" onclick="closeMenu()">X</div>
+            </div>
+            <div id="menu-middle">
+                <h1>Local query/response storage???</h1>
+            </div>
+            <div id="menu-bottom">
+                <h1>Response sorting</h1>
+                <h1>Add new page</h1>
+                <h1>Keyword detect</h1>
+                <div id="settings">
+
+                </div>
+            </div>
+        </section>
         <section id="main-panel">
             <div id = "response">
             </div>
@@ -21,8 +37,25 @@
     </div>
     <div id="footer">
         <form class="user-input-form">
-            <input type="text" class="user-input" size="20" maxlength="100" placeholder="Write here!" >
+            <input type="text" class="user-input" id="user-input" size="20" maxlength="100" placeholder="Write here!" >
             <input type="submit" hidden />
+            <div id="query-settings">
+                <div class="settings-item">
+                    <p>Maximum number of results:</p><textarea maxlength="2" placeholder="5"></textarea>
+                </div>
+                <div class="settings-item">
+                    <p>Maximum number of comments:</p><textarea maxlength="2" placeholder="5"></textarea>
+                </div>
+                <div class="settings-item">
+                    <p>Minimum score:</p><textarea maxlength="2" placeholder="0"></textarea>
+                </div>
+                <div class="settings-item toggle-able">
+                    <p>Exclude unsupported sites</p>
+                </div>
+                <div class="settings-item toggle-able">
+                    <p>Include original post</p>
+                </div>
+            </div>
         </form>
     </div>
 </body>
