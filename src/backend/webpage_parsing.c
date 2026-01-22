@@ -23,7 +23,6 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
 
     for (int i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
         char* item_body = get_json_value(items_array[i], "body");
-        printf("ITEM[%d]_BODY: %s\n", i, item_body);
 
         if (strlen(item_body) >= MAX_CONTENT_BODY_LEN) {
             continue;
@@ -82,7 +81,6 @@ ParseWebpageContentError parse_reddit_content(char* content, ContentList* conten
             continue;
         }
         char* item_body = get_json_value(comments[i], "body_html");
-        printf("ITEM[%d]_BODY: %s\n", i, item_body);
 
         if (strlen(item_body) >= MAX_CONTENT_BODY_LEN) {
             continue;

@@ -100,8 +100,6 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
         return NULL;
     }
     
-    printf("DATA: %s\n", writeback.data);
-
     return writeback.data;
 }
 
@@ -198,7 +196,6 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
             curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, user_agent);
             curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
             curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
-            printf("URL: %s\n", new_url);
 
             *escaped = 1;
             break;
