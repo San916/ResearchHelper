@@ -232,26 +232,23 @@ form .user-input:focus {
     height: 100%;
     /* padding: 2% 5% 5% 5%; */
     background-color: white;
-    overflow: scroll;
+    overflow: hidden;
     scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
 }
 
 #response .response-header {
+    position: sticky;
     text-align: center;
     padding: 0 0 10px 0;
 }
 
 #response .response-content {
     height: 100%;
-    overflow: scroll;
+    overflow-y: scroll;
     scrollbar-width: none;
     font-family: 'Lucida Console';
-}
-
-#response .response-content::after {
-    content: "";
-    display: block;
-    height: 40px;
 }
 
 .result-item {
@@ -352,7 +349,6 @@ form .user-input:focus {
 
 .result-item .content-item .content-text {
     line-height: 1.5;
-    margin-left: -1px;
     padding: 6px 20px;
     border-left-style: solid;
     border-left-width: 1px;
