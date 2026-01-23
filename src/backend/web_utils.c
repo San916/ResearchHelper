@@ -211,6 +211,7 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
             *headers = curl_slist_append(*headers, "Accept: application/json");
             curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
             curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+            curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "ResearchHelper/1.0");
 
             break;
         } case WEBSITE_GITHUB: {

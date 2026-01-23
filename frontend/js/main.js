@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", function() {
             footer.style.position = "fixed";
         }
 
-        displayResults(JSON.parse(exampleResults), "Example query");
-        return;
+        // displayResults(JSON.parse(exampleResults), "Example query");
+        // return;
 
         const userInput = document.getElementById("user-input").value;
 
@@ -47,10 +47,46 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         try {
+            let maxNumResults = document.getElementById("max-num-results");
+            let maxNumResultsValue = maxNumResults.value;
+            if (maxNumResultsValue.length === 0) {
+                maxNumResultsValue = maxNumResults.placeholder;
+            } else if (!Number.isFinite(Number(maxNumResultsValue))) {
+                maxNumResults.value = "";
+                return;
+            } else {
+                maxNumResultsValue = Number(maxNumResults.value);
+            }
+
+            let maxNumComments = document.getElementById("max-num-comments");
+            let maxNumCommentsValue = maxNumComments.value;
+            if (maxNumCommentsValue.length === 0) {
+                maxNumCommentsValue = maxNumComments.placeholder;
+            } else if (!Number.isFinite(Number(maxNumCommentsValue))) {
+                maxNumComments.value = "";
+                return;
+            } else {
+                maxNumCommentsValue = Number(maxNumComments.value);
+            }
+
+            let minScore = document.getElementById("min-score");
+            let minScoreValue = minScore.value;
+            if (minScoreValue.length === 0) {
+                minScoreValue = minScore.placeholder;
+            } else if (!Number.isFinite(Number(minScoreValue))) {
+                minScore.value = "";
+                return;
+            } else {
+                minScoreValue = Number(minScore.value);
+            }
+            
             const response = await fetch("/submit", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
+                    "Max-Num-Responses": maxNumResultsValue,
+                    "Max-Num-Comments": maxNumCommentsValue,
+                    "Min-Score": minScoreValue,
                 },
                 body: `user_input=${encodeURIComponent(userInput)}`
             });
