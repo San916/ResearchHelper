@@ -222,15 +222,18 @@ HttpResponse handle_content_request(HttpRequest* req) {
 
     if (set_header(resp.headers, &resp.num_headers, "Content-Type", "application/json; charset=utf-8") != 0 ||
         set_header(resp.headers, &resp.num_headers, "Html-Escaped", escaped ? "true" : "false") != 0) {
+        free(response_msg);
         return handle_500();
     }
 
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
+        free(response_msg);
         return handle_500();   
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);
+    free(response_msg);
 
     if (add_content_length(&resp) != 0) {
         free(resp.body);

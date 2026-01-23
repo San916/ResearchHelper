@@ -13,7 +13,7 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }
 
 body {
@@ -22,10 +22,9 @@ body {
     height: 100vh;
     overflow: hidden;
     background-color: white;
-    /* display: flex; */
     margin: 0;
     padding: 0;
-    font-family: 'Arial';
+    font-family: 'Lucida Console';
 }
 
 #title-page {
@@ -37,7 +36,6 @@ body {
     margin-top: 30vh;
     margin-bottom: 10px;
     width: 100%;
-    /* height: 60%; */
     text-align: center;
 }
 
@@ -49,7 +47,7 @@ body {
 #footer {
     left: 0;
     width: 40%;
-    height: 200px;
+    /* height: 200px; */
     background-color: white;
     border-radius: 20px;
     padding: 20px;
@@ -59,6 +57,10 @@ body {
     border-color: #989898;
     border-style: solid;
     border-width: 1px;
+}
+
+#footer {
+    
 }
 
 form {
@@ -91,7 +93,12 @@ form {
     background-color: #f0f0f0;
 }
 
-textarea {
+.settings-item:hover textarea {
+    background-color: #f0f0f0;
+}
+
+.settings-item textarea {
+    transition: background-color 0.1s ease-out;
     width: 1.5rem;
     height: 1.5rem;
     resize: none;
@@ -108,7 +115,7 @@ form {
     padding: 0;
     margin: 0;
     width: 100%;
-    height: 4rem;
+    /* height: 4rem; */
     border-radius: 1.5rem;
     /* border-style: solid; */
     /* border-width: 1px; */
@@ -127,7 +134,7 @@ form .user-input {
     box-sizing: border-box;
     width: 100%;
     max-width:100%;
-    height: 100%;
+    height: 4rem;
     padding: 0rem 1rem;
     margin: 0;
     background-color: transparent;
@@ -161,13 +168,16 @@ form .user-input:focus {
 #menu {
     background-color: #f8f8f8;
     height: 100%;
-    width: 250px;
-    margin-left: -250px;
+    width: 300px;
+    margin-left: -300px;
     transition: 0.2s ease-out;
     z-index: 10;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #f0f0f0;
 }
 
 #menu.open {
@@ -175,8 +185,16 @@ form .user-input:focus {
 }
 
 #menu #menu-top {
+    padding: 1rem;
+    text-align: center;
     display: flex;
     justify-content: space-between;
+}
+
+#menu #menu-top #icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #menu #close-button {
@@ -185,6 +203,8 @@ form .user-input:focus {
     top: 0;
     font-size: 36px;
     display: none;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #menu #menu-bottom {
@@ -194,16 +214,22 @@ form .user-input:focus {
 #main-panel {
     flex: 1;
     min-width: 0;
-    width: 100%;
+    max-width: 60vw;
+    margin: 0 auto;
     height: 100%;
     padding: 3rem;
     justify-content: center;
+    border-width: 1px;
+    border-color: #989898;
+    border-style: solid;
+    border-top-style: none;
+    border-bottom-style: none;
 }
 
 #response {
-    width: 50vw;
-    margin: 0 auto;
-    max-height: 100vh;
+    /* max-width: 60vw; */
+    /* padding-top: 24px; */
+    height: 100%;
     /* padding: 2% 5% 5% 5%; */
     background-color: white;
     overflow: scroll;
@@ -219,7 +245,13 @@ form .user-input:focus {
     height: 100%;
     overflow: scroll;
     scrollbar-width: none;
-    font-family: 'Arial';
+    font-family: 'Lucida Console';
+}
+
+#response .response-content::after {
+    content: "";
+    display: block;
+    height: 40px;
 }
 
 .result-item {
@@ -229,13 +261,21 @@ form .user-input:focus {
     border-style: solid; */
 }
 
+.result-item:hover .result-header {
+    border-color: #242424;
+}
+
 .result-item .result-header {
     color: #242424;
     /* background-color: #f8f8f8; */
+    padding: 6px 0px;
     width: 100%;
     display: flex;
     align-items: center;
     user-select: none;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #989898;
 }
 
 .result-item .result-header a {
@@ -276,10 +316,23 @@ form .user-input:focus {
 
 .result-item .content-item .content-header {
     display: flex;
-    margin-left: -10px;
-    padding: 4px 0;
+    margin-left: -14px;
+    padding: 8px 8px;
     cursor: pointer;
     user-select: none;
+}
+
+.result-item .content-item .content-header {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #989898;
+    /* border-bottom-width: 0px;
+    border-right-width: 0px; */
+    /* box-shadow: -2px -2px 4px 2px #d0d0d0; */
+}
+
+.result-item .content-item:hover .content-header {
+    border-color: #242424;
 }
 
 .result-item .content-item .content-header .comment-expander {
@@ -289,9 +342,9 @@ form .user-input:focus {
 .result-item .content-item .invisible-border {
     content: "";
     position: absolute;
-    left: -5px;
+    left: -8px;
     top: 0;
-    width: 10px;
+    width: 16px;
     height: 100%;
     cursor: pointer;
     background-color: transparent;
