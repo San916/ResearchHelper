@@ -72,16 +72,16 @@ document.addEventListener("DOMContentLoaded", function() {
     function displayResults(data, query) {
         responseDiv.innerHTML = "";
 
-        const queryElement = document.createElement("div");
-        queryElement.className = "response-header";
-        queryElement.innerHTML = `<h2>Results for: "${query}"</h2>`;
-        responseDiv.appendChild(queryElement);
-        
+        const responseHeader = document.createElement("div");
+        responseHeader.className = "response-header";
+        responseHeader.innerHTML = `<h2>Results for: "${query}"</h2>`;
+        responseDiv.appendChild(responseHeader);
+
         if (!data.results || data.results.length === 0) {
             responseDiv.innerHTML += `<div class="no-results">No results!</div>`;
             return;
         }
-        
+
         const responseContent = document.createElement("div");
         responseContent.className = "response-content";
 
