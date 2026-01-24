@@ -1,5 +1,4 @@
 #include "web_crawler_config.h"
-#include "web_utils.h"
 
 // REQUIRES: Valud url
 // EFFECTS: Returns the specific type of website in the url
@@ -22,6 +21,44 @@ char* get_google_search_url(const char* input) {
     if (!url) return NULL;
     snprintf(url, MAX_CURL_URL_LEN, "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s", api_key, search_engine_id, input);
     return url;
+}
+
+// REQUIRES: Valid stackoverflow post url
+// EFFECTS: Returns the question id as string
+char* extract_stackoverflow_question_id(const char* url) {
+    const char* pattern = "questions/";
+    char* first_slash = strstr(url, pattern);
+    if (!first_slash) {
+        return NULL;
+    }
+    first_slash = first_slash + strlen(pattern);
+    char* second_slash = strchr(first_slash, '/');
+    size_t question_id_length = second_slash - first_slash;
+    if (question_id_length > 12) {
+        return NULL;
+    }
+    char* question_id = calloc(1, question_id_length + 1);
+    strncpy(question_id, first_slash, question_id_length);
+    return question_id;
+}
+
+// REQUIRES: Valid stackoverflow post url
+// EFFECTS: Returns the question id as string
+char* extract_reddit_question_id(const char* url) {
+    const char* pattern = "comments/";
+    char* first_slash = strstr(url, pattern);
+    if (!first_slash) {
+        return NULL;
+    }
+    first_slash = first_slash + strlen(pattern);
+    char* second_slash = strchr(first_slash, '/');
+    size_t question_id_length = second_slash - first_slash;
+    if (question_id_length > 12) {
+        return NULL;
+    }
+    char* question_id = calloc(1, question_id_length + 1);
+    strncpy(question_id, first_slash, question_id_length);
+    return question_id;
 }
 
 // REQUIRES: url, curl handle and headers, reference to int flag, REDDIT_ID env should exist
@@ -89,13 +126,16 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
     switch (type) {
         case WEBSITE_REDDIT: {
             new_url = setup_reddit_url(url, curl_handle, headers, escaped);
+            break;
         } case WEBSITE_STACKOVERFLOW: {
-            new_url = setup_reddit_url(url, curl_handle, headers, escaped);
+            new_url = setup_stackoverflow_url(url, curl_handle, headers, escaped);
+            break;
         } case WEBSITE_GITHUB: {
+            break;
         } default: {
+            break;
         }
     }
 
-    
     return new_url;
 }

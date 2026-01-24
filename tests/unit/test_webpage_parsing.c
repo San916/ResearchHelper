@@ -1,7 +1,8 @@
 #include "unity.h"
 #include "test_webpage_parsing_utils.h"
 #include "webpage_parsing.h"
-#include "content_formatting.h"
+
+#include <stdlib.h>
 
 // Define all variables here
 

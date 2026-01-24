@@ -1,7 +1,9 @@
 #include "unity.h"
 #include "web_utils.h"
+
 #include <string.h>
 #include <stdlib.h>
+#include <curl/curl.h>
 
 // Define all variables here
 static const char TEST_ENV_FILENAME[] = "..\\tests\\data\\test_env.env";
@@ -44,6 +46,11 @@ void test_create_curl_handle(void) {
     destroy_curl_handle(curl_handle);
 }
 
+void test_create_curl_headers(void) {
+    struct curl_slist* headers = create_curl_headers();
+    TEST_ASSERT_NULL(headers);
+}
+
 void test_destroy_curl_handle(void) {
     destroy_curl_handle(NULL);
 
@@ -51,7 +58,16 @@ void test_destroy_curl_handle(void) {
     TEST_ASSERT_NOT_NULL(curl_handle);
 
     destroy_curl_handle(curl_handle);
-    destroy_curl_handle(curl_handle);
+}
+
+void test_destroy_curl_headers(void) {
+    struct curl_slist* headers = create_curl_headers();
+    TEST_ASSERT_NULL(headers);
+
+    headers = curl_slist_append(headers, "Accept: application/json");
+    TEST_ASSERT_NOT_NULL(headers);
+
+    destroy_curl_headers(headers);
 }
 
 int main(void) {
@@ -60,7 +76,9 @@ int main(void) {
     // Tests
     RUN_TEST(test_load_env);
     RUN_TEST(test_create_curl_handle);
+    RUN_TEST(test_create_curl_headers);
     RUN_TEST(test_destroy_curl_handle);
+    RUN_TEST(test_destroy_curl_headers);
     RUN_TEST(test_write_memory_callback);
 
     return UNITY_END();

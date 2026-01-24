@@ -17,7 +17,10 @@ typedef enum {
     WEBSITE_STUB,
 } WebsiteType;
 
+WebsiteType detect_website_type(const char* url);
 char* get_google_search_url(const char* input);
+char* extract_reddit_question_id(const char* url);
+char* extract_stackoverflow_question_id(const char* url);
 char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped);
 char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped);
 char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped);

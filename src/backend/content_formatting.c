@@ -1,6 +1,7 @@
 #include "content_formatting.h"
-#include "webpage_parsing.h"
+
 #include "json.h"
+
 #include <stdlib.h>
 
 // REQUIRES: Google search api response in JSON format with key "items"

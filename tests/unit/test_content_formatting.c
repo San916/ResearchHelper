@@ -1,8 +1,9 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include "unity.h"
 #include "content_formatting.h"
 #include "webpage_parsing.h"
-#include <string.h>
-#include <stdlib.h>
 
 // Define all variables here
 static int MAX_RESPONSE_LENGTH = 1024;

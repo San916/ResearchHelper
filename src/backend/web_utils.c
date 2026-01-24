@@ -1,5 +1,5 @@
 #include "web_utils.h"
-#include "webpage_parsing.h"
+
 #include <stdio.h>
 
 // REQUIRES: Path to .env starting at root/build/
@@ -64,20 +64,18 @@ struct curl_slist* create_curl_headers() {
 
 // EFFECTS: Cleans up curl handle
 void destroy_curl_handle(CURL* curl_handle) {
-    if (!curl_handle) return;
     curl_easy_cleanup(curl_handle);
 }
 
 // EFFECTS: Cleans up curl headers
 void destroy_curl_headers(struct curl_slist* headers) {
-    if (!headers) return;
     curl_slist_free_all(headers);
 }
 
 // REQUIRES: Url and curl handle
 // EFEFCTS: Returns webpage content as string
 char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle, struct curl_slist* headers) {
-    if (strlen(url) >= MAX_CURL_URL_LEN || !curl_handle) {
+    if (!curl_handle || !url) {
         return NULL;
     }
     CURLcode response_code;
@@ -101,42 +99,4 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
     }
     
     return writeback.data;
-}
-
-// REQUIRES: Valid stackoverflow post url
-// EFFECTS: Returns the question id as string
-char* extract_stackoverflow_question_id(const char* url) {
-    const char* pattern = "questions/";
-    char* first_slash = strstr(url, pattern);
-    if (!first_slash) {
-        return NULL;
-    }
-    first_slash = first_slash + strlen(pattern);
-    char* second_slash = strchr(first_slash, '/');
-    size_t question_id_length = second_slash - first_slash;
-    if (question_id_length > 12) {
-        return NULL;
-    }
-    char* question_id = calloc(1, question_id_length + 1);
-    strncpy(question_id, first_slash, question_id_length);
-    return question_id;
-}
-
-// REQUIRES: Valid stackoverflow post url
-// EFFECTS: Returns the question id as string
-char* extract_reddit_question_id(const char* url) {
-    const char* pattern = "comments/";
-    char* first_slash = strstr(url, pattern);
-    if (!first_slash) {
-        return NULL;
-    }
-    first_slash = first_slash + strlen(pattern);
-    char* second_slash = strchr(first_slash, '/');
-    size_t question_id_length = second_slash - first_slash;
-    if (question_id_length > 12) {
-        return NULL;
-    }
-    char* question_id = calloc(1, question_id_length + 1);
-    strncpy(question_id, first_slash, question_id_length);
-    return question_id;
 }

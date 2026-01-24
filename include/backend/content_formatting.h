@@ -1,8 +1,8 @@
 #ifndef CONTENT_FORMATTING_H
 #define CONTENT_FORMATTING_H
 
-#include "web_utils.h"
 #include "web_crawler_config.h"
+#include "webpage_parsing.h"
 
 #define MAX_NUM_RESPONSES 5
 #define MAX_RESPONSE_TITLE_LEN 128
