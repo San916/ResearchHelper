@@ -1,8 +1,9 @@
 #include "web_crawler.h"
+
 #include "web_utils.h"
+#include "web_crawler_config.h"
 #include "content_formatting.h"
-#include "webpage_parsing.h"
-#include "json.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,10 +50,14 @@ char* get_content_item(const char* url, int* status_code, int* escaped, size_t m
     struct curl_slist* headers = create_curl_headers();
 
     WebsiteType website_type = detect_website_type(url);
+
+    printf("website_type: %d\n", (int)website_type);
     char* new_url = web_specific_setup(url, website_type, curl_handle, &headers, escaped);
     if (!new_url) {
         goto destroy_curl_return;
     }
+
+    printf("new_url: %s\n", new_url);
 
     // To avoid spamming stackoverflow api
     // char* webpage_content = fetch_webpage_content(new_url, status_code, curl_handle, headers);
@@ -61,6 +66,7 @@ char* get_content_item(const char* url, int* status_code, int* escaped, size_t m
 
     content_json = structure_webpage_content_response(webpage_content, website_type, max_content_length);
 
+    printf("content_json: %s\n", content_json);
     // Actual ver
     // char* webpage_content = fetch_webpage_content(new_url, status_code, curl_handle, headers);
     // free(new_url);
