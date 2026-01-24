@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "content_formatting.h"
+#include "webpage_parsing.h"
 #include <string.h>
 #include <stdlib.h>
 

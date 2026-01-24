@@ -1,5 +1,6 @@
 #include "web_crawler.h"
 #include "web_utils.h"
+#include "web_crawler_config.h"
 #include "content_formatting.h"
 #include "webpage_parsing.h"
 #include "json.h"

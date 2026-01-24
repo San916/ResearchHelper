@@ -29,6 +29,7 @@ set(SOURCES
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
@@ -58,6 +59,7 @@ add_compile_definitions(
 add_executable(test_content_formatting
     ${TEST_DIR}/unit/test_content_formatting.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
@@ -104,6 +106,7 @@ add_executable(test_router
     ${SOURCE_DIR}/server/http_errors.c
     ${SOURCE_DIR}/server/handlers.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
@@ -131,6 +134,7 @@ target_link_libraries(test_utils unity)
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
