@@ -132,7 +132,7 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
 // REQUIRES: Valid url and WebsiteType
 // EFFECTS: Executes different curl_handle setups according to the website type
 // new url to curl (some websites may want us to append .json, add .api, etc)
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped, int max_num_comments) {
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
     if (strlen(url) >= MAX_CURL_URL_LEN) {
         return NULL;
     }
