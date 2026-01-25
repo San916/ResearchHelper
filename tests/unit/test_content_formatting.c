@@ -53,7 +53,7 @@ void tearDown(void) {
 }
 
 void test_parse_google_query_response(void) {
-    QueryResponse* response = parse_google_query_response(google_query_response);
+    QueryResponse* response = parse_google_query_response(google_query_response, 10);
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_EQUAL_INT(strcmp(response->responses[0].link, "\"https://www.flyingforbeginners.com\""), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(response->responses[0].title, "\"How to fly\""), 0);
@@ -63,7 +63,7 @@ void test_parse_google_query_response(void) {
 }
 
 void test_stringify_google_query_response(void) {
-    QueryResponse* response = parse_google_query_response(google_query_response);
+    QueryResponse* response = parse_google_query_response(google_query_response, 10);
     TEST_ASSERT_NOT_NULL(response);
     char* response_json = stringify_google_query_response(response, MAX_RESPONSE_LENGTH);
     TEST_ASSERT_NOT_NULL(response_json);
@@ -73,7 +73,7 @@ void test_stringify_google_query_response(void) {
 }
 
 void test_structure_google_query_response(void) {
-    char* response = structure_google_query_response(google_query_response, MAX_RESPONSE_LENGTH);
+    char* response = structure_google_query_response(google_query_response, MAX_RESPONSE_LENGTH, 10);
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_EQUAL_INT(strcmp(response, expected_json_response), 0);
     free(response);

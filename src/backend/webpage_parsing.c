@@ -2,9 +2,6 @@
 #include "json.h"
 #include <stdlib.h>
 
-#define NUM_BYTES_TO_READ_STACKOVERFLOW 32768
-#define NUM_BYTES_TO_READ_REDDIT 65536
-
 // REQUIRES: Content in the format of a stackoverflow json api response
 // MODIFIES: content_list with parsed content
 // EFFECTS: Parses through content string and fills content_list
@@ -15,7 +12,7 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
         return PARSE_WEBPAGE_CONTENT_BAD;
     }
     int num_elements = 0;
-    char** items_array = separate_array(items, &num_elements, NUM_BYTES_TO_READ_STACKOVERFLOW);
+    char** items_array = separate_array(items, &num_elements, MAX_CONTENT_ITEMS);
     free(items);
     if (!items_array) {
         return PARSE_WEBPAGE_CONTENT_BAD;
@@ -47,7 +44,7 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
 // TODO: Improve efficiency after improving json.c
 static char** get_reddit_comments(char* content, int* num_elements) {
     *num_elements = 0;
-    char** items_array = separate_array(content, num_elements, NUM_BYTES_TO_READ_REDDIT);
+    char** items_array = separate_array(content, num_elements, 2);
     if (!items_array || *num_elements < 2) {
         return NULL;
     }
@@ -62,7 +59,7 @@ static char** get_reddit_comments(char* content, int* num_elements) {
     }
 
     *num_elements = 0;
-    char** children_array = separate_array(children, num_elements, NUM_BYTES_TO_READ_REDDIT);
+    char** children_array = separate_array(children, num_elements, MAX_CONTENT_ITEMS);
     free(children);
 
     return children_array;
