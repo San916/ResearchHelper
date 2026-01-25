@@ -29,6 +29,7 @@ set(SOURCES
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
@@ -58,7 +59,6 @@ add_compile_definitions(
 add_executable(test_content_formatting
     ${TEST_DIR}/unit/test_content_formatting.c
     ${SOURCE_DIR}/backend/content_formatting.c
-    ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
@@ -104,6 +104,7 @@ add_executable(test_router
     ${SOURCE_DIR}/server/http_errors.c
     ${SOURCE_DIR}/server/handlers.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
@@ -127,10 +128,28 @@ target_include_directories(test_utils PRIVATE
 )
 target_link_libraries(test_utils unity)
 
+# ========== Unit test web crawler config ==========
+add_executable(west_web_crawler_config
+    ${TEST_DIR}/unit/test_webpage_parsing.c
+    ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(west_web_crawler_config PRIVATE
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(west_web_crawler_config unity CURL::libcurl)
+
+
 # ========== Unit test web crawler ==========
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
     ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
     ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
@@ -159,9 +178,6 @@ target_link_libraries(test_web_utils unity CURL::libcurl)
 add_executable(test_webpage_parsing
     ${TEST_DIR}/unit/test_webpage_parsing.c
     ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
-    ${SOURCE_DIR}/backend/content_formatting.c
-    ${SOURCE_DIR}/backend/web_crawler.c
-    ${SOURCE_DIR}/backend/web_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
@@ -180,6 +196,7 @@ add_test(NAME test_content_formatting COMMAND test_content_formatting)
 add_test(NAME test_http COMMAND test_http)
 add_test(NAME test_json COMMAND test_json)
 add_test(NAME test_router COMMAND test_router)
+add_test(NAME west_web_crawler_config COMMAND west_web_crawler_config)
 add_test(NAME test_web_crawler COMMAND test_web_crawler)
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_web_utils COMMAND test_web_utils)

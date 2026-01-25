@@ -1,12 +1,23 @@
 #ifndef WEBPAGE_PARSING
 #define WEBPAGE_PARSING
 
-#include "content_formatting.h"
+#define MAX_CONTENT_ITEMS 3
+#define MAX_CONTENT_BODY_LEN 4096
 
 typedef enum {
     PARSE_WEBPAGE_CONTENT_BAD = -1,
     PARSE_WEBPAGE_CONTENT_OK = 0,
 } ParseWebpageContentError;
+
+typedef struct ContentItem {
+    char content_body[MAX_CONTENT_BODY_LEN];
+    int score;
+} ContentItem;
+
+typedef struct ContentList {
+    ContentItem items[MAX_CONTENT_ITEMS];
+    int num_items;
+} ContentList;
 
 ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList* content_list);
 ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list);

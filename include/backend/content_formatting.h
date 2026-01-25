@@ -1,15 +1,13 @@
 #ifndef CONTENT_FORMATTING_H
 #define CONTENT_FORMATTING_H
 
-#include "web_utils.h"
+#include "web_crawler_config.h"
+#include "webpage_parsing.h"
 
 #define MAX_NUM_RESPONSES 5
 #define MAX_RESPONSE_TITLE_LEN 128
 #define MAX_RESPONSE_LINK_LEN 256
 #define MAX_RESPONSE_WEB_CONTENT_LEN 1024
-
-#define MAX_CONTENT_ITEMS 3
-#define MAX_CONTENT_BODY_LEN 4096
 
 typedef struct SingleResponse {
     char link[MAX_RESPONSE_LINK_LEN];
@@ -21,16 +19,6 @@ typedef struct QueryResponse {
     SingleResponse responses[MAX_NUM_RESPONSES];
     int num_responses;
 } QueryResponse;
-
-typedef struct ContentItem {
-    char content_body[MAX_CONTENT_BODY_LEN];
-    int score;
-} ContentItem;
-
-typedef struct ContentList {
-    ContentItem items[MAX_CONTENT_ITEMS];
-    int num_items;
-} ContentList;
 
 QueryResponse* parse_google_query_response(const char* input);
 char* stringify_google_query_response(QueryResponse* query_response, size_t max_length);

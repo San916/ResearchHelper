@@ -1,8 +1,6 @@
 #ifndef WEB_CRAWLER_H
 #define WEB_CRAWLER_H
 
-#include <curl/curl.h>
-
 #define MAX_NUM_RESPONSES 5
 #define MAX_RESPONSE_TITLE_LEN 128
 #define MAX_RESPONSE_LINK_LEN 256

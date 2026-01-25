@@ -1,8 +1,12 @@
+#include "handlers.h"
+
 #include "http.h"
 #include "http_errors.h"
-#include "handlers.h"
-#include "utils.h"
+
 #include "web_crawler.h"
+
+#include "utils.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -203,6 +207,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     }
     encoded_url = encoded_url + 5;
 
+    printf("encoded_url: %s\n", encoded_url);
+
     int decoded_url_len = url_decoded_str_len(encoded_url);
     int encoded_url_len = strlen(encoded_url);
     char* decoded_url = malloc(decoded_url_len + 1);
@@ -210,6 +216,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     decoded_url[decoded_url_len] = '\0';
     decode_url(decoded_url, encoded_url, encoded_url_len);
     
+    printf("getting content item: %s\n", decoded_url);
+
     int status_code = 0;
     int escaped = 0;
     char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN);
@@ -226,10 +234,12 @@ HttpResponse handle_content_request(HttpRequest* req) {
         return handle_500();
     }
 
+    printf("HEREHERERERE\n");
+
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
         free(response_msg);
-        return handle_500();   
+        return handle_500();
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);

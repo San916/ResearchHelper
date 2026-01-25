@@ -1,6 +1,6 @@
 #include "webpage_parsing.h"
-#include "web_crawler.h"
 #include "json.h"
+#include <stdlib.h>
 
 #define NUM_BYTES_TO_READ_STACKOVERFLOW 32768
 #define NUM_BYTES_TO_READ_REDDIT 65536
@@ -44,7 +44,7 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
 
 // REQUIRES: Reddit JSON response
 // EFFECTS: Parses response and returns 
-// TODO: Improve after implementing get_ith_element() in json.c
+// TODO: Improve efficiency after improving json.c
 static char** get_reddit_comments(char* content, int* num_elements) {
     *num_elements = 0;
     char** items_array = separate_array(content, num_elements, NUM_BYTES_TO_READ_REDDIT);
