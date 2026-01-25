@@ -10,6 +10,6 @@ typedef struct Route {
     HttpHandler handler;
 } Route;
 
-void find_route(Route* routes, int num_routes, HttpRequest* req, HttpResponse* resp);
+void find_route(Route* routes, size_t num_routes, HttpRequest* req, HttpResponse* resp);
 
 #endif

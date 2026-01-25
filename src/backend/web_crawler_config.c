@@ -76,7 +76,7 @@ char* extract_reddit_question_id(const char* url) {
 // REQUIRES: url, curl handle and headers, reference to int flag, REDDIT_ID env should exist
 // MODIFIES: curl handle and headers, escaped flag
 // EFFECTS: Does reddit-specific setup, returns new url
-char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
+char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments) {
     char* new_url = calloc(1, MAX_CURL_URL_LEN);
     if (!new_url) {
         return NULL;
@@ -87,7 +87,7 @@ char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** h
         return NULL;
     }
 
-    snprintf(new_url, MAX_CURL_URL_LEN, "https://www.reddit.com/comments/%s.json?limit=%d&depth=%d&sort=top", question_id, REDDIT_API_LIMIT, REDDIT_API_DEPTH);
+    snprintf(new_url, MAX_CURL_URL_LEN, "https://www.reddit.com/comments/%s.json?limit=%zu&depth=%d&sort=top", question_id, max_num_comments, REDDIT_API_DEPTH);
     free(question_id);
 
     char* reddit_id = getenv("REDDIT_ID");
@@ -129,10 +129,10 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
     return new_url;
 }
 
-// REQUIRES: Valid url and WebsiteType
-// EFFECTS: Executes different curl_handle setups according to the website type
+// REQUIRES: Valid url and WebsiteType, curl handler and headers, max num comments
+// EFFECTS: Executes different curl_handle setups according to the website type, sets escaped flag if necessary, sets url to return max_num_comments if possible
 // new url to curl (some websites may want us to append .json, add .api, etc)
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
+char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments) {
     if (strlen(url) >= MAX_CURL_URL_LEN) {
         return NULL;
     }
@@ -140,7 +140,7 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
 
     switch (type) {
         case WEBSITE_REDDIT: {
-            new_url = setup_reddit_url(url, curl_handle, headers, escaped);
+            new_url = setup_reddit_url(url, curl_handle, headers, escaped, max_num_comments);
             break;
         } case WEBSITE_STACKOVERFLOW: {
             new_url = setup_stackoverflow_url(url, curl_handle, headers, escaped);

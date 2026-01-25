@@ -17,12 +17,12 @@ typedef struct SingleResponse {
 
 typedef struct QueryResponse {
     SingleResponse responses[MAX_NUM_RESPONSES];
-    int num_responses;
+    size_t num_responses;
 } QueryResponse;
 
-QueryResponse* parse_google_query_response(const char* input, int max_num_responses);
+QueryResponse* parse_google_query_response(const char* input, size_t max_num_responses);
 char* stringify_google_query_response(QueryResponse* query_response, size_t max_length);
-char* structure_google_query_response(const char* content, size_t max_length, int max_num_responses);
+char* structure_google_query_response(const char* content, size_t max_length, size_t max_num_responses);
 
 ContentList* parse_webpage_content(char* content, WebsiteType website_type);
 char* stringify_content_response(ContentList* content, size_t max_length);

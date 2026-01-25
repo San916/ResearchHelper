@@ -19,7 +19,7 @@ void free_http_response(HttpResponse* resp) {
 
 // REQUIRES: Pointer to start of HttpHeader array, number of headers, and key value pair
 // MODIFIES/EFFECTS: Sets header with key and value pair, and increments num_headers. Returns status code or 0
-HttpRequestError set_header(HttpHeader* headers, int* num_headers, const char* key, const char* val) {
+HttpRequestError set_header(HttpHeader* headers, size_t* num_headers, const char* key, const char* val) {
     if (*num_headers >= MAX_HEADER_COUNT) return SET_TOO_MANY_HEADERS;
     if (strlen(key) >= MAX_KEY_LEN - 1 || strlen(val) >= MAX_VALUE_LEN - 1) return SET_HEADER_ENTRY_TOO_LARGE;
 
@@ -34,7 +34,7 @@ HttpRequestError set_header(HttpHeader* headers, int* num_headers, const char* k
 // EFFECTS: Returns true if the method is a valid method (i.e "GET")
 bool is_valid_method(char* method) {
     if (strlen(method) >= MAX_METHOD_LEN - 1) return false;
-    for (int i = 0; i < sizeof(VALID_HTTP_METHODS) / sizeof(VALID_HTTP_METHODS[0]); i++) {
+    for (size_t i = 0; i < sizeof(VALID_HTTP_METHODS) / sizeof(VALID_HTTP_METHODS[0]); i++) {
         if (strcmp(method, VALID_HTTP_METHODS[i]) == 0) {
             return true;
         }
@@ -46,7 +46,7 @@ bool is_valid_method(char* method) {
 // EFFECTS: Returns true if the version is a valid version (i.e "HTTP/1.1")
 bool is_valid_version(char* version) {
     if (strlen(version) >= MAX_VERSION_LEN - 1) return false;
-    for (int i = 0; i < sizeof(VALID_HTTP_VERSIONS) / sizeof(VALID_HTTP_VERSIONS[0]); i++) {
+    for (size_t i = 0; i < sizeof(VALID_HTTP_VERSIONS) / sizeof(VALID_HTTP_VERSIONS[0]); i++) {
         if (strcmp(version, VALID_HTTP_VERSIONS[i]) == 0) {
             return true;
         }
@@ -114,10 +114,11 @@ HttpRequestError parse_headers(HttpRequest* req) {
     bool contains_host = false;
     bool keep_alive = true;
 
-    for (int i = 0; i < req->num_headers; i++) {
+    for (size_t i = 0; i < req->num_headers; i++) {
         char* key = req->headers[i].key;
         char* value = req->headers[i].value;
 
+        printf("KEY: %s\nVALUE: %s\n", key, value);
         if (str_equals(key, "Connection", false)) {
             if (str_equals(value, "keep-alive", false)) keep_alive = true;
             else if (str_equals(value, "close", false)) keep_alive = false;
@@ -125,9 +126,11 @@ HttpRequestError parse_headers(HttpRequest* req) {
             if (contains_host) return PARSE_MULTIPLE_HOST_HEADERS;
             contains_host = true;
         } else if (str_equals(key, "Max-Num-Responses", false)) {
-            req->max_num_responses = atoi(value);
+            char *end_ptr;
+            req->max_num_responses = strtoull(value, &end_ptr, 10);
         } else if (str_equals(key, "Max-Num-Comments", false)) {
-            req->max_num_comments = atoi(value);
+            char *end_ptr;
+            req->max_num_comments = strtoull(value, &end_ptr, 10);
         } else if (str_equals(key, "Min-Score", false)) {
             req->min_score = atoi(value);
         }
@@ -151,7 +154,7 @@ HttpRequestError parse_body(HttpRequest* req, char** context) {
 // REQUIRES: Takes buffer with buffer_len = len of str without null terminator (aka strlen(buffer))
 // EFFECTS: Parses buffer into an HTTPRequest* and returns it, or return NULL on failure
 // Caller must free the HttpRequest*
-HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code) {
+HttpRequest* parse_http_request(const char* buffer, size_t buffer_len, int* status_code) {
     HttpRequest* req = calloc(1, sizeof(HttpRequest));
     if (!req) {
         *status_code = MALLOC_ERROR;
@@ -205,10 +208,10 @@ char* build_http_response(HttpResponse* resp) {
     if (resp->num_headers > MAX_HEADER_COUNT) return NULL;
     if (resp->body_length >= MAX_RESPONSE_BODY_LEN - 1) return NULL;
 
-    int total_size = HEADER_SIZE_ESTIMATE + resp->body_length;
+    size_t total_size = HEADER_SIZE_ESTIMATE + resp->body_length;
 
     char* output = calloc(1, total_size);
-    int offset = 0;
+    size_t offset = 0;
     if (!output) return NULL;
 
     #define VERIFY_OFFSET() if (offset >= total_size) { free(output); return NULL; }
@@ -217,7 +220,7 @@ char* build_http_response(HttpResponse* resp) {
         HTTP_VERSION, resp->status_code, resp->status_text);
     VERIFY_OFFSET()
 
-    for (int i = 0; i < resp->num_headers; i++) {
+    for (size_t i = 0; i < resp->num_headers; i++) {
         offset += snprintf(output + offset, total_size - offset,
             "%s: %s\r\n",
             resp->headers[i].key,

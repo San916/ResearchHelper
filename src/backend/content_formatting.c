@@ -6,7 +6,7 @@
 
 // REQUIRES: Google search api response in JSON format with key "items"
 // EFFECTS: Structures query response items and returns
-QueryResponse* parse_google_query_response(const char* input, int max_num_responses) {
+QueryResponse* parse_google_query_response(const char* input, size_t max_num_responses) {
     if (max_num_responses < 1) {
         return NULL;
     }
@@ -16,7 +16,7 @@ QueryResponse* parse_google_query_response(const char* input, int max_num_respon
         return NULL;
     }
 
-    int num_elems = 0;
+    size_t num_elems = 0;
     char* items = get_json_value(input, "items");
     if (!items) {
         free(response);
@@ -30,7 +30,7 @@ QueryResponse* parse_google_query_response(const char* input, int max_num_respon
     }
 
     response->num_responses = 0;
-    for (int i = 0; i < num_elems; i++) {
+    for (size_t i = 0; i < num_elems; i++) {
         char* link = get_json_value(items_array[i], "link");
         char* title = get_json_value(items_array[i], "title");
         struct SingleResponse current_response = {0};
@@ -43,7 +43,7 @@ QueryResponse* parse_google_query_response(const char* input, int max_num_respon
     }
 
     free(items);
-    for (int i = 0; i < num_elems; i++) {
+    for (size_t i = 0; i < num_elems; i++) {
         free(items_array[i]);
     }
     free(items_array);
@@ -58,11 +58,11 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
         return NULL;
     }
     
-    int current_position = 0;
-    int remaining = max_length;
+    size_t current_position = 0;
+    size_t remaining = max_length;
     current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"results\":[");
     
-    for (int i = 0 ; i < query_response->num_responses; i++) {
+    for (size_t i = 0 ; i < query_response->num_responses; i++) {
         if (i > 0) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
@@ -88,7 +88,7 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
 
 // REQUIRES: Google search api response as a string, max length of string, max number of responses to return
 // EFFECTS: Creates a string containing relevant information from response, in JSON format
-char* structure_google_query_response(const char* content, size_t max_length, int max_num_responses) {
+char* structure_google_query_response(const char* content, size_t max_length, size_t max_num_responses) {
     QueryResponse* query_response = parse_google_query_response(content, max_num_responses);
     if (!query_response) {
         return NULL;
@@ -152,11 +152,11 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
         return NULL;
     }
 
-    int current_position = 0;
-    int remaining = max_length;
+    size_t current_position = 0;
+    size_t remaining = max_length;
     current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"content\":[");
 
-    for (int i = 0 ; i < content->num_items; i++) {
+    for (size_t i = 0 ; i < content->num_items; i++) {
         if (i > 0) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
@@ -172,7 +172,7 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     }
 
     current_position += snprintf(response_msg + current_position, remaining - current_position, 
-        "],\"count\":%d}",
+        "],\"count\":%zu}",
         content->num_items
     );
     if (current_position + 1 >= remaining) {

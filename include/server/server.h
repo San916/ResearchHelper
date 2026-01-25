@@ -8,15 +8,15 @@
 typedef struct Server {
     bool running;
     int port;
-    int num_clients;
-    int capacity;
+    size_t num_clients;
+    size_t capacity;
     SOCKET socket;
     SOCKET *clients;
     Route* routes;
-    int num_routes;
+    size_t num_routes;
 } Server;
 
-Server* createServer(int port, int initial_capacity, Route* routes, int num_routes);
+Server* createServer(int port, size_t initial_capacity, Route* routes, size_t num_routes);
 bool startServer(Server *server);
 void pollServer(Server *server, int timeout);
 void stopServer(Server *server);

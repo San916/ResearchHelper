@@ -6,7 +6,7 @@
 #include "webpage_parsing.h"
 
 // Define all variables here
-static int MAX_RESPONSE_LENGTH = 1024;
+static size_t MAX_RESPONSE_LENGTH = 1024;
 
 static char google_query_response[] = 
     "{\"items\": ["
@@ -67,7 +67,7 @@ void test_parse_google_query_response(void) {
 }
 
 void test_parse_google_query_response_bad_max_num_responses(void) {
-    QueryResponse* response = parse_google_query_response(google_query_response, -1);
+    QueryResponse* response = parse_google_query_response(google_query_response, 0);
     TEST_ASSERT_NULL(response);
 
     const char* query_response_start = "{\"items\": [";
@@ -81,7 +81,7 @@ void test_parse_google_query_response_bad_max_num_responses(void) {
     }
 
     strcpy(google_query_response_large, query_response_start);
-    for (int i = 0; i < MAX_NUM_RESPONSES + 1; i++) {
+    for (size_t i = 0; i < MAX_NUM_RESPONSES + 1; i++) {
         strcpy(google_query_response_large + strlen(google_query_response_large), query_response_item);
     }
     strcpy(google_query_response_large + strlen(google_query_response_large), query_response_end);
@@ -89,7 +89,7 @@ void test_parse_google_query_response_bad_max_num_responses(void) {
     response = parse_google_query_response(google_query_response_large, MAX_NUM_RESPONSES);
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_EQUAL_INT(response->num_responses, MAX_NUM_RESPONSES);
-    for (int i = 0; i < MAX_NUM_RESPONSES; i++) {
+    for (size_t i = 0; i < MAX_NUM_RESPONSES; i++) {
         TEST_ASSERT_EQUAL_INT(strcmp(response->responses[i].link, "\"https://www.flyingforbeginners.com\""), 0);
         TEST_ASSERT_EQUAL_INT(strcmp(response->responses[i].title, "\"How to fly\""), 0);
     }

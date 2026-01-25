@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-static int add_content_length(HttpResponse* resp) {
+static HttpRequestError add_content_length(HttpResponse* resp) {
     char body_length_str[32];
-    sprintf(body_length_str, "%d", resp->body_length);
+    sprintf(body_length_str, "%zu", resp->body_length);
     return set_header(resp->headers, &resp->num_headers, "Content-Length", body_length_str);
 }
 
@@ -207,8 +207,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     }
     encoded_url = encoded_url + 5;
 
-    int decoded_url_len = url_decoded_str_len(encoded_url);
-    int encoded_url_len = strlen(encoded_url);
+    size_t decoded_url_len = url_decoded_str_len(encoded_url);
+    size_t encoded_url_len = strlen(encoded_url);
     char* decoded_url = malloc(decoded_url_len + 1);
     if (!decoded_url) return handle_500();
     decoded_url[decoded_url_len] = '\0';
@@ -216,7 +216,8 @@ HttpResponse handle_content_request(HttpRequest* req) {
     
     int status_code = 0;
     int escaped = 0;
-    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN);
+    printf("MAX_NUM_COMMENTS: %zu\n", req->max_num_comments);
+    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN, req->max_num_comments);
     if (!response_msg) {
         return handle_500();
     }

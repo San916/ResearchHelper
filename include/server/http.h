@@ -61,9 +61,9 @@ typedef struct HttpRequest {
 
     HttpHeader headers[MAX_HEADER_COUNT];
     char* body;
-    int num_headers;
-    int max_num_responses;
-    int max_num_comments;
+    size_t num_headers;
+    size_t max_num_responses;
+    size_t max_num_comments;
     int min_score;
     bool keep_alive;
 } HttpRequest;
@@ -73,20 +73,20 @@ typedef struct HttpResponse {
     int status_code;
 
     HttpHeader headers[MAX_HEADER_COUNT];
-    int num_headers;
+    size_t num_headers;
 
     char* body;
-    int body_length;
+    size_t body_length;
     bool close_connection;
 } HttpResponse;
 
 void free_http_response(HttpResponse* resp);
-HttpRequestError set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
+HttpRequestError set_header(HttpHeader* header, size_t* num_headers, const char* key, const char* val);
 HttpRequestError parse_request_line(char* line, HttpRequest* req);
 HttpRequestError set_headers(HttpRequest* req, char** context);
 HttpRequestError parse_headers(HttpRequest* req);
 HttpRequestError parse_body(HttpRequest* req, char** context);
-HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code);
+HttpRequest* parse_http_request(const char* buffer, size_t buffer_len, int* status_code);
 char* build_http_response(HttpResponse* resp);
 
 #endif

@@ -100,7 +100,7 @@ void test_set_header_too_many_headers(void) {
     char* key = "Host";
     char* value = "www.example.com";
 
-    for (int i = 0; i < MAX_HEADER_COUNT; i++) {
+    for (size_t i = 0; i < MAX_HEADER_COUNT; i++) {
         TEST_ASSERT_EQUAL_INT(set_header(req->headers, &req->num_headers, key, value), 0);
     }
 
@@ -125,7 +125,7 @@ void test_parse_request_line(void) {
     char bad_line_3[] = "GET /index.html EVIL_HTTP/1.1";
     char bad_line_4[] = "GETTOOLONGWAYTOOLONG /index.html EVIL_HTTP/1.1";
     char bad_line_5[300] = "GET ";
-    for(int i = 4; i < 4 + MAX_PATH_LEN; i++) {
+    for(size_t i = 4; i < 4 + MAX_PATH_LEN; i++) {
         bad_line_5[i] = 'A';
     }
 

@@ -28,7 +28,7 @@ int main() {
         {"/content", handle_content_request},
         {"/about", handle_about},
     };
-    int num_routes = sizeof(routes) / sizeof(Route);
+    size_t num_routes = sizeof(routes) / sizeof(Route);
 
     server = createServer(8080, NUM_INITIAL_CLIENTS, routes, num_routes);
     if (!server) {

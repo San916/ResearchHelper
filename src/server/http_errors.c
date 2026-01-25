@@ -13,7 +13,7 @@ HttpResponse handle_400(HttpRequest* req) {
     };
 
     const char* msg = "400 - Bad request";
-    int len = (int)strlen(msg);
+    size_t len = strlen(msg);
 
     resp.body = malloc(len + 1);
     if (!resp.body) {
@@ -39,7 +39,7 @@ HttpResponse handle_404(HttpRequest* req) {
     };
 
     const char* msg = "404 - Page not found";
-    int len = (int)strlen(msg);
+    size_t len = strlen(msg);
 
     resp.body = malloc(len + 1);
     if (!resp.body) return handle_500();
@@ -63,7 +63,7 @@ HttpResponse handle_405(HttpRequest* req) {
     };
 
     const char* msg = "405 - Bad method";
-    int len = (int)strlen(msg);
+    size_t len = strlen(msg);
 
     resp.body = malloc(len + 1);
     if (!resp.body) return handle_500();

@@ -11,14 +11,14 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
     if (!items) {
         return PARSE_WEBPAGE_CONTENT_BAD;
     }
-    int num_elements = 0;
+    size_t num_elements = 0;
     char** items_array = separate_array(items, &num_elements, MAX_CONTENT_ITEMS);
     free(items);
     if (!items_array) {
         return PARSE_WEBPAGE_CONTENT_BAD;
     }
 
-    for (int i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
+    for (size_t i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
         char* item_body = get_json_value(items_array[i], "body");
 
         if (strlen(item_body) >= MAX_CONTENT_BODY_LEN) {
@@ -32,7 +32,7 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
         free(item_body);
     }
 
-    for (int i = 0; i < num_elements; i++) {
+    for (size_t i = 0; i < num_elements; i++) {
         free(items_array[i]);
     }
     free(items_array);
@@ -42,7 +42,7 @@ ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList*
 // REQUIRES: Reddit JSON response
 // EFFECTS: Parses response and returns 
 // TODO: Improve efficiency after improving json.c
-static char** get_reddit_comments(char* content, int* num_elements) {
+static char** get_reddit_comments(char* content, size_t* num_elements) {
     *num_elements = 0;
     char** items_array = separate_array(content, num_elements, 2);
     if (!items_array || *num_elements < 2) {
@@ -50,7 +50,7 @@ static char** get_reddit_comments(char* content, int* num_elements) {
     }
 
     char* children = get_json_value(items_array[1], "children");
-    for (int i = 0; i < *num_elements; i++) {
+    for (size_t i = 0; i < *num_elements; i++) {
         free(items_array[i]);
     }
     free(items_array);
@@ -66,13 +66,13 @@ static char** get_reddit_comments(char* content, int* num_elements) {
 }
 
 ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list) {
-    int num_elements = 0;
+    size_t num_elements = 0;
     char** comments = get_reddit_comments(content, &num_elements);
     if (!comments) {
         return PARSE_WEBPAGE_CONTENT_BAD;
     }
 
-    for (int i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
+    for (size_t i = 0; i < num_elements && i < MAX_CONTENT_ITEMS; i++) {
         char* kind = get_json_value(comments[i], "kind");
         if (strcmp(kind, "\"t1\"")) {
             continue;
@@ -90,7 +90,7 @@ ParseWebpageContentError parse_reddit_content(char* content, ContentList* conten
         free(item_body);
     }
 
-    for (int i = 0; i < num_elements; i++) {
+    for (size_t i = 0; i < num_elements; i++) {
         free(comments[i]);
     }
     free(comments);

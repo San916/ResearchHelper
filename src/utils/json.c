@@ -111,7 +111,7 @@ char* get_json_value(const char* src, const char* key) {
 
 // REQUIRES: JSON array as string, capacity
 // EFFECTS: Returns an array of JSON objects below capacity, changes num_elems to number of objects in array
-char** separate_array(char* src, int* num_elems, int capacity) {
+char** separate_array(char* src, size_t* num_elems, size_t capacity) {
     char** result = malloc(capacity * sizeof(char*));
     if (!result) return NULL;
     *num_elems = 0;
@@ -154,7 +154,7 @@ char** separate_array(char* src, int* num_elems, int capacity) {
     return result;
 
 cleanup_return:
-    for (int i = 0; i < *num_elems; i++) {
+    for (size_t i = 0; i < *num_elems; i++) {
         free(result[i]);
     }
     free(result);
