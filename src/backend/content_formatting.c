@@ -7,8 +7,14 @@
 // REQUIRES: Google search api response in JSON format with key "items"
 // EFFECTS: Structures query response items and returns
 QueryResponse* parse_google_query_response(const char* input, int max_num_responses) {
+    if (max_num_responses < 1) {
+        return NULL;
+    }
+    max_num_responses = (max_num_responses > MAX_NUM_RESPONSES) ? MAX_NUM_RESPONSES : max_num_responses;
     QueryResponse* response = malloc(sizeof(QueryResponse));
-    if (!response) return NULL;
+    if (!response) {
+        return NULL;
+    }
 
     int num_elems = 0;
     char* items = get_json_value(input, "items");
@@ -71,7 +77,7 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
     }
 
     current_position += snprintf(response_msg + current_position, remaining - current_position, "]}");
-    if (current_position + 1 >= remaining) {
+    if (current_position >= remaining) {
         free(response_msg);
         return NULL;
     }
@@ -80,12 +86,9 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
     return response_msg;
 }
 
-// REQUIRES: Google search api response as a string
+// REQUIRES: Google search api response as a string, max length of string, max number of responses to return
 // EFFECTS: Creates a string containing relevant information from response, in JSON format
 char* structure_google_query_response(const char* content, size_t max_length, int max_num_responses) {
-    if (max_num_responses < 1 || max_num_responses > MAX_NUM_RESPONSES) {
-        return NULL;
-    }
     QueryResponse* query_response = parse_google_query_response(content, max_num_responses);
     if (!query_response) {
         return NULL;

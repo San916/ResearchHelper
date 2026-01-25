@@ -33,16 +33,22 @@ char* extract_stackoverflow_question_id(const char* url) {
     }
     first_slash = first_slash + strlen(pattern);
     char* second_slash = strchr(first_slash, '/');
-    size_t question_id_length = second_slash - first_slash;
-    if (question_id_length > 12) {
+    if (!second_slash) {
         return NULL;
     }
+    if (!(second_slash - first_slash)) {
+        return NULL;
+    }
+    size_t question_id_length = second_slash - first_slash;
     char* question_id = calloc(1, question_id_length + 1);
+    if (!question_id) {
+        return NULL;
+    }
     strncpy(question_id, first_slash, question_id_length);
     return question_id;
 }
 
-// REQUIRES: Valid stackoverflow post url
+// REQUIRES: Valid reddit post url
 // EFFECTS: Returns the question id as string
 char* extract_reddit_question_id(const char* url) {
     const char* pattern = "comments/";
@@ -52,11 +58,17 @@ char* extract_reddit_question_id(const char* url) {
     }
     first_slash = first_slash + strlen(pattern);
     char* second_slash = strchr(first_slash, '/');
-    size_t question_id_length = second_slash - first_slash;
-    if (question_id_length > 12) {
+    if (!second_slash) {
         return NULL;
     }
+    if (!(second_slash - first_slash)) {
+        return NULL;
+    }
+    size_t question_id_length = second_slash - first_slash;
     char* question_id = calloc(1, question_id_length + 1);
+    if (!question_id) {
+        return NULL;
+    }
     strncpy(question_id, first_slash, question_id_length);
     return question_id;
 }
@@ -121,6 +133,9 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
 // EFFECTS: Executes different curl_handle setups according to the website type
 // new url to curl (some websites may want us to append .json, add .api, etc)
 char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
+    if (strlen(url) >= MAX_CURL_URL_LEN) {
+        return NULL;
+    }
     char* new_url = NULL;
 
     switch (type) {

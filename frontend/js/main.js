@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", function() {
             footer.style.position = "fixed";
         }
 
-        // displayResults(JSON.parse(exampleResults), "Example query");
-        // return;
+        displayResults(JSON.parse(exampleResults), "Example query");
+        return;
 
         const userInput = document.getElementById("user-input").value;
 

@@ -33,7 +33,7 @@ size_t write_memory_callback(char* content, size_t size, size_t nmemb, void* dat
     char* temp_ptr = realloc(chunk->data, new_size);
     if (!temp_ptr) return 0;
     chunk->data = temp_ptr;
-    temp_ptr = NULL;\
+    temp_ptr = NULL;
 
     chunk->size = new_size;
     chunk->data[new_strlen] = '\0';
