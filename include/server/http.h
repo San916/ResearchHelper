@@ -35,15 +35,17 @@ typedef enum {
     PARSE_FIRST_LINE_INVALID_VERSION,
     PARSE_FIRST_LINE_INVALID_PATH,
 
-    PARSE_HEADERS_OK = 200,
-    PARSE_HEADERS_INVALID_FORMAT,
-    PARSE_HEADER_ENTRY_TOO_LARGE,
-    PARSE_TOO_MANY_HEADERS,
+    SET_HEADERS_OK = 200,
+    SET_HEADERS_INVALID_FORMAT,
+    SET_HEADER_ENTRY_TOO_LARGE,
+    SET_TOO_MANY_HEADERS,
+    SET_HEADERS_NO_END_LINE,
+
+    PARSE_HEADERS_OK = 300,
     PARSE_MULTIPLE_HOST_HEADERS,
     PARSE_NO_HOST_HEADERS,
-    PARSE_NO_EMPTY_LINE_HEADERS,
 
-    PARSE_BODY_OK = 300,
+    PARSE_BODY_OK = 400,
 
 } HttpRequestError;
 
@@ -59,7 +61,10 @@ typedef struct HttpRequest {
 
     HttpHeader headers[MAX_HEADER_COUNT];
     char* body;
-    int num_headers;
+    size_t num_headers;
+    size_t max_num_responses;
+    size_t max_num_comments;
+    int min_score;
     bool keep_alive;
 } HttpRequest;
 
@@ -68,19 +73,20 @@ typedef struct HttpResponse {
     int status_code;
 
     HttpHeader headers[MAX_HEADER_COUNT];
-    int num_headers;
+    size_t num_headers;
 
     char* body;
-    int body_length;
+    size_t body_length;
     bool close_connection;
 } HttpResponse;
 
 void free_http_response(HttpResponse* resp);
-HttpRequestError set_header(HttpHeader* header, int* num_headers, const char* key, const char* val);
+HttpRequestError set_header(HttpHeader* header, size_t* num_headers, const char* key, const char* val);
 HttpRequestError parse_request_line(char* line, HttpRequest* req);
-HttpRequestError parse_headers(HttpRequest* req, char** context);
+HttpRequestError set_headers(HttpRequest* req, char** context);
+HttpRequestError parse_headers(HttpRequest* req);
 HttpRequestError parse_body(HttpRequest* req, char** context);
-HttpRequest* parse_http_request(const char* buffer, int buffer_len, int* status_code);
+HttpRequest* parse_http_request(const char* buffer, size_t buffer_len, int* status_code);
 char* build_http_response(HttpResponse* resp);
 
 #endif

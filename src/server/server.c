@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <winsock2.h>
 
-Server* createServer(int port, int initial_capacity, Route* routes, int num_routes) {
+Server* createServer(int port, size_t initial_capacity, Route* routes, size_t num_routes) {
     Server *server = malloc(sizeof(Server));
     if (!server) return NULL;
     server->running = false;
@@ -74,7 +74,7 @@ void pollServer(Server *server, int timeout) {
     FD_ZERO(&readfds);
     FD_SET(server->socket, &readfds);
 
-    for (int i = 0; i < server->num_clients && (i + 1) < FD_SETSIZE; i++) {
+    for (size_t i = 0; i < server->num_clients && (i + 1) < FD_SETSIZE; i++) {
         FD_SET(server->clients[i], &readfds);
     }
 
@@ -97,11 +97,11 @@ void pollServer(Server *server, int timeout) {
                 server->clients = temp_clients;
             }
             server->clients[server->num_clients++] = client_socket;
-            printf("Client connected (now %d total clients)\n", server->num_clients);
+            printf("Client connected (now %zu total clients)\n", server->num_clients);
         }
     }
 
-    for (int i = 0; i < server->num_clients; i++) {
+    for (size_t i = 0; i < server->num_clients; i++) {
         SOCKET client_socket = server->clients[i];
         if (client_socket == 0) continue; // FD_ISSET can't be called with 0 so skip
         if (!FD_ISSET(client_socket, &readfds)) continue;
@@ -114,7 +114,7 @@ void pollServer(Server *server, int timeout) {
             server->clients[i] = server->clients[server->num_clients - 1];
             server->num_clients--;
             i--;
-            printf("Client socket closed (now %d total clients)\n", server->num_clients);
+            printf("Client socket closed (now %zu total clients)\n", server->num_clients);
         } else {
             bool build_http_request_failure = false;
             buffer[bytes] = '\0';
@@ -144,9 +144,9 @@ void pollServer(Server *server, int timeout) {
                 server->clients[i] = server->clients[server->num_clients - 1];
                 server->num_clients--;
                 i--;
-                printf("Client socket closed (now %d total clients)\n", server->num_clients);
+                printf("Client socket closed (now %zu total clients)\n", server->num_clients);
             } else {
-                printf("Client socket stays open (now %d total clients)\n", server->num_clients);
+                printf("Client socket stays open (now %zu total clients)\n", server->num_clients);
             }
         }
     }
@@ -156,7 +156,7 @@ void stopServer(Server *server) {
     if (!server || !server->running) return;
     server->running = false;
 
-    for (int i = 0; i < server->num_clients; i++) {
+    for (size_t i = 0; i < server->num_clients; i++) {
         int fd = server->clients[i];
         if (fd <= 0) continue;
         closesocket(fd);

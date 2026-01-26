@@ -170,7 +170,7 @@ void test_separate_array(void) {
         "    {\"gh\": 78}"
         "]"
     };
-    int num_elems = 0;
+    size_t num_elems = 0;
     char** result = separate_array(json_array, &num_elems, 2);
     TEST_ASSERT_EQUAL_INT(strcmp(result[0], json_array_separated[0]), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(result[1], json_array_separated[1]), 0);

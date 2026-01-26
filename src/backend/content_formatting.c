@@ -6,17 +6,23 @@
 
 // REQUIRES: Google search api response in JSON format with key "items"
 // EFFECTS: Structures query response items and returns
-QueryResponse* parse_google_query_response(const char* input) {
+QueryResponse* parse_google_query_response(const char* input, size_t max_num_responses) {
+    if (max_num_responses < 1) {
+        return NULL;
+    }
+    max_num_responses = (max_num_responses > MAX_NUM_RESPONSES) ? MAX_NUM_RESPONSES : max_num_responses;
     QueryResponse* response = malloc(sizeof(QueryResponse));
-    if (!response) return NULL;
+    if (!response) {
+        return NULL;
+    }
 
-    int num_elems = 0;
+    size_t num_elems = 0;
     char* items = get_json_value(input, "items");
     if (!items) {
         free(response);
         return NULL;
     }
-    char** items_array = separate_array(items, &num_elems, MAX_NUM_RESPONSES);
+    char** items_array = separate_array(items, &num_elems, max_num_responses);
     if (!items_array) {
         free(items);
         free(response);
@@ -24,7 +30,7 @@ QueryResponse* parse_google_query_response(const char* input) {
     }
 
     response->num_responses = 0;
-    for (int i = 0; i < num_elems; i++) {
+    for (size_t i = 0; i < num_elems; i++) {
         char* link = get_json_value(items_array[i], "link");
         char* title = get_json_value(items_array[i], "title");
         struct SingleResponse current_response = {0};
@@ -37,7 +43,7 @@ QueryResponse* parse_google_query_response(const char* input) {
     }
 
     free(items);
-    for (int i = 0; i < num_elems; i++) {
+    for (size_t i = 0; i < num_elems; i++) {
         free(items_array[i]);
     }
     free(items_array);
@@ -52,11 +58,11 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
         return NULL;
     }
     
-    int current_position = 0;
-    int remaining = max_length;
+    size_t current_position = 0;
+    size_t remaining = max_length;
     current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"results\":[");
     
-    for (int i = 0 ; i < query_response->num_responses; i++) {
+    for (size_t i = 0 ; i < query_response->num_responses; i++) {
         if (i > 0) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
@@ -65,13 +71,13 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
             query_response->responses[i].title,
             query_response->responses[i].link);
         
-        if (current_position >= remaining - 10) {
+        if (current_position >= remaining - 20) {
             break;
         }
     }
 
     current_position += snprintf(response_msg + current_position, remaining - current_position, "]}");
-    if (current_position + 1 >= remaining) {
+    if (current_position >= remaining) {
         free(response_msg);
         return NULL;
     }
@@ -80,10 +86,10 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
     return response_msg;
 }
 
-// REQUIRES: Google search api response as a string
+// REQUIRES: Google search api response as a string, max length of string, max number of responses to return
 // EFFECTS: Creates a string containing relevant information from response, in JSON format
-char* structure_google_query_response(const char* content, size_t max_length) {
-    QueryResponse* query_response = parse_google_query_response(content);
+char* structure_google_query_response(const char* content, size_t max_length, size_t max_num_responses) {
+    QueryResponse* query_response = parse_google_query_response(content, max_num_responses);
     if (!query_response) {
         return NULL;
     }
@@ -98,7 +104,8 @@ char* structure_google_query_response(const char* content, size_t max_length) {
 
 // REQUIRES: Webpage content, website type
 // EFFECTS: Structures content and returns
-ContentList* parse_webpage_content(char* content, WebsiteType website_type) {
+ContentList* parse_webpage_content(char* content, WebsiteType website_type, size_t max_num_comments, int min_score) {
+    max_num_comments = (max_num_comments > MAX_CONTENT_ITEMS) ? MAX_CONTENT_ITEMS : max_num_comments;
     ContentList* content_list = calloc(1, sizeof(ContentList));
     if (!content_list) {
         return NULL;
@@ -107,13 +114,13 @@ ContentList* parse_webpage_content(char* content, WebsiteType website_type) {
 
     switch (website_type) {
         case WEBSITE_REDDIT: {
-            int status_code = parse_reddit_content(content, content_list);
+            int status_code = parse_reddit_content(content, content_list, max_num_comments, min_score);
             if (status_code) {
                 goto free_return_null;
             }
             break;
         } case WEBSITE_STACKOVERFLOW: {
-            int status_code = parse_stackoverflow_content(content, content_list);
+            int status_code = parse_stackoverflow_content(content, content_list, max_num_comments, min_score);
             if (status_code) {
                 goto free_return_null;
             }
@@ -146,11 +153,11 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
         return NULL;
     }
 
-    int current_position = 0;
-    int remaining = max_length;
+    size_t current_position = 0;
+    size_t remaining = max_length;
     current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"content\":[");
 
-    for (int i = 0 ; i < content->num_items; i++) {
+    for (size_t i = 0 ; i < content->num_items; i++) {
         if (i > 0) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
@@ -160,17 +167,18 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
             content->items[i].score
         );
         
-        if (current_position >= remaining - 10) {
+        if (current_position >= remaining - 20) {
             break;
         }
     }
 
     current_position += snprintf(response_msg + current_position, remaining - current_position, 
-        "],\"count\":%d}",
+        "],\"count\":%zu}",
         content->num_items
     );
-    if (current_position + 1 >= remaining) {
+    if (current_position >= remaining) {
         free(response_msg);
+        return NULL;
     }
 
     response_msg[current_position] = '\0';
@@ -178,8 +186,8 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     return response_msg;
 }
 
-char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length) {
-    ContentList* content_list = parse_webpage_content(content, website_type);
+char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {
+    ContentList* content_list = parse_webpage_content(content, website_type, max_num_comments, min_score);
     if (!content_list) {
         return NULL;
     }

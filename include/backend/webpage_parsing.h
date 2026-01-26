@@ -1,7 +1,7 @@
 #ifndef WEBPAGE_PARSING
 #define WEBPAGE_PARSING
 
-#define MAX_CONTENT_ITEMS 3
+#define MAX_CONTENT_ITEMS 5
 #define MAX_CONTENT_BODY_LEN 4096
 
 typedef enum {
@@ -16,10 +16,10 @@ typedef struct ContentItem {
 
 typedef struct ContentList {
     ContentItem items[MAX_CONTENT_ITEMS];
-    int num_items;
+    size_t num_items;
 } ContentList;
 
-ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList* content_list);
-ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list);
+ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList* content_list, size_t max_num_comments, int min_score);
+ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list, size_t max_num_comments, int min_score);
 
 #endif
