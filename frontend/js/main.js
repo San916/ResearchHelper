@@ -18,6 +18,214 @@ document.addEventListener("DOMContentLoaded", function() {
     }, { passive: false });
 });
 
+function displayResults(data, query) {
+    const responseDiv = document.getElementById("response");
+
+    responseDiv.innerHTML = "";
+
+    const responseHeader = document.createElement("div");
+    responseHeader.className = "response-header";
+    const responseText = document.createElement("h2");
+    responseText.innerText = `Results for: ${query}`;
+    responseHeader.appendChild(responseText);
+    responseDiv.appendChild(responseHeader);
+
+    if (!data.results || data.results.length === 0) {
+        responseDiv.innerHTML += `<div class="no-results">No results!</div>`;
+        return;
+    }
+
+    const responseContent = document.createElement("div");
+    responseContent.className = "response-content";
+
+    data.results.forEach((result, index) => {
+        const resultElement = document.createElement("div");
+        resultElement.className = "result-item";
+        
+        const resultExpander = document.createElement("div");
+        resultExpander.className = "result-expander";
+        resultExpander.textContent = "▼";
+
+        const resultHeader = document.createElement("div");
+        resultHeader.className = "result-header";
+        resultHeader.appendChild(resultExpander);
+        resultHeader.innerHTML += `
+            <a href="${result.link}" target="_blank" rel="noopener noreferrer">
+                <h3 class="result-title">${result.title}</h3>
+            </a>
+        `;
+
+        const resultContent = document.createElement("div");
+        resultContent.className = "result-content";
+        resultContent.style.display = "none";
+        
+        resultHeader.addEventListener("click", async function() {
+            const visible = resultContent.style.display !== "none";
+            resultContent.style.display = "none";
+            if (visible) {
+                resultContent.style.display = "none";
+                resultExpander.textContent = "▼";
+            } else {
+                resultContent.style.display = "block";
+                resultExpander.textContent = "▲";
+                
+                if (!resultContent.dataset.loaded) {
+                    await fetchAndDisplayContent(result.link, resultContent);
+                }
+            }
+        });
+
+        resultElement.appendChild(resultHeader);
+        resultElement.appendChild(resultContent);
+        responseContent.appendChild(resultElement);
+    });
+    
+    responseDiv.appendChild(responseContent);
+}
+
+async function fetchAndDisplayContent(resultLink, contentArea) {
+    try {
+        let maxNumComments = document.getElementById("max-num-comments");
+        let maxNumCommentsValue = maxNumComments.value;
+        if (maxNumCommentsValue.length === 0) {
+            maxNumCommentsValue = maxNumComments.placeholder;
+        } else if (!Number.isFinite(Number(maxNumCommentsValue))) {
+            maxNumComments.value = "";
+            return;
+        } else {
+            maxNumCommentsValue = Number(maxNumComments.value);
+        }
+
+        let minScore = document.getElementById("min-score");
+        let minScoreValue = minScore.value;
+        if (minScoreValue.length === 0) {
+            minScoreValue = minScore.placeholder;
+        } else if (!Number.isFinite(Number(minScoreValue))) {
+            minScore.value = "";
+            return;
+        } else {
+            minScoreValue = Number(minScore.value);
+        }
+
+        const response = await fetch(`/content?url=${encodeURIComponent(resultLink)}`, {
+            method: "GET",
+            headers: {
+                "Max-Num-Comments": maxNumCommentsValue,
+                "Min-Score": minScoreValue
+            },
+        });
+
+        if (response.ok) {
+            const escaped = response.headers.get("Html-Escaped") === "true";
+            const data = await response.text();
+            const jsonData = JSON.parse(data);
+            jsonData.content.forEach((item) => {
+                let html = item.content_body;
+
+                if (escaped) {
+                    const txt = document.createElement("textarea");
+                    txt.innerHTML = html;
+                    html = txt.value;
+                }
+
+                const contentItem = document.createElement("div");
+                contentItem.className = "content-item";
+
+                const contentText = document.createElement("div");
+                contentText.className = "content-text";
+                contentText.innerHTML = html;
+
+                const contentHeader = document.createElement("div");
+                contentHeader.className = "content-header";
+                contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
+
+                const commentExpander = document.createElement("div");
+                commentExpander.className = "comment-expander";
+                commentExpander.textContent = "[close]";
+                contentHeader.addEventListener("click", function() {
+                    const closing = commentExpander.textContent === "[close]";
+                    if (closing) {
+                        commentExpander.textContent = "[expand]";
+                        contentText.style.display = "none";
+                    } else {
+                        commentExpander.textContent = "[close]";
+                        contentText.style.display = "block";
+                    }
+                });
+
+                const invisibleBorder = document.createElement("div");
+                invisibleBorder.className = "invisible-border";
+                invisibleBorder.addEventListener("click", function() {
+                    contentHeader.click();
+                })
+
+                contentHeader.appendChild(commentExpander);
+
+                contentItem.appendChild(contentHeader);
+                contentItem.appendChild(contentText);
+                contentItem.appendChild(invisibleBorder);
+
+                contentArea.appendChild(contentItem);
+            });
+            contentArea.dataset.loaded = true;
+        } else {
+            contentArea.textContent = `Error: ${response.status}`;
+        }
+    } catch (error) {
+        contentArea.textContent = `Error: ${error.message}`;
+        console.error("Error:", error);
+    }
+}
+
+const queryStorage = {
+    sessionStorageKey: "research_helper_query_history",
+
+    getHistory: function() {
+        const history = sessionStorage.getItem(this.sessionStorageKey);
+        return history ? JSON.parse(history) : [];
+    },
+
+    saveQuery: function(query, response, id) {
+        const history = this.getHistory();
+
+        const entry = {
+            query,
+            response,
+            id
+        };
+        history.unshift(entry);
+          
+        sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(history));
+    },
+
+    clearHistory: function() {
+        sessionStorage.removeItem(this.sessionStorageKey);
+    },
+
+    renderHistory: function(query, id) {
+        const history = this.getHistory();
+
+        const queryHistory = document.getElementById("query-history");
+        if (history.length === 0) {
+            queryHistory.innerHTML = "<h1>No saved queries</h1>";
+            return;
+        }
+
+        const newItem = document.createElement("div");
+        newItem.className = "query-history-item";
+        newItem.innerText = `${query}`;
+        newItem.id = `${id}`;
+
+        newItem.addEventListener("click", function (event) {
+            const itemInfo = history.find((item) => (item.id === id));
+            if (itemInfo) {
+                displayResults(itemInfo.response, itemInfo.query);
+            }
+        });
+        queryHistory.prepend(newItem);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const userInputForm = document.getElementById("user-input-form");
     const responseDiv = document.getElementById("response");
@@ -69,7 +277,12 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (response.ok) {
                 const data = await response.text();
-                displayResults(JSON.parse(data), userInput);
+                const parsedData = JSON.parse(data);
+                const id = Date.now();
+
+                queryStorage.saveQuery(userInput, parsedData, id);
+                queryStorage.renderHistory(userInput, id);
+                displayResults(parsedData, userInput);
             } else {
                 responseDiv.textContent = `Error: ${response.status}`;
             }
@@ -80,167 +293,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         document.querySelectorAll(".user-input").forEach((user_input) => {user_input.value = ""});
     });
-
-    function displayResults(data, query) {
-        responseDiv.innerHTML = "";
-
-        const responseHeader = document.createElement("div");
-        responseHeader.className = "response-header";
-        responseHeader.innerHTML = `<h2>Results for: "${query}"</h2>`;
-        responseDiv.appendChild(responseHeader);
-
-        if (!data.results || data.results.length === 0) {
-            responseDiv.innerHTML += `<div class="no-results">No results!</div>`;
-            return;
-        }
-
-        const responseContent = document.createElement("div");
-        responseContent.className = "response-content";
-
-        data.results.forEach((result, index) => {
-            const resultElement = document.createElement("div");
-            resultElement.className = "result-item";
-            
-            const resultExpander = document.createElement("div");
-            resultExpander.className = "result-expander";
-            resultExpander.textContent = "▼";
-
-            const resultHeader = document.createElement("div");
-            resultHeader.className = "result-header";
-            resultHeader.appendChild(resultExpander);
-            resultHeader.innerHTML += `
-                <a href="${result.link}" target="_blank" rel="noopener noreferrer">
-                    <h3 class="result-title">${result.title}</h3>
-                </a>
-            `;
-
-            const resultContent = document.createElement("div");
-            resultContent.className = "result-content";
-            resultContent.style.display = "none";
-            
-            resultHeader.addEventListener("click", async function() {
-                const visible = resultContent.style.display !== "none";
-                resultContent.style.display = "none";
-                if (visible) {
-                    resultContent.style.display = "none";
-                    resultExpander.textContent = "▼";
-                } else {
-                    resultContent.style.display = "block";
-                    resultExpander.textContent = "▲";
-                    
-                    if (!resultContent.dataset.loaded) {
-                        await fetchAndDisplayContent(result.link, resultContent);
-                    }
-                }
-            });
-
-            resultElement.appendChild(resultHeader);
-            resultElement.appendChild(resultContent);
-            responseContent.appendChild(resultElement);
-        });
-        
-        responseDiv.appendChild(responseContent);
-    }
-
-    async function fetchAndDisplayContent(resultLink, contentArea) {
-        try {
-            let maxNumComments = document.getElementById("max-num-comments");
-            let maxNumCommentsValue = maxNumComments.value;
-            if (maxNumCommentsValue.length === 0) {
-                maxNumCommentsValue = maxNumComments.placeholder;
-            } else if (!Number.isFinite(Number(maxNumCommentsValue))) {
-                maxNumComments.value = "";
-                return;
-            } else {
-                maxNumCommentsValue = Number(maxNumComments.value);
-            }
-
-            let minScore = document.getElementById("min-score");
-            let minScoreValue = minScore.value;
-            if (minScoreValue.length === 0) {
-                minScoreValue = minScore.placeholder;
-            } else if (!Number.isFinite(Number(minScoreValue))) {
-                minScore.value = "";
-                return;
-            } else {
-                minScoreValue = Number(minScore.value);
-            }
-
-            const response = await fetch(`/content?url=${encodeURIComponent(resultLink)}`, {
-                method: "GET",
-                headers: {
-                    "Max-Num-Comments": maxNumCommentsValue,
-                    "Min-Score": minScoreValue
-                },
-            });
-
-            if (response.ok) {
-                const escaped = response.headers.get("Html-Escaped") === "true";
-                const data = await response.text();
-                const jsonData = JSON.parse(data);
-                jsonData.content.forEach((item) => {
-                    let html = item.content_body;
-
-                    if (escaped) {
-                        const txt = document.createElement("textarea");
-                        txt.innerHTML = html;
-                        html = txt.value;
-                    }
-                    console.log(item);
-
-                    const contentItem = document.createElement("div");
-                    contentItem.className = "content-item";
-
-                    const contentText = document.createElement("div");
-                    contentText.className = "content-text";
-                    contentText.innerHTML = html;
-
-                    const contentHeader = document.createElement("div");
-                    contentHeader.className = "content-header";
-                    contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
-
-                    const commentExpander = document.createElement("div");
-                    commentExpander.className = "comment-expander";
-                    commentExpander.textContent = "[close]";
-                    contentHeader.addEventListener("click", function() {
-                        const closing = commentExpander.textContent === "[close]";
-                        if (closing) {
-                            commentExpander.textContent = "[expand]";
-                            contentText.style.display = "none";
-                        } else {
-                            commentExpander.textContent = "[close]";
-                            contentText.style.display = "block";
-                        }
-                    });
-
-                    const invisibleBorder = document.createElement("div");
-                    invisibleBorder.className = "invisible-border";
-                    invisibleBorder.addEventListener("click", function() {
-                        contentHeader.click();
-                    })
-
-                    contentHeader.appendChild(commentExpander);
-
-                    contentItem.appendChild(contentHeader);
-                    contentItem.appendChild(contentText);
-                    contentItem.appendChild(invisibleBorder);
-
-                    contentArea.appendChild(contentItem);
-                });
-                contentArea.dataset.loaded = true;
-            } else {
-                contentArea.textContent = `Error: ${response.status}`;
-            }
-        } catch (error) {
-            contentArea.textContent = `Error: ${error.message}`;
-            console.error("Error:", error);
-        }
-    }
 });
-
-function expandComment() {
-    document.get
-}
 
 function onCloseMenuEnd(event) {
     document.getElementById("expand-button").style.display = "block";
