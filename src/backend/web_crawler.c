@@ -41,7 +41,7 @@ destroy_curl_return:
 
 // REQUIRES: url, status code address
 // EFFECTS: Looks through webpage in the url, returns relevant information as JSON formatted string
-char* get_content_item(const char* url, int* status_code, int* escaped, size_t max_content_length, size_t max_num_comments) {
+char* get_content_item(const char* url, int* status_code, int* escaped, size_t max_content_length, size_t max_num_comments, int min_score) {
     char* content_json = NULL;
     CURL* curl_handle = create_curl_handle();
     if (!curl_handle) {
@@ -53,7 +53,6 @@ char* get_content_item(const char* url, int* status_code, int* escaped, size_t m
 
     load_env("..\\.env");
     char* new_url = web_specific_setup(url, website_type, curl_handle, &headers, escaped, max_num_comments);
-    printf("NEW_URL: %s\n", new_url);
     if (!new_url) {
         goto destroy_curl_return;
     }
@@ -64,7 +63,7 @@ char* get_content_item(const char* url, int* status_code, int* escaped, size_t m
         goto destroy_curl_return;
     }
 
-    content_json = structure_webpage_content_response(webpage_content, website_type, max_content_length);
+    content_json = structure_webpage_content_response(webpage_content, website_type, max_content_length, max_num_comments, min_score);
     free (webpage_content);
 
 destroy_curl_return:

@@ -71,7 +71,7 @@ char* stringify_google_query_response(QueryResponse* query_response, size_t max_
             query_response->responses[i].title,
             query_response->responses[i].link);
         
-        if (current_position >= remaining - 10) {
+        if (current_position >= remaining - 20) {
             break;
         }
     }
@@ -104,7 +104,8 @@ char* structure_google_query_response(const char* content, size_t max_length, si
 
 // REQUIRES: Webpage content, website type
 // EFFECTS: Structures content and returns
-ContentList* parse_webpage_content(char* content, WebsiteType website_type) {
+ContentList* parse_webpage_content(char* content, WebsiteType website_type, size_t max_num_comments, int min_score) {
+    max_num_comments = (max_num_comments > MAX_CONTENT_ITEMS) ? MAX_CONTENT_ITEMS : max_num_comments;
     ContentList* content_list = calloc(1, sizeof(ContentList));
     if (!content_list) {
         return NULL;
@@ -113,13 +114,13 @@ ContentList* parse_webpage_content(char* content, WebsiteType website_type) {
 
     switch (website_type) {
         case WEBSITE_REDDIT: {
-            int status_code = parse_reddit_content(content, content_list);
+            int status_code = parse_reddit_content(content, content_list, max_num_comments, min_score);
             if (status_code) {
                 goto free_return_null;
             }
             break;
         } case WEBSITE_STACKOVERFLOW: {
-            int status_code = parse_stackoverflow_content(content, content_list);
+            int status_code = parse_stackoverflow_content(content, content_list, max_num_comments, min_score);
             if (status_code) {
                 goto free_return_null;
             }
@@ -166,7 +167,7 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
             content->items[i].score
         );
         
-        if (current_position >= remaining - 10) {
+        if (current_position >= remaining - 20) {
             break;
         }
     }
@@ -175,8 +176,9 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
         "],\"count\":%zu}",
         content->num_items
     );
-    if (current_position + 1 >= remaining) {
+    if (current_position >= remaining) {
         free(response_msg);
+        return NULL;
     }
 
     response_msg[current_position] = '\0';
@@ -184,8 +186,8 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     return response_msg;
 }
 
-char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length) {
-    ContentList* content_list = parse_webpage_content(content, website_type);
+char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {
+    ContentList* content_list = parse_webpage_content(content, website_type, max_num_comments, min_score);
     if (!content_list) {
         return NULL;
     }

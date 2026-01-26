@@ -16,7 +16,6 @@ void tearDown(void) {
 // ==================================
 // detect_website_type
 // ==================================
-
 void test_detect_website_type(void) {
     TEST_ASSERT_EQUAL_INT(detect_website_type("https://www.stackoverflow.com/"), WEBSITE_STACKOVERFLOW);
     TEST_ASSERT_EQUAL_INT(detect_website_type("https://www.reddit.com/"), WEBSITE_REDDIT);
@@ -28,7 +27,6 @@ void test_detect_website_type(void) {
 // ==================================
 // get_google_search_url
 // ==================================
-
 void test_get_google_search_url(void) {
     load_env(TEST_ENV_FILENAME);
 
@@ -70,7 +68,6 @@ void test_get_google_search_url_truncation(void) {
 // ==================================
 // extract_stackoverflow_question_id
 // ==================================
-
 void test_extract_stackoverflow_question_id(void) {
     char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
     char* question_id = extract_stackoverflow_question_id(url);
@@ -93,7 +90,6 @@ void test_extract_stackoverflow_question_id(void) {
 // ==================================
 // extract_reddit_question_id
 // ==================================
-
 void test_extract_reddit_question_id(void) {
     char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
     char* question_id = extract_reddit_question_id(url);

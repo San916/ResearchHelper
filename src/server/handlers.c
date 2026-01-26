@@ -216,8 +216,7 @@ HttpResponse handle_content_request(HttpRequest* req) {
     
     int status_code = 0;
     int escaped = 0;
-    printf("MAX_NUM_COMMENTS: %zu\n", req->max_num_comments);
-    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN, req->max_num_comments);
+    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN, req->max_num_comments, req->min_score);
     if (!response_msg) {
         return handle_500();
     }

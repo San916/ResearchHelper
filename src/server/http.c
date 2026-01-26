@@ -118,7 +118,6 @@ HttpRequestError parse_headers(HttpRequest* req) {
         char* key = req->headers[i].key;
         char* value = req->headers[i].value;
 
-        printf("KEY: %s\nVALUE: %s\n", key, value);
         if (str_equals(key, "Connection", false)) {
             if (str_equals(value, "keep-alive", false)) keep_alive = true;
             else if (str_equals(value, "close", false)) keep_alive = false;
