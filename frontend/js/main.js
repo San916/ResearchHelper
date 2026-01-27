@@ -83,6 +83,58 @@ function displayResults(data, query) {
     responseDiv.appendChild(responseContent);
 }
 
+function displayWebContent(contentArea, jsonData, escaped) {
+    jsonData.content.forEach((item) => {
+        let html = item.content_body;
+
+        if (escaped) {
+            const txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            html = txt.value;
+        }
+
+        const contentItem = document.createElement("div");
+        contentItem.className = "content-item";
+
+        const contentText = document.createElement("div");
+        contentText.className = "content-text";
+        contentText.innerHTML = html;
+
+        const contentHeader = document.createElement("div");
+        contentHeader.className = "content-header";
+        contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
+
+        const commentExpander = document.createElement("div");
+        commentExpander.className = "comment-expander";
+        commentExpander.textContent = "[close]";
+        contentHeader.addEventListener("click", function() {
+            const closing = commentExpander.textContent === "[close]";
+            if (closing) {
+                commentExpander.textContent = "[expand]";
+                contentText.style.display = "none";
+            } else {
+                commentExpander.textContent = "[close]";
+                contentText.style.display = "block";
+            }
+        });
+
+        const invisibleBorder = document.createElement("div");
+        invisibleBorder.className = "invisible-border";
+        invisibleBorder.addEventListener("click", function() {
+            contentHeader.click();
+        })
+
+        contentHeader.appendChild(commentExpander);
+
+        contentItem.appendChild(contentHeader);
+        contentItem.appendChild(contentText);
+        contentItem.appendChild(invisibleBorder);
+
+        contentArea.appendChild(contentItem);
+    });
+    contentArea.dataset.loaded = true;
+}
+
 async function fetchAndDisplayContent(resultLink, contentArea) {
     try {
         let maxNumComments = document.getElementById("max-num-comments");
@@ -107,67 +159,27 @@ async function fetchAndDisplayContent(resultLink, contentArea) {
             minScoreValue = Number(minScore.value);
         }
 
+        const headers = {
+            "Max-Num-Comments": maxNumCommentsValue,
+            "Min-Score": minScoreValue
+        };
+        const savedContent = webpageContentStorage.checkSavedWebContent(resultLink, headers);
+        if (savedContent) {
+            displayWebContent(contentArea, savedContent.content, savedContent.escaped);
+            return;
+        }
+
         const response = await fetch(`/content?url=${encodeURIComponent(resultLink)}`, {
             method: "GET",
-            headers: {
-                "Max-Num-Comments": maxNumCommentsValue,
-                "Min-Score": minScoreValue
-            },
+            headers: headers,
         });
 
         if (response.ok) {
             const escaped = response.headers.get("Html-Escaped") === "true";
             const data = await response.text();
             const jsonData = JSON.parse(data);
-            jsonData.content.forEach((item) => {
-                let html = item.content_body;
-
-                if (escaped) {
-                    const txt = document.createElement("textarea");
-                    txt.innerHTML = html;
-                    html = txt.value;
-                }
-
-                const contentItem = document.createElement("div");
-                contentItem.className = "content-item";
-
-                const contentText = document.createElement("div");
-                contentText.className = "content-text";
-                contentText.innerHTML = html;
-
-                const contentHeader = document.createElement("div");
-                contentHeader.className = "content-header";
-                contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
-
-                const commentExpander = document.createElement("div");
-                commentExpander.className = "comment-expander";
-                commentExpander.textContent = "[close]";
-                contentHeader.addEventListener("click", function() {
-                    const closing = commentExpander.textContent === "[close]";
-                    if (closing) {
-                        commentExpander.textContent = "[expand]";
-                        contentText.style.display = "none";
-                    } else {
-                        commentExpander.textContent = "[close]";
-                        contentText.style.display = "block";
-                    }
-                });
-
-                const invisibleBorder = document.createElement("div");
-                invisibleBorder.className = "invisible-border";
-                invisibleBorder.addEventListener("click", function() {
-                    contentHeader.click();
-                })
-
-                contentHeader.appendChild(commentExpander);
-
-                contentItem.appendChild(contentHeader);
-                contentItem.appendChild(contentText);
-                contentItem.appendChild(invisibleBorder);
-
-                contentArea.appendChild(contentItem);
-            });
-            contentArea.dataset.loaded = true;
+            displayWebContent(contentArea, jsonData, escaped);
+            webpageContentStorage.saveWebContent(resultLink, headers, escaped, jsonData);
         } else {
             contentArea.textContent = `Error: ${response.status}`;
         }
@@ -223,6 +235,47 @@ const queryStorage = {
             }
         });
         queryHistory.prepend(newItem);
+    }
+}
+
+const webpageContentStorage = {
+    sessionStorageKey: "research_helper_web_content",
+    
+    getSavedWebContent: function() {
+        const content = sessionStorage.getItem(this.sessionStorageKey);
+        return content ? JSON.parse(content) : [];
+    },
+
+    checkSavedWebContent: function(url, params) {
+        const content = this.getSavedWebContent();
+        if (!content.length) {
+            return null;
+        }
+
+        const savedContent = content.find((item) => {
+            return (item.url === url && JSON.stringify(item.params) === JSON.stringify(params));
+        });
+        if (!savedContent) {
+            return null;
+        }
+        return { content: savedContent.webContent, escaped: savedContent.escaped };
+    },
+
+    saveWebContent: function(url, params, escaped, webContent) {
+        const content = this.getSavedWebContent();
+        const entry = {
+            url,
+            params,
+            escaped,
+            webContent
+        };
+        content.unshift(entry);
+          
+        sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(content));
+    },
+
+    clearWebContent: function() {
+        sessionStorage.removeItem(this.sessionStorageKey);
     }
 }
 
