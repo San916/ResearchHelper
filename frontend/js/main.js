@@ -364,7 +364,7 @@ function onCloseMenuEnd(event) {
 function expandMenu() {
     document.getElementById("expand-button").style.display = "none";
     document.getElementById("close-button").style.display = "flex";
-    document.getElementById("footer").style.left = "150px";
+    document.getElementById("footer").style.left = "175px";
     document.getElementById("menu").classList.add('open');
 }
 

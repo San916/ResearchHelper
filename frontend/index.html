@@ -26,11 +26,25 @@
                 <div id="query-history"></div>
             </div>
             <div id="menu-bottom">
-                <h1>Response sorting</h1>
-                <h1>Add new page</h1>
-                <h1>Keyword detect</h1>
-                <div id="settings">
-
+                <div id="query-settings-header">
+                    Settings:
+                </div>
+                <div id="query-settings">
+                    <div class="settings-item">
+                        <p>Maximum number of results:</p><textarea maxlength="2" placeholder="5" id="max-num-results"></textarea>
+                    </div>
+                    <div class="settings-item">
+                        <p>Maximum number of comments:</p><textarea maxlength="2" placeholder="5" id="max-num-comments"></textarea>
+                    </div>
+                    <div class="settings-item">
+                        <p>Minimum score:</p><textarea maxlength="2" placeholder="0" id="min-score"></textarea>
+                    </div>
+                    <div class="settings-item toggle-able">
+                        <p>Exclude unsupported sites</p>
+                    </div>
+                    <div class="settings-item toggle-able">
+                        <p>Include original post</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -43,23 +57,6 @@
         <form id="user-input-form">
             <input type="text" class="user-input" id="user-input" size="20" maxlength="100" placeholder="Write here!" spellcheck="false">
             <input type="submit" hidden />
-            <div id="query-settings">
-                <div class="settings-item">
-                    <p>Maximum number of results:</p><textarea maxlength="2" placeholder="5" id="max-num-results"></textarea>
-                </div>
-                <div class="settings-item">
-                    <p>Maximum number of comments:</p><textarea maxlength="2" placeholder="5" id="max-num-comments"></textarea>
-                </div>
-                <div class="settings-item">
-                    <p>Minimum score:</p><textarea maxlength="2" placeholder="0" id="min-score"></textarea>
-                </div>
-                <div class="settings-item toggle-able">
-                    <p>Exclude unsupported sites</p>
-                </div>
-                <div class="settings-item toggle-able">
-                    <p>Include original post</p>
-                </div>
-            </div>
         </form>
     </div>
 </body>
