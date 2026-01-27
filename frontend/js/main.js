@@ -212,6 +212,8 @@ const queryStorage = {
 
     clearHistory: function() {
         sessionStorage.removeItem(this.sessionStorageKey);
+        const queryHistory = document.getElementById("query-history");
+        queryHistory.innerHTML = "";
     },
 
     renderHistory: function(query, id) {
@@ -219,7 +221,7 @@ const queryStorage = {
 
         const queryHistory = document.getElementById("query-history");
         if (history.length === 0) {
-            queryHistory.innerHTML = "<h1>No saved queries</h1>";
+            queryHistory.innerHTML = "";
             return;
         }
 
@@ -347,6 +349,12 @@ document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".user-input").forEach((user_input) => {user_input.value = ""});
     });
 });
+
+function clearHistory() {
+    queryStorage.clearHistory();
+    webpageContentStorage.clearWebContent();
+
+}
 
 function onCloseMenuEnd(event) {
     document.getElementById("expand-button").style.display = "block";
