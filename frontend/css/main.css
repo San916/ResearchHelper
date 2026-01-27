@@ -102,7 +102,7 @@ form {
     width: 1.5rem;
     height: 1.5rem;
     resize: none;
-    scrollbar-width: 0;
+    scrollbar-width: none;
     text-align: center;
     font-size: 1rem;
     margin-left: 4px;
@@ -207,8 +207,33 @@ form .user-input:focus {
     justify-content: center;
 }
 
+#menu #menu-middle #query-history {
+    height: 300px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+#menu #menu-middle #query-history-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+#menu #menu-middle #query-history .query-history-item {
+    padding: 1rem 1.5rem;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#menu #menu-middle #query-history .query-history-item:hover {
+    background-color: #f0f0f0;
+}
+
+
 #menu #menu-bottom {
-    height: 400px;
+    height: 300px;
 }
 
 #main-panel {
