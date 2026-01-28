@@ -10,40 +10,47 @@
         <p>A web crawler that finds human-written answers for any of your coding related problems.</p>
     </div>
     <div id="main-page">
-        <div id="expand-button" onclick="expandMenu()">O</div>
+        <div id="expand-button" onclick="expandMenu()">&#9776;</div>
         <section id="menu">
             <div id="menu-top">
                 <div id="icon">
                     <h2>ResearchHelper</h2>
                 </div>
-                <div id="close-button" onclick="closeMenu()">X</div>
+                <div id="close-button" onclick="closeMenu()">&#9776;</div>
             </div>
-            <div id="menu-middle">
-                <div id="query-history-header">
-                    <p id="query-history-header-text">Previous queries:</p>
-                    <p id="clear-history" onclick="clearHistory()">Clear</p>
+            <div id="menu-middle-bottom">
+                <div id="menu-middle">
+                    <div id="query-history-header">
+                        <p id="query-history-header-text">Previous Queries:</p>
+                        <p id="clear-history" onclick="clearHistory()">Clear</p>
+                    </div>
+                    <div id="query-history"></div>
                 </div>
-                <div id="query-history"></div>
-            </div>
-            <div id="menu-bottom">
-                <div id="query-settings-header">
-                    Settings:
-                </div>
-                <div id="query-settings">
-                    <div class="settings-item">
-                        <p>Maximum number of results:</p><textarea maxlength="2" placeholder="5" id="max-num-results"></textarea>
+                <div id="menu-bottom">
+                    <div class="settings-header">
+                        View Settings:
                     </div>
-                    <div class="settings-item">
-                        <p>Maximum number of comments:</p><textarea maxlength="2" placeholder="5" id="max-num-comments"></textarea>
+                    <div id="view-settings" class="settings">
+                        <div class="settings-item toggle-able">
+                            <p>Code only</p>
+                        </div>
+                        <div class="settings-item toggle-able">
+                            <p>Show original post</p>
+                        </div>
                     </div>
-                    <div class="settings-item">
-                        <p>Minimum score:</p><textarea maxlength="2" placeholder="0" id="min-score"></textarea>
+                    <div class="settings-header">
+                        Query Settings:
                     </div>
-                    <div class="settings-item toggle-able">
-                        <p>Exclude unsupported sites</p>
-                    </div>
-                    <div class="settings-item toggle-able">
-                        <p>Include original post</p>
+                    <div id="query-settings" class="settings">
+                        <div class="settings-item">
+                            <p>Max results:</p><textarea maxlength="2" placeholder="5" id="max-num-results"></textarea>
+                        </div>
+                        <div class="settings-item">
+                            <p>Max comments:</p><textarea maxlength="2" placeholder="5" id="max-num-comments"></textarea>
+                        </div>
+                        <div class="settings-item">
+                            <p>Min score:</p><textarea maxlength="2" placeholder="0" id="min-score"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -109,12 +109,20 @@ form .user-input:focus {
 }
 
 #expand-button {
+    margin: 1rem;
     width: 50px;
     height: 50px;
     position: absolute;
     left: 0;
     top: 0;
-    font-size: 36px;
+    font-size: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.05s ease-in-out;
 }
 
 #menu {
@@ -130,6 +138,7 @@ form .user-input:focus {
     border-right-width: 1px;
     border-right-style: solid;
     border-right-color: #f0f0f0;
+    z-index: 4;
 }
 
 #menu.open {
@@ -153,10 +162,17 @@ form .user-input:focus {
     width: 50px;
     height: 50px;
     top: 0;
-    font-size: 36px;
+    font-size: 40px;
     display: none;
     flex-direction: column;
     justify-content: center;
+}
+
+#menu #menu-middle-bottom {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 
 #menu #menu-middle #query-history {
@@ -176,7 +192,8 @@ form .user-input:focus {
 }
 
 #menu #menu-middle #query-history-header #clear-history {
-    padding: 1rem 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
     display: flex;
     align-items: center;
     border-style: solid;
@@ -201,43 +218,42 @@ form .user-input:focus {
     background-color: #f0f0f0;
 }
 
+#menu #menu-middle #query-history .selected {
+    background-color: #f0f0f0;
+}
+
 #menu #menu-bottom {
     height: 300px;
 }
 
-#query-settings-header {
+#menu #menu-bottom .settings-header {
     justify-content: left;
     padding: 0.5rem 1.5rem;
 }
 
-#query-settings {
+#menu #menu-bottom .settings {
     color: #242424;
-    /* margin-top: 10px; */
-    display: flex;
-    /* gap: 10px; */
-    flex-wrap: wrap;
-    justify-content: right;
 }
 
-.settings-item {
+#menu #menu-bottom .settings .settings-item {
+    width: 100%;
     background-color: #f8f8f8;
-    /* width: 100%; */
-    /* border-color: #989898; */
-    /* border-width: 1px;
-    border-style: solid;
-    border-radius: 8px;
-    padding: 5px 10px; */
     display: flex;
     align-items: center;
+    justify-content: right;
     transition: background-color 0.1s ease-out;
     padding: 0.5rem 1.5rem;
 }
 
-.settings-item:hover {
+#menu #menu-bottom .settings .settings-item.toggle-able.selected {
     background-color: #f0f0f0;
 }
 
-.settings-item:hover textarea {
+#menu #menu-bottom .settings .settings-item:hover {
+    background-color: #f0f0f0;
+}
+
+#menu #menu-bottom .settings .settings-item:hover textarea {
     background-color: #f0f0f0;
 }
 
