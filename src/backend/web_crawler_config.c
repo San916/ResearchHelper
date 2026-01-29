@@ -23,54 +23,26 @@ char* get_google_search_url(const char* input) {
     return url;
 }
 
-// REQUIRES: Valid stackoverflow post url
-// EFFECTS: Returns the question id as string
-char* extract_stackoverflow_question_id(const char* url) {
-    const char* pattern = "questions/";
-    char* first_slash = strstr(url, pattern);
-    if (!first_slash) {
-        return NULL;
-    }
-    first_slash = first_slash + strlen(pattern);
-    char* second_slash = strchr(first_slash, '/');
-    if (!second_slash) {
-        return NULL;
-    }
-    if (!(second_slash - first_slash)) {
-        return NULL;
-    }
-    size_t question_id_length = second_slash - first_slash;
-    char* question_id = calloc(1, question_id_length + 1);
-    if (!question_id) {
-        return NULL;
-    }
-    strncpy(question_id, first_slash, question_id_length);
-    return question_id;
-}
-
-// REQUIRES: Valid reddit post url
-// EFFECTS: Returns the question id as string
-char* extract_reddit_question_id(const char* url) {
+// REQUIRES: Valid reddit post url, output string and length
+// MODIFIES: output string
+// EFFECTS: Write question id in out, returns 1 on success, 0 if fail
+int extract_reddit_question_id(const char* url, char* out, size_t out_len) {
     const char* pattern = "comments/";
     char* first_slash = strstr(url, pattern);
     if (!first_slash) {
-        return NULL;
+        return 0;
     }
     first_slash = first_slash + strlen(pattern);
+
     char* second_slash = strchr(first_slash, '/');
     if (!second_slash) {
-        return NULL;
+        return 0;
     }
-    if (!(second_slash - first_slash)) {
-        return NULL;
-    }
+
     size_t question_id_length = second_slash - first_slash;
-    char* question_id = calloc(1, question_id_length + 1);
-    if (!question_id) {
-        return NULL;
-    }
-    strncpy(question_id, first_slash, question_id_length);
-    return question_id;
+    strncpy(out, first_slash, question_id_length);
+
+    return 1;
 }
 
 // REQUIRES: url, curl handle and headers, reference to int flag, REDDIT_ID env should exist
@@ -82,13 +54,12 @@ char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** h
         return NULL;
     }
 
-    char* question_id = extract_reddit_question_id(url);
-    if (!question_id) {
+    char question_id[32] = {0};
+    if (!extract_reddit_question_id(url, question_id, 32)) {
         return NULL;
     }
 
     snprintf(new_url, MAX_CURL_URL_LEN, "https://www.reddit.com/comments/%s.json?limit=%zu&depth=%d&sort=top", question_id, max_num_comments, REDDIT_API_DEPTH);
-    free(question_id);
 
     char* reddit_id = getenv("REDDIT_ID");
     if (!reddit_id) {
@@ -105,6 +76,70 @@ char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** h
     return new_url;
 }
 
+// REQUIRES: Valid stackexchange post url, output string and length
+// MODIFIES: output string
+// EFFECTS: Write question id in out, returns 1 on success, 0 if fail
+int extract_stackoverflow_question_id(const char* url, char* out, size_t out_len) {
+    const char* pattern = "questions/";
+    char* first_slash = strstr(url, pattern);
+    if (!first_slash) {
+        return 0;
+    }
+    first_slash = first_slash + strlen(pattern);
+
+    char* second_slash = strchr(first_slash, '/');
+    if (!second_slash) {
+        return 0;
+    }
+
+    size_t question_id_length = second_slash - first_slash;
+    strncpy(out, first_slash, question_id_length);
+    
+    return 1;
+}
+
+// REQUIRES: Valid stackexchange post url, output string and length
+// MODIFIES: output string
+// EFFECTS: Write site name in out, returns 1 on success, 0 if fail
+int extract_stackoverflow_site(const char* url, char* out, size_t out_len) {
+    const char* pattern = "://";
+    char* start = strstr(url, pattern);
+    if (!start) {
+        return 0;
+    }
+    start = start + strlen(pattern);
+
+    char* end = strchr(start, '/');
+    if (!end) {
+        return 0;
+    }
+
+    size_t site_len = end - start;
+    char site[256];
+    strncpy(site, start, site_len);
+    site[site_len] = '\0';
+
+    if (!strcmp(site, "stackoverflow.com")) {
+        strncpy(out, "stackoverflow", out_len);
+        return 1;
+    } else if (!strcmp(site, "superuser.com")) {
+        strncpy(out, "superuser", out_len);
+        return 1;
+    } else if (!strcmp(site, "serverfault.com")) {
+        strncpy(out, "serverfault", out_len);
+        return 1;
+    }
+
+    const char *suffix = ".stackexchange.com";
+    size_t suffix_len = strlen(suffix);
+    if (!strcmp(site + site_len - suffix_len, suffix)) {
+        strncpy(out, site, site_len - suffix_len);
+        return 1;
+    }
+
+    return 0;
+}
+
 // REQUIRES: url, curl handle and headers, reference to int flag
 // MODIFIES: curl handle and headers, escaped flag
 // EFFECTS: Does stackoverflow-specific setup, returns new url
@@ -114,18 +149,26 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
         return NULL;
     }
 
-    char* question_id = extract_stackoverflow_question_id(url);
-    if (!question_id) {
+    printf("GETTING QUESTION ID\n");
+    char question_id[32] = {0};
+    if (!extract_stackoverflow_question_id(url, question_id, 32)) {
         return NULL;
     }
+    printf("QUESTION ID: %s\n", question_id);
 
-    snprintf(new_url, MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/answers?site=stackoverflow&order=desc&sort=votes&filter=withbody", question_id);
-    free(question_id);
+    char site[32] = {0};
+    if (!extract_stackoverflow_site(url, site, 32)) {
+        return NULL;
+    }
+    printf("SITE: %s\n", site);
+
+    snprintf(new_url, MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/answers?site=%s&order=desc&sort=votes&filter=withbody", question_id, site);
 
     *headers = curl_slist_append(*headers, "Accept: application/json");
     curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
     curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
 
+    printf("NEW_URL: %s\n", new_url);
     return new_url;
 }
 

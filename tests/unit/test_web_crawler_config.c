@@ -70,21 +70,39 @@ void test_get_google_search_url_truncation(void) {
 // ==================================
 void test_extract_stackoverflow_question_id(void) {
     char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
-    char* question_id = extract_stackoverflow_question_id(url);
+    char question_id[32] = {0};
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 1);
     TEST_ASSERT_EQUAL_INT(strcmp(question_id, "21006707"), 0);
-    free(question_id);
 
     url = "https://stackoverflow.com/questions//proper-usage-of-realloc";
-    question_id = extract_stackoverflow_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://stackoverflow.com/questions/proper-usage-of-realloc";
-    question_id = extract_stackoverflow_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://stackoverflow.com/question/21006707/proper-usage-of-realloc";
-    question_id = extract_stackoverflow_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
+}
+
+// ==================================
+// extract_stackoverflow_site
+// ==================================
+void test_extract_stackoverflow_site(void) {
+    char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
+    char site[32] = {0};
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strcmp(site, "stackoverflow"), 0);
+
+    url = "https://gamedev.stackexchange.com/questions/13436/glm-euler-angles-to-quaternion";
+    memset(site, 0, strlen(site));
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strcmp(site, "gamedev"), 0);
 }
 
 // ==================================
@@ -92,21 +110,24 @@ void test_extract_stackoverflow_question_id(void) {
 // ==================================
 void test_extract_reddit_question_id(void) {
     char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
-    char* question_id = extract_reddit_question_id(url);
+    char question_id[32] = {0};
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
     TEST_ASSERT_EQUAL_INT(strcmp(question_id, "1lrkzjb"), 0);
-    free(question_id);
 
     url = "https://www.reddit.com/r/cprogramming/comments//question_about_realloc/";
-    question_id = extract_reddit_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://www.reddit.com/r/cprogramming/comments/question_about_realloc";
-    question_id = extract_reddit_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://www.reddit.com/r/cprogramming/comment/1lrkzjb/question_about_realloc/";
-    question_id = extract_reddit_question_id(url);
-    TEST_ASSERT_NULL(question_id);
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 }
 
 int main(void) {
@@ -123,6 +144,9 @@ int main(void) {
 
     // extract_stackoverflow_question_id
     RUN_TEST(test_extract_stackoverflow_question_id);
+
+    //extract_stackoverflow_site
+    RUN_TEST(test_extract_stackoverflow_site);
 
     // extract_reddit_question_id
     RUN_TEST(test_extract_reddit_question_id);
