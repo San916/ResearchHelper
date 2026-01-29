@@ -71,22 +71,22 @@ void test_get_google_search_url_truncation(void) {
 void test_extract_reddit_question_id(void) {
     char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
     char question_id[32] = {0};
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(question_id, "1lrkzjb"), 0);
 
     url = "https://www.reddit.com/r/cprogramming/comments//question_about_realloc/";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://www.reddit.com/r/cprogramming/comments/question_about_realloc";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), -1);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://www.reddit.com/r/cprogramming/comment/1lrkzjb/question_about_realloc/";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), -1);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 }
 
@@ -101,11 +101,13 @@ void test_setup_reddit_url(void) {
     int escaped = 0;
 
     load_env(TEST_ENV_FILENAME);
-    char* new_url = setup_reddit_url(url, curl_handle, &headers, &escaped, 10);
+    size_t num_urls = 0;
+    char* new_url = setup_reddit_url(url, curl_handle, &headers, &escaped, 10, &num_urls);
     char expected_url[256] = {0};
     snprintf(expected_url, 255, "https://www.reddit.com/comments/1lrkzjb.json?limit=10&depth=%d&sort=top", REDDIT_API_DEPTH);
     TEST_ASSERT_EQUAL_INT(strcmp(new_url, expected_url), 0);
     TEST_ASSERT_EQUAL_INT(escaped, 1);
+    TEST_ASSERT_EQUAL_INT(num_urls, 1);
     free(new_url);
 }
 
@@ -115,22 +117,22 @@ void test_setup_reddit_url(void) {
 void test_extract_stackoverflow_question_id(void) {
     char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
     char question_id[32] = {0};
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(question_id, "21006707"), 0);
 
     url = "https://stackoverflow.com/questions//proper-usage-of-realloc";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://stackoverflow.com/questions/proper-usage-of-realloc";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), -1);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 
     url = "https://stackoverflow.com/question/21006707/proper-usage-of-realloc";
     memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_question_id(url, question_id, 32), -1);
     TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
 }
 
@@ -140,12 +142,12 @@ void test_extract_stackoverflow_question_id(void) {
 void test_extract_stackoverflow_site(void) {
     char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
     char site[32] = {0};
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(site, "stackoverflow"), 0);
 
     url = "https://gamedev.stackexchange.com/questions/13436/glm-euler-angles-to-quaternion";
     memset(site, 0, strlen(site));
-    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 1);
+    TEST_ASSERT_EQUAL_INT(extract_stackoverflow_site(url, site, 32), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(site, "gamedev"), 0);
 }
 
@@ -158,11 +160,15 @@ void test_setup_stackoverflow_url(void) {
     struct curl_slist* headers = create_curl_headers();
     WebsiteType website_type = detect_website_type(url);
     int escaped = 0;
+    size_t num_urls = 0;
 
-    char* new_url = setup_stackoverflow_url(url, curl_handle, &headers, &escaped);
-    TEST_ASSERT_EQUAL_INT(strcmp(new_url, "https://api.stackexchange.com/2.3/questions/21006707/answers?site=stackoverflow&order=desc&sort=votes&filter=withbody"), 0);
-    free(new_url);
+    char** new_urls = setup_stackoverflow_urls(url, curl_handle, &headers, &escaped, &num_urls);
+    TEST_ASSERT_EQUAL_INT(strcmp(new_urls[1], "https://api.stackexchange.com/2.3/questions/21006707/answers?site=stackoverflow&order=desc&sort=votes&filter=withbody"), 0);
     TEST_ASSERT_EQUAL_INT(escaped, 0);
+    TEST_ASSERT_EQUAL_INT(num_urls, 2);
+    free(new_urls[0]);
+    free(new_urls[1]);
+    free(new_urls);
 }
 
 int main(void) {

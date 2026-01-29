@@ -38,14 +38,18 @@ static char expected_json_response[] =
     "}";
 
 static char expected_json_content_response[] =
-    "{\"content\":"
-        "["
+    "{"
+        "\"original_post\":{"
+            "\"content_body\":\"what is i equal to?\","
+            "\"score\":0"
+        "},"
+        "\"comments\":["
             "{"
                 "\"content_body\":\"<code>int i = 0;</code>\","
                 "\"score\":10"
             "}"
         "],"
-        "\"count\":1"
+        "\"comment_count\":1"
     "}";
 
 
@@ -156,51 +160,78 @@ void test_structure_google_query_response(void) {
 // parse_webpage_content
 // ==================================
 void test_parse_webpage_content(void) {
-    ContentList* response = parse_webpage_content("", WEBSITE_STUB, max_num_comments, min_score);
-    TEST_ASSERT_NOT_NULL(response);
-    TEST_ASSERT_EQUAL_INT(strcmp(response->items[0].content_body, "\"<code>int i = 0;</code>\""), 0);
-    TEST_ASSERT_EQUAL_INT(response->items[0].score, 10);
-    free(response);
+    ContentList* comments = calloc(1, sizeof(ContentList));
+    if (!comments) {
+        return;
+    }
+    ContentItem* original_post = calloc(1, sizeof(ContentItem));
+    if (!original_post) {
+        free(comments);
+        return;
+    }
+    TEST_ASSERT_EQUAL_INT(parse_webpage_content(NULL, 0, WEBSITE_STUB, comments, original_post, max_num_comments, min_score), 0);
+    TEST_ASSERT_EQUAL_INT(strcmp(comments->items[0].content_body, "\"<code>int i = 0;</code>\""), 0);
+    TEST_ASSERT_EQUAL_INT(comments->items[0].score, 10);
+    free(comments);
+    free(original_post);
 }
 
 // ==================================
 // stringify_content_response
 // ==================================
 void test_stringify_content_response(void) {
-    ContentList* response = parse_webpage_content("", WEBSITE_STUB, max_num_comments, min_score);
-    TEST_ASSERT_NOT_NULL(response);
-    char* response_json = stringify_content_response(response, MAX_RESPONSE_LENGTH);
+    ContentList* comments = calloc(1, sizeof(ContentList));
+    if (!comments) {
+        return;
+    }
+    ContentItem* original_post = calloc(1, sizeof(ContentItem));
+    if (!original_post) {
+        free(comments);
+        return;
+    }
+    TEST_ASSERT_EQUAL_INT(parse_webpage_content(NULL, 0, WEBSITE_STUB, comments, original_post, max_num_comments, min_score), 0);
+    char* response_json = stringify_content_response(comments, original_post, MAX_RESPONSE_LENGTH);
     TEST_ASSERT_NOT_NULL(response_json);
     TEST_ASSERT_EQUAL_INT(strcmp(response_json, expected_json_content_response), 0);
-    free(response);
     free(response_json);
+    free(original_post);
+    free(comments);
 }
 
 void test_stringify_content_response_max_length_too_small(void) {
-    ContentList* response = parse_webpage_content("", WEBSITE_STUB, max_num_comments, min_score);
-    TEST_ASSERT_NOT_NULL(response);
+    ContentList* comments = calloc(1, sizeof(ContentList));
+    if (!comments) {
+        return;
+    }
+    ContentItem* original_post = calloc(1, sizeof(ContentItem));
+    if (!original_post) {
+        free(comments);
+        return;
+    }
+    TEST_ASSERT_EQUAL_INT(parse_webpage_content(NULL, 0, WEBSITE_STUB, comments, original_post, max_num_comments, min_score), 0);
 
-    char* response_json = stringify_content_response(response, strlen(expected_json_content_response) + 1);
+    char* response_json = stringify_content_response(comments, original_post, strlen(expected_json_content_response) + 1);
     TEST_ASSERT_NOT_NULL(response_json);
     TEST_ASSERT_EQUAL_INT(strcmp(response_json, expected_json_content_response), 0);
     free(response_json);
 
-    response_json = stringify_content_response(response, strlen(expected_json_content_response));
+    response_json = stringify_content_response(comments, original_post, strlen(expected_json_content_response));
     TEST_ASSERT_NULL(response_json);
 
-    response_json = stringify_content_response(response, strlen(expected_json_content_response) + 5);
+    response_json = stringify_content_response(comments, original_post, strlen(expected_json_content_response) + 5);
     TEST_ASSERT_NOT_NULL(response_json);
     TEST_ASSERT_EQUAL_INT(strcmp(response_json, expected_json_content_response), 0);
     
     free(response_json);
-    free(response);
+    free(original_post);
+    free(comments);
 }
 
 // ==================================
 // structure_webpage_content_response
 // ==================================
 void test_structure_webpage_content_response(void) {
-    char* response = structure_webpage_content_response("", WEBSITE_STUB, MAX_RESPONSE_LENGTH, max_num_comments, min_score);
+    char* response = structure_webpage_content_response(NULL, 0, WEBSITE_STUB, MAX_RESPONSE_LENGTH, max_num_comments, min_score);
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_EQUAL_INT(strcmp(response, expected_json_content_response), 0);
     free(response);

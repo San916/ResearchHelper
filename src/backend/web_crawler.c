@@ -52,18 +52,28 @@ char* get_content_item(const char* url, int* status_code, int* escaped, size_t m
     WebsiteType website_type = detect_website_type(url);
 
     load_env("..\\.env");
-    char* new_url = web_specific_setup(url, website_type, curl_handle, &headers, escaped, max_num_comments);
-    if (!new_url) {
+    size_t num_urls = 0;
+    char** new_urls = web_specific_setup(url, website_type, curl_handle, &headers, escaped, max_num_comments, &num_urls);
+    if (!new_urls) {
         goto destroy_curl_return;
     }
 
-    char* webpage_content = fetch_webpage_content(new_url, status_code, curl_handle, headers);
-    free(new_url);
+    char** webpage_content = malloc(num_urls * sizeof(char*));
     if (!webpage_content) {
         goto destroy_curl_return;
     }
-
-    content_json = structure_webpage_content_response(webpage_content, website_type, max_content_length, max_num_comments, min_score);
+    for (size_t i = 0; i < num_urls; i++) {
+        webpage_content[i] = fetch_webpage_content(new_urls[i], status_code, curl_handle, headers);
+        free(new_urls[i]);
+        if (!webpage_content[i]) {
+            for (size_t j = 0; j < i; j++) {
+                free(webpage_content[j]);
+            }
+            goto destroy_curl_return;
+        }
+    }
+    free(new_urls);
+    content_json = structure_webpage_content_response(webpage_content, num_urls, website_type, max_content_length, max_num_comments, min_score);
     free (webpage_content);
 
 destroy_curl_return:

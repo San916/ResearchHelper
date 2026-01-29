@@ -84,8 +84,8 @@ function displayResults(data, query) {
 }
 
 function displayWebContent(contentArea, jsonData, escaped) {
-    jsonData.content.forEach((item) => {
-        let html = item.content_body;
+    function addItem(item, original_post) {
+        let  html = item.content_body;
 
         if (escaped) {
             const txt = document.createElement("textarea");
@@ -102,7 +102,11 @@ function displayWebContent(contentArea, jsonData, escaped) {
 
         const contentHeader = document.createElement("div");
         contentHeader.className = "content-header";
-        contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
+        if (!original_post) {
+            contentHeader.innerHTML = `Score: ${item.score >= 0 ? item.score : "N/A"}`;
+        } else {
+            contentHeader.innerHTML = `Original Post:`;
+        }
 
         const commentExpander = document.createElement("div");
         commentExpander.className = "comment-expander";
@@ -131,6 +135,11 @@ function displayWebContent(contentArea, jsonData, escaped) {
         contentItem.appendChild(invisibleBorder);
 
         contentArea.appendChild(contentItem);
+    }
+
+    addItem(jsonData.original_post, true);
+    jsonData.comments.forEach((item) => {
+        addItem(item, false);
     });
     contentArea.dataset.loaded = true;
 }
