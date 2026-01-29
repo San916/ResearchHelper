@@ -19,7 +19,7 @@ typedef struct ContentList {
     size_t num_items;
 } ContentList;
 
-ParseWebpageContentError parse_stackoverflow_content(char* content, ContentList* content_list, size_t max_num_comments, int min_score);
-ParseWebpageContentError parse_reddit_content(char* content, ContentList* content_list, size_t max_num_comments, int min_score);
+ParseWebpageContentError parse_stackoverflow_content(char** content, size_t num_urls, ContentList* comments, ContentItem* original_post, size_t max_num_comments, int min_score);
+ParseWebpageContentError parse_reddit_content(char** content, size_t num_urls, ContentList* comments, ContentItem* original_post, size_t max_num_comments, int min_score);
 
 #endif

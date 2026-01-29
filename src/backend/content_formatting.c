@@ -103,51 +103,45 @@ char* structure_google_query_response(const char* content, size_t max_length, si
 }
 
 // REQUIRES: Webpage content, website type
-// EFFECTS: Structures content and returns
-ContentList* parse_webpage_content(char* content, WebsiteType website_type, size_t max_num_comments, int min_score) {
+// MODIFIES: comments, original_post
+// EFFECTS: Structures content into comments and original_post, returns 0 on success, -1 on fail
+int parse_webpage_content(char** content, size_t num_urls, WebsiteType website_type, ContentList* comments, ContentItem* original_post, size_t max_num_comments, int min_score) {
     max_num_comments = (max_num_comments > MAX_CONTENT_ITEMS) ? MAX_CONTENT_ITEMS : max_num_comments;
-    ContentList* content_list = calloc(1, sizeof(ContentList));
-    if (!content_list) {
-        return NULL;
-    }
-    content_list->num_items = 0;
 
     switch (website_type) {
         case WEBSITE_REDDIT: {
-            int status_code = parse_reddit_content(content, content_list, max_num_comments, min_score);
+            int status_code = parse_reddit_content(content, num_urls, comments, original_post, max_num_comments, min_score);
             if (status_code) {
-                goto free_return_null;
+                return -1;
             }
             break;
         } case WEBSITE_STACKOVERFLOW: {
-            int status_code = parse_stackoverflow_content(content, content_list, max_num_comments, min_score);
+            int status_code = parse_stackoverflow_content(content, num_urls, comments, original_post, max_num_comments, min_score);
             if (status_code) {
-                goto free_return_null;
+                return -1;
             }
             break;
         } case WEBSITE_GITHUB: {
             break;
         } case WEBSITE_STUB: {
             // Return a stub
-            content_list->num_items++;
-            strcpy(content_list->items[0].content_body, "\"<code>int i = 0;</code>\"");
-            content_list->items[0].score = 10;
+            strcpy(original_post->content_body, "\"what is i equal to?\"");
+            comments->num_items++;
+            strcpy(comments->items[0].content_body, "\"<code>int i = 0;</code>\"");
+            comments->items[0].score = 10;
             break;
         } default: {
             break;
         }
     }
 
-    return content_list;
-
-free_return_null:
-    free(content_list);
-    return NULL;
+    return 0;
 }
 
 // REQUIRES: Structured webpage content, max response length
+// content[0] should contain the original post (if it exists, other)
 // EFFECTS: Turns content struct into a JSON string
-char* stringify_content_response(ContentList* content, size_t max_length) {
+char* stringify_content_response(ContentList* comments, ContentItem* original_post, size_t max_length) {
     char* response_msg = calloc(1, max_length);
     if (!response_msg) {
         return NULL;
@@ -155,16 +149,22 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
 
     size_t current_position = 0;
     size_t remaining = max_length;
-    current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"content\":[");
+    current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"original_post\":");\
+    current_position += snprintf(response_msg + current_position, remaining - current_position, 
+        "{\"content_body\":%s,\"score\":%d}", 
+        original_post->content_body,
+        original_post->score
+    );
+    current_position += snprintf(response_msg + current_position, remaining - current_position, ",\"comments\":[");
 
-    for (size_t i = 0 ; i < content->num_items; i++) {
+    for (size_t i = 0 ; i < comments->num_items; i++) {
         if (i > 0) {
             current_position += snprintf(response_msg + current_position, remaining - current_position, ",");
         }
         current_position += snprintf(response_msg + current_position, remaining - current_position, 
             "{\"content_body\":%s,\"score\":%d}", 
-            content->items[i].content_body,
-            content->items[i].score
+            comments->items[i].content_body,
+            comments->items[i].score
         );
         
         if (current_position >= remaining - 20) {
@@ -173,8 +173,8 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     }
 
     current_position += snprintf(response_msg + current_position, remaining - current_position, 
-        "],\"count\":%zu}",
-        content->num_items
+        "],\"comment_count\":%zu}",
+        comments->num_items
     );
     if (current_position >= remaining) {
         free(response_msg);
@@ -186,14 +186,23 @@ char* stringify_content_response(ContentList* content, size_t max_length) {
     return response_msg;
 }
 
-char* structure_webpage_content_response(char* content, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {
-    ContentList* content_list = parse_webpage_content(content, website_type, max_num_comments, min_score);
-    if (!content_list) {
+char* structure_webpage_content_response(char** content, size_t num_urls, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {\
+    ContentList* comments = calloc(1, sizeof(ContentList));
+    if (!comments) {
+        return NULL;
+    }
+    ContentItem* original_post = calloc(1, sizeof(ContentItem));
+    if (!original_post) {
         return NULL;
     }
 
-    char* response_msg = stringify_content_response(content_list, max_length);
-    free(content_list);
+    if (parse_webpage_content(content, num_urls, website_type, comments, original_post, max_num_comments, min_score)) {
+        return NULL;
+    }
+
+    char* response_msg = stringify_content_response(comments, original_post, max_length);
+    free(comments);
+    free(original_post);
     if (!response_msg) {
         return NULL;
     }

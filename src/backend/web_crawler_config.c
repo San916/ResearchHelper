@@ -25,37 +25,37 @@ char* get_google_search_url(const char* input) {
 
 // REQUIRES: Valid reddit post url, output string and length
 // MODIFIES: output string
-// EFFECTS: Write question id in out, returns 1 on success, 0 if fail
+// EFFECTS: Write question id in out, returns 0 on success, -1 if fail
 int extract_reddit_question_id(const char* url, char* out, size_t out_len) {
     const char* pattern = "comments/";
     char* first_slash = strstr(url, pattern);
     if (!first_slash) {
-        return 0;
+        return -1;
     }
     first_slash = first_slash + strlen(pattern);
 
     char* second_slash = strchr(first_slash, '/');
     if (!second_slash) {
-        return 0;
+        return -1;
     }
 
     size_t question_id_length = second_slash - first_slash;
     strncpy(out, first_slash, question_id_length);
 
-    return 1;
+    return 0;
 }
 
 // REQUIRES: url, curl handle and headers, reference to int flag, REDDIT_ID env should exist
 // MODIFIES: curl handle and headers, escaped flag
 // EFFECTS: Does reddit-specific setup, returns new url
-char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments) {
+char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments, size_t* num_urls) {
     char* new_url = calloc(1, MAX_CURL_URL_LEN);
     if (!new_url) {
         return NULL;
     }
 
     char question_id[32] = {0};
-    if (!extract_reddit_question_id(url, question_id, 32)) {
+    if (extract_reddit_question_id(url, question_id, 32)) {
         return NULL;
     }
 
@@ -73,45 +73,46 @@ char* setup_reddit_url(const char* url, CURL* curl_handle, struct curl_slist** h
     curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
 
     *escaped = 1;
+    *num_urls = 1;
     return new_url;
 }
 
 // REQUIRES: Valid stackexchange post url, output string and length
 // MODIFIES: output string
-// EFFECTS: Write question id in out, returns 1 on success, 0 if fail
+// EFFECTS: Write question id in out, returns 0 on success, -1 if fail
 int extract_stackoverflow_question_id(const char* url, char* out, size_t out_len) {
     const char* pattern = "questions/";
     char* first_slash = strstr(url, pattern);
     if (!first_slash) {
-        return 0;
+        return -1;
     }
     first_slash = first_slash + strlen(pattern);
 
     char* second_slash = strchr(first_slash, '/');
     if (!second_slash) {
-        return 0;
+        return -1;
     }
 
     size_t question_id_length = second_slash - first_slash;
     strncpy(out, first_slash, question_id_length);
     
-    return 1;
+    return 0;
 }
 
 // REQUIRES: Valid stackexchange post url, output string and length
 // MODIFIES: output string
-// EFFECTS: Write site name in out, returns 1 on success, 0 if fail
+// EFFECTS: Write site name in out, returns 0 on success, -1 if fail
 int extract_stackoverflow_site(const char* url, char* out, size_t out_len) {
     const char* pattern = "://";
     char* start = strstr(url, pattern);
     if (!start) {
-        return 0;
+        return -1;
     }
     start = start + strlen(pattern);
 
     char* end = strchr(start, '/');
     if (!end) {
-        return 0;
+        return -1;
     }
 
     size_t site_len = end - start;
@@ -121,68 +122,80 @@ int extract_stackoverflow_site(const char* url, char* out, size_t out_len) {
 
     if (!strcmp(site, "stackoverflow.com")) {
         strncpy(out, "stackoverflow", out_len);
-        return 1;
+        return 0;
     } else if (!strcmp(site, "superuser.com")) {
         strncpy(out, "superuser", out_len);
-        return 1;
+        return 0;
     } else if (!strcmp(site, "serverfault.com")) {
         strncpy(out, "serverfault", out_len);
-        return 1;
+        return 0;
     }
 
     const char *suffix = ".stackexchange.com";
     size_t suffix_len = strlen(suffix);
     if (!strcmp(site + site_len - suffix_len, suffix)) {
         strncpy(out, site, site_len - suffix_len);
-        return 1;
+        return 0;
     }
 
-    return 0;
+    return -1;
 }
 
 // REQUIRES: url, curl handle and headers, reference to int flag
 // MODIFIES: curl handle and headers, escaped flag
-// EFFECTS: Does stackoverflow-specific setup, returns new url
-char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped) {
-    char* new_url = calloc(1, MAX_CURL_URL_LEN);
-    if (!new_url) {
+// EFFECTS: Does stackoverflow-specific setup, returns url to original post and url to answers to post
+char** setup_stackoverflow_urls(const char* url, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t* num_urls) {
+    char** new_urls = malloc(2 * sizeof(char*));
+    if (!new_urls) {
+        return NULL;
+    }
+    new_urls[0] = calloc(1, MAX_CURL_URL_LEN);
+    new_urls[1] = calloc(1, MAX_CURL_URL_LEN);
+    if (!new_urls[0] || !new_urls[1]) {
+        if (new_urls[0]) free(new_urls[0]);
+        if (new_urls[1]) free(new_urls[1]);
+        free(new_urls);
         return NULL;
     }
 
     char question_id[32] = {0};
-    if (!extract_stackoverflow_question_id(url, question_id, 32)) {
+    if (extract_stackoverflow_question_id(url, question_id, 32)) {
         return NULL;
     }
 
     char site[32] = {0};
-    if (!extract_stackoverflow_site(url, site, 32)) {
+    if (extract_stackoverflow_site(url, site, 32)) {
         return NULL;
     }
 
-    snprintf(new_url, MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/answers?site=%s&order=desc&sort=votes&filter=withbody", question_id, site);
+    snprintf(new_urls[0], MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/?site=%s&filter=withbody", question_id, site);
+    snprintf(new_urls[1], MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/answers?site=%s&order=desc&sort=votes&filter=withbody", question_id, site);
 
     *headers = curl_slist_append(*headers, "Accept: application/json");
-    curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
     curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
 
-    return new_url;
+    *num_urls = 2;
+    *escaped = 0;
+    return new_urls;
 }
 
-// REQUIRES: Valid url and WebsiteType, curl handler and headers, max num comments
+// REQUIRES: Valid url and WebsiteType, curl handler and headers, max num comments, reference to num_urls
+// MODIFIES: sets num_urls
 // EFFECTS: Executes different curl_handle setups according to the website type, sets escaped flag if necessary, sets url to return max_num_comments if possible
-// new url to curl (some websites may want us to append .json, add .api, etc)
-char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments) {
+// new urls to curl (some websites may want us to append .json, add .api, etc) and number of urls
+char** web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, struct curl_slist** headers, int* escaped, size_t max_num_comments, size_t* num_urls) {
     if (strlen(url) >= MAX_CURL_URL_LEN) {
         return NULL;
     }
-    char* new_url = NULL;
+    char** new_urls = NULL;
 
     switch (type) {
         case WEBSITE_REDDIT: {
-            new_url = setup_reddit_url(url, curl_handle, headers, escaped, max_num_comments);
+            new_urls = malloc(1 * sizeof(char*));
+            new_urls[0] = setup_reddit_url(url, curl_handle, headers, escaped, max_num_comments, num_urls);
             break;
         } case WEBSITE_STACKOVERFLOW: {
-            new_url = setup_stackoverflow_url(url, curl_handle, headers, escaped);
+            new_urls = setup_stackoverflow_urls(url, curl_handle, headers, escaped, num_urls);
             break;
         } case WEBSITE_GITHUB: {
             break;
@@ -191,5 +204,5 @@ char* web_specific_setup(const char* url, WebsiteType type, CURL* curl_handle, s
         }
     }
 
-    return new_url;
+    return new_urls;
 }
