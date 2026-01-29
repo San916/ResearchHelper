@@ -149,18 +149,15 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
         return NULL;
     }
 
-    printf("GETTING QUESTION ID\n");
     char question_id[32] = {0};
     if (!extract_stackoverflow_question_id(url, question_id, 32)) {
         return NULL;
     }
-    printf("QUESTION ID: %s\n", question_id);
 
     char site[32] = {0};
     if (!extract_stackoverflow_site(url, site, 32)) {
         return NULL;
     }
-    printf("SITE: %s\n", site);
 
     snprintf(new_url, MAX_CURL_URL_LEN, "https://api.stackexchange.com/2.3/questions/%s/answers?site=%s&order=desc&sort=votes&filter=withbody", question_id, site);
 
@@ -168,7 +165,6 @@ char* setup_stackoverflow_url(const char* url, CURL* curl_handle, struct curl_sl
     curl_easy_setopt(curl_handle, CURLOPT_URL, new_url);
     curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
 
-    printf("NEW_URL: %s\n", new_url);
     return new_url;
 }
 

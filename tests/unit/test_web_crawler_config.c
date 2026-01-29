@@ -66,6 +66,50 @@ void test_get_google_search_url_truncation(void) {
 }
 
 // ==================================
+// extract_reddit_question_id
+// ==================================
+void test_extract_reddit_question_id(void) {
+    char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
+    char question_id[32] = {0};
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strcmp(question_id, "1lrkzjb"), 0);
+
+    url = "https://www.reddit.com/r/cprogramming/comments//question_about_realloc/";
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
+
+    url = "https://www.reddit.com/r/cprogramming/comments/question_about_realloc";
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
+
+    url = "https://www.reddit.com/r/cprogramming/comment/1lrkzjb/question_about_realloc/";
+    memset(question_id, 0, strlen(question_id));
+    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
+    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
+}
+
+// ==================================
+// setup_reddit_url
+// ==================================
+void test_setup_reddit_url(void) {
+    char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
+    CURL* curl_handle = create_curl_handle();
+    struct curl_slist* headers = create_curl_headers();
+    WebsiteType website_type = detect_website_type(url);
+    int escaped = 0;
+
+    load_env(TEST_ENV_FILENAME);
+    char* new_url = setup_reddit_url(url, curl_handle, &headers, &escaped, 10);
+    char expected_url[256] = {0};
+    snprintf(expected_url, 255, "https://www.reddit.com/comments/1lrkzjb.json?limit=10&depth=%d&sort=top", REDDIT_API_DEPTH);
+    TEST_ASSERT_EQUAL_INT(strcmp(new_url, expected_url), 0);
+    TEST_ASSERT_EQUAL_INT(escaped, 1);
+    free(new_url);
+}
+
+// ==================================
 // extract_stackoverflow_question_id
 // ==================================
 void test_extract_stackoverflow_question_id(void) {
@@ -106,28 +150,19 @@ void test_extract_stackoverflow_site(void) {
 }
 
 // ==================================
-// extract_reddit_question_id
+// setup_stackoverflow_url
 // ==================================
-void test_extract_reddit_question_id(void) {
-    char* url = "https://www.reddit.com/r/cprogramming/comments/1lrkzjb/question_about_realloc/";
-    char question_id[32] = {0};
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
-    TEST_ASSERT_EQUAL_INT(strcmp(question_id, "1lrkzjb"), 0);
+void test_setup_stackoverflow_url(void) {
+    char* url = "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc";
+    CURL* curl_handle = create_curl_handle();
+    struct curl_slist* headers = create_curl_headers();
+    WebsiteType website_type = detect_website_type(url);
+    int escaped = 0;
 
-    url = "https://www.reddit.com/r/cprogramming/comments//question_about_realloc/";
-    memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 1);
-    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
-
-    url = "https://www.reddit.com/r/cprogramming/comments/question_about_realloc";
-    memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
-    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
-
-    url = "https://www.reddit.com/r/cprogramming/comment/1lrkzjb/question_about_realloc/";
-    memset(question_id, 0, strlen(question_id));
-    TEST_ASSERT_EQUAL_INT(extract_reddit_question_id(url, question_id, 32), 0);
-    TEST_ASSERT_EQUAL_INT(strlen(question_id), 0);
+    char* new_url = setup_stackoverflow_url(url, curl_handle, &headers, &escaped);
+    TEST_ASSERT_EQUAL_INT(strcmp(new_url, "https://api.stackexchange.com/2.3/questions/21006707/answers?site=stackoverflow&order=desc&sort=votes&filter=withbody"), 0);
+    free(new_url);
+    TEST_ASSERT_EQUAL_INT(escaped, 0);
 }
 
 int main(void) {
@@ -142,14 +177,21 @@ int main(void) {
     RUN_TEST(test_get_google_search_url_env_not_loaded);
     RUN_TEST(test_get_google_search_url_truncation);
 
+    // extract_reddit_question_id
+    RUN_TEST(test_extract_reddit_question_id);
+
+    // setup_reddit_url
+    RUN_TEST(test_setup_reddit_url);
+
     // extract_stackoverflow_question_id
     RUN_TEST(test_extract_stackoverflow_question_id);
 
-    //extract_stackoverflow_site
+    // extract_stackoverflow_site
     RUN_TEST(test_extract_stackoverflow_site);
 
-    // extract_reddit_question_id
-    RUN_TEST(test_extract_reddit_question_id);
+    // setup_stackoverflow_url
+    RUN_TEST(test_setup_stackoverflow_url);
+
 
     return UNITY_END();
 }
