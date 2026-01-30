@@ -18,6 +18,38 @@ document.addEventListener("DOMContentLoaded", function() {
     }, { passive: false });
 });
 
+const viewSettings = {
+    codeOnly: false,
+    showOriginalPost: true
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".toggle-able").forEach((item) => {
+        item.addEventListener("click", function() {            
+            this.classList.toggle("selected");
+
+            if (this.id === "code-only-toggle") {
+                viewSettings.codeOnly = this.classList.contains("selected");
+            } else if (this.id === "show-original-post-toggle") {
+                viewSettings.showOriginalPost = this.classList.contains("selected");
+            }
+
+            reRenderContent();
+        });
+    });
+});
+
+function reRenderContent() {
+    document.querySelectorAll(`.result-content[data-loaded="true"]`).forEach(contentArea => {
+        const url = contentArea.dataset.url;
+        const params = JSON.parse(contentArea.dataset.params);
+        const savedContent = webpageContentStorage.checkSavedWebContent(url, params);
+        if (savedContent) {
+            displayWebContent(contentArea, savedContent.content, savedContent.escaped, url, params);
+        }
+    });
+}
+
 function displayResults(data, query) {
     const responseDiv = document.getElementById("response");
 
@@ -83,7 +115,24 @@ function displayResults(data, query) {
     responseDiv.appendChild(responseContent);
 }
 
-function displayWebContent(contentArea, jsonData, escaped) {
+function extractCodeBlocks(html) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    
+    const codeBlocks = tempDiv.querySelectorAll("pre");
+    if (codeBlocks.length === 0) {
+        return "No Code!";
+    }
+    
+    let codeOnly = "";
+    codeBlocks.forEach((element) => {
+        codeOnly += element.outerHTML;
+    });
+    
+    return codeOnly;
+}
+
+function displayWebContent(contentArea, jsonData, escaped, url, params) {
     function addItem(item, original_post) {
         let  html = item.content_body;
 
@@ -91,6 +140,13 @@ function displayWebContent(contentArea, jsonData, escaped) {
             const txt = document.createElement("textarea");
             txt.innerHTML = html;
             html = txt.value;
+        }
+
+        if (viewSettings.codeOnly) {    
+            html = extractCodeBlocks(html);
+            if (!html.trim()) {
+                return;
+            }
         }
 
         const contentItem = document.createElement("div");
@@ -137,11 +193,16 @@ function displayWebContent(contentArea, jsonData, escaped) {
         contentArea.appendChild(contentItem);
     }
 
-    addItem(jsonData.original_post, true);
+    contentArea.innerHTML = "";
+    if (viewSettings.showOriginalPost) {
+        addItem(jsonData.original_post, true);
+    }
     jsonData.comments.forEach((item) => {
         addItem(item, false);
     });
     contentArea.dataset.loaded = true;
+    contentArea.dataset.url = url;
+    contentArea.dataset.params = JSON.stringify(params);
 }
 
 async function fetchAndDisplayContent(resultLink, contentArea) {
@@ -174,7 +235,7 @@ async function fetchAndDisplayContent(resultLink, contentArea) {
         };
         const savedContent = webpageContentStorage.checkSavedWebContent(resultLink, headers);
         if (savedContent) {
-            displayWebContent(contentArea, savedContent.content, savedContent.escaped);
+            displayWebContent(contentArea, savedContent.content, savedContent.escaped, resultLink, headers);
             return;
         }
 
@@ -187,7 +248,7 @@ async function fetchAndDisplayContent(resultLink, contentArea) {
             const escaped = response.headers.get("Html-Escaped") === "true";
             const data = await response.text();
             const jsonData = JSON.parse(data);
-            displayWebContent(contentArea, jsonData, escaped);
+            displayWebContent(contentArea, jsonData, escaped, resultLink, headers);
             webpageContentStorage.saveWebContent(resultLink, headers, escaped, jsonData);
         } else {
             contentArea.textContent = `Error: ${response.status}`;
@@ -369,14 +430,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         document.querySelectorAll(".user-input").forEach((user_input) => {user_input.value = ""});
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".toggle-able").forEach((result) => {
-        result.addEventListener("click", function() {
-            result.classList.toggle("selected");
-        });
     });
 });
 
