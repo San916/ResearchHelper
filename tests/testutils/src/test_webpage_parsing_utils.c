@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 char* read_file(const char* file_name) {
-    FILE *fp = fopen(file_name, "r");
+    FILE *fp = fopen(file_name, "rb");
     if (fp == NULL) return NULL;
 
     fseek(fp, 0, SEEK_END);

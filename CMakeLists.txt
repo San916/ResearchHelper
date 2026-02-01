@@ -147,6 +147,7 @@ target_link_libraries(test_web_crawler_config unity CURL::libcurl)
 # ========== Unit test web crawler ==========
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
+    ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
     ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
@@ -157,6 +158,7 @@ add_executable(test_web_crawler
 )
 target_include_directories(test_web_crawler PRIVATE
     ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
     ${UNITY_DIR}/src
 )
 target_link_libraries(test_web_crawler unity CURL::libcurl)

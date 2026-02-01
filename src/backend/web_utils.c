@@ -97,6 +97,6 @@ char* fetch_webpage_content(const char* url, int* status_code, CURL* curl_handle
         free(writeback.data);
         return NULL;
     }
-    
+
     return writeback.data;
 }
