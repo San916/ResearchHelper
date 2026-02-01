@@ -162,7 +162,9 @@ HttpResponse handle_submit(HttpRequest* req) {
     input = req->body + 11;
 
     int status_code = 0;
-    char* response_msg = get_content_list(input, &status_code, MAX_RESPONSE_BODY_LEN, req->max_num_responses);
+    GetContentListHandle* handle = get_content_list_handle(MAX_RESPONSE_BODY_LEN, req->max_num_responses);
+    char* response_msg = get_content_list(input, &status_code, handle);
+    free(handle);
     if (!response_msg) {
         return handle_500();
     }
@@ -182,14 +184,13 @@ HttpResponse handle_submit(HttpRequest* req) {
     } 
     strcpy(resp.body, response_msg);
     resp.body_length = (int)strlen(response_msg);
-    
+    free(response_msg);
+
     if (add_content_length(&resp) != 0) {
-        free(response_msg);
         free(resp.body);
         return handle_500();
     }
     
-    free(response_msg);
     resp.close_connection = !req->keep_alive;
     return resp;
 }
@@ -216,7 +217,9 @@ HttpResponse handle_content_request(HttpRequest* req) {
     
     int status_code = 0;
     int escaped = 0;
-    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, MAX_RESPONSE_BODY_LEN, req->max_num_comments, req->min_score);
+    GetContentItemHandle* handle = get_content_item_handle(MAX_RESPONSE_BODY_LEN, req->max_num_comments, req->min_score);
+    char* response_msg = get_content_item(decoded_url, &status_code, &escaped, handle);
+    free(handle);
     if (!response_msg) {
         return handle_500();
     }

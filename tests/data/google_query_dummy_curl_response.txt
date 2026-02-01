@@ -1,0 +1,1183 @@
+{
+  "kind": "customsearch#search",
+  "url": {
+    "type": "application/json",
+    "template": "https://www.googleapis.com/customsearch/v1?q={searchTerms}&num={count?}&start={startIndex?}&lr={language?}&safe={safe?}&cx={cx?}&sort={sort?}&filter={filter?}&gl={gl?}&cr={cr?}&googlehost={googleHost?}&c2coff={disableCnTwTranslation?}&hq={hq?}&hl={hl?}&siteSearch={siteSearch?}&siteSearchFilter={siteSearchFilter?}&exactTerms={exactTerms?}&excludeTerms={excludeTerms?}&linkSite={linkSite?}&orTerms={orTerms?}&dateRestrict={dateRestrict?}&lowRange={lowRange?}&highRange={highRange?}&searchType={searchType}&fileType={fileType?}&rights={rights?}&imgSize={imgSize?}&imgType={imgType?}&imgColorType={imgColorType?}&imgDominantColor={imgDominantColor?}&alt=json"
+  },
+  "queries": {
+    "request": [
+      {
+        "title": "Google Custom Search - How to use realloc()",
+        "totalResults": "352000",
+        "searchTerms": "How to use realloc()",
+        "count": 10,
+        "startIndex": 1,
+        "inputEncoding": "utf8",
+        "outputEncoding": "utf8",
+        "safe": "off",
+        "cx": "f3ffe7de7785848bc"
+      }
+    ],
+    "nextPage": [
+      {
+        "title": "Google Custom Search - How to use realloc()",
+        "totalResults": "352000",
+        "searchTerms": "How to use realloc()",
+        "count": 10,
+        "startIndex": 11,
+        "inputEncoding": "utf8",
+        "outputEncoding": "utf8",
+        "safe": "off",
+        "cx": "f3ffe7de7785848bc"
+      }
+    ]
+  },
+  "context": {
+    "title": "web_crawler"
+  },
+  "searchInformation": {
+    "searchTime": 0.210398,
+    "formattedSearchTime": "0.21",
+    "totalResults": "352000",
+    "formattedTotalResults": "352,000"
+  },
+  "items": [
+    {
+      "kind": "customsearch#result",
+      "title": "How to use realloc in a function in C - Stack Overflow",
+      "htmlTitle": "\u003cb\u003eHow to use realloc\u003c/b\u003e in a function in C - Stack Overflow",
+      "link": "https://stackoverflow.com/questions/13748338/how-to-use-realloc-in-a-function-in-c",
+      "displayLink": "stackoverflow.com",
+      "snippet": "Dec 6, 2012 ... 17. I can't believe you didn't cast the return value of malloc() and you also correctly used the sizeof() operator... ┬À Welcome. ┬À 8 ┬À 4 ┬À Ah, I'm┬á...",
+      "htmlSnippet": "Dec 6, 2012 \u003cb\u003e...\u003c/b\u003e 17. I can&#39;t believe you didn&#39;t cast the return value of malloc\u003cb\u003e()\u003c/b\u003e and you also correctly used the sizeof\u003cb\u003e()\u003c/b\u003e operator... &middot; Welcome. &middot; 8 &middot; 4 &middot; Ah, I&#39;m&nbsp;...",
+      "formattedUrl": "https://stackoverflow.com/questions/.../how-to-use-realloc-in-a-function-in-...",
+      "htmlFormattedUrl": "https://stackoverflow.com/questions/.../\u003cb\u003ehow-to-use\u003c/b\u003e-\u003cb\u003erealloc\u003c/b\u003e-in-a-function-in-...",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyuYKf6qiOvVBT_-FVj82Pe9J02kFCrdYhAD7sxPbWhucsGPO1LbWiQmU&s",
+            "width": "225",
+            "height": "225"
+          }
+        ],
+        "qapage": [
+          {
+            "image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "primaryimageofpage": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "ispartof": "https://stackoverflow.com/#website",
+            "name": "How to use realloc in a function in C",
+            "description": "Building on what I learned here: Manipulating dynamic array through functions in C. void test(int data[]) { data[0] = 1; } int main(void) { int *data = malloc(4 * sizeof *data...",
+            "publisher": "https://stackoverflow.com/#organization",
+            "url": "https://stackoverflow.com/questions/13748338/how-to-use-realloc-in-a-function-in-c"
+          }
+        ],
+        "question": [
+          {
+            "image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon.png?v=c78bd457575a",
+            "upvotecount": "41",
+            "commentcount": "6",
+            "answercount": "3",
+            "name": "How to use realloc in a function in C",
+            "datecreated": "2012-12-06 16:42:02Z",
+            "text": "Building on what I learned here: Manipulating dynamic array through functions in C. Copyvoid test(int data[]) { data[0] = 1; } int main(void) { int *data = malloc(4 * sizeof *data); test(data);...",
+            "url": "Share"
+          }
+        ],
+        "answer": [
+          {
+            "upvotecount": "40",
+            "text": "You want to modify the value of an int* (your array) so need to pass a pointer to it into your increase function: Copyvoid increase(int** data) { *data = realloc(*data, 5 * sizeof int); } Calling...",
+            "datecreated": "2012-12-06 16:43:29Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "8",
+            "text": "Keep in mind the difference between a pointer and an array. An array is a chuck of memory in the stack, and that's all.If you have an array: Copyint arr[100]; Then arr is an address of memory,...", 
+            "datecreated": "2012-12-06 16:54:50Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "6",
+            "text": "Both code are very problematic, if you use the same pointer to send and receive from realloc, if it fails, you will lose your pointer to free it later. you should do some thing like this :...",     
+            "datecreated": "2017-05-19 13:23:54Z",
+            "url": "Share"
+          }
+        ],
+        "person": [
+          {
+            "name": "Legendre",
+            "url": "Legendre"
+          },
+          {
+            "name": "user529758"
+          },
+          {
+            "name": "user529758"
+          },
+          {
+            "name": "Legendre",
+            "url": "Legendre"
+          },
+          {
+            "name": "user529758"
+          },
+          {
+            "name": "Legendre",
+            "url": "Legendre"
+          },
+          {
+            "name": "simonc",
+            "url": "simonc"
+          },
+          {
+            "name": "user1201614"
+          },
+          {
+            "name": "Ramy Al Zuhouri",
+            "url": "Ramy Al Zuhouri"
+          },
+          {
+            "name": "user8036942",
+            "url": "user8036942"
+          },
+          {
+            "name": "Alex",
+            "url": "Alex"
+          },
+          {
+            "name": "woodenadmin",
+            "url": "woodenadmin"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "og:type": "website",
+            "twitter:card": "summary",
+            "twitter:title": "How to use realloc in a function in C",
+            "og:site_name": "Stack Overflow",
+            "twitter:domain": "stackoverflow.com",
+            "viewport": "width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0",
+            "twitter:description": "Building on what I learned here: Manipulating dynamic array through functions in C.\n\nvoid test(int data[])\n{\n    data[0] = 1;    \n}    \n\nint main(void)\n{    \n    int *data = malloc(4 * sizeof *data...",
+            "og:url": "https://stackoverflow.com/questions/13748338/how-to-use-realloc-in-a-function-in-c"
+          }
+        ],
+        "comment": [
+          {
+            "text": "I can't believe you didn't cast the return value of malloc() and you also correctly used the sizeof() operator... Awesome! +1.",
+            "datepublished": "2012-12-06 16:49:32 +00:00"
+          },
+          {
+            "text": "Welcome. Believe or not, every time I encounter a question tagged c, I am (and must be) prepared for clutter like char *p = (char *)malloc(len * sizeof(char);, which is wrong at 3 places at...",    
+            "datepublished": "2012-12-06 17:01:30 +00:00"
+          },
+          {
+            "text": "@H2CO3 - At the risk of sounding like a fool: 1. the cast before malloc is not necessary, 2. sizeof *p is equivalent to sizeof (char) and more useful when changing types, 3. its missing a closing...",
+            "datepublished": "2012-12-07 14:38:13 +00:00"
+          },
+          {
+            "text": "Oh so it's 4! Yes, I missed the close bracket indeed (0th error). First one: tick, second one: and since sizeof(char) is always 1, it's just clutter and decreases readability, third one: if...",    
+            "datepublished": "2012-12-07 14:41:49 +00:00"
+          },
+          {
+            "text": "Ah, I'm relatively new to programming and didn't realize that it is standard for sizeof(char) to be 1. Learned something today. Thanks for the interesting exercise! +1",
+            "datepublished": "2012-12-07 14:44:29 +00:00"
+          },
+          {
+            "text": "Beware memory leak! As mentioned in here stackoverflow.com/a/44071325/1201614 you need to use a temp pointer to check realloc return value",
+            "datepublished": "2020-03-03T10:52:55.72Z+00:00"
+          },
+          {
+            "text": "you free(area) on failure. Instead of freeing it, can I keep using area if realloc fails?",
+            "datepublished": "2020-07-02T07:52:29.527Z+00:00"
+          },
+          {
+            "text": "@Alex yes, you can",
+            "datepublished": "2023-12-26T02:50:44.413Z+00:00"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Using realloc vs malloc and free : r/C_Programming - Reddit",
+      "htmlTitle": "\u003cb\u003eUsing realloc\u003c/b\u003e vs malloc and free : r/C_Programming - Reddit",
+      "link": "https://www.reddit.com/r/C_Programming/comments/1fx03h1/using_realloc_vs_malloc_and_free/",
+      "displayLink": "www.reddit.com",
+      "snippet": "Oct 5, 2024 ... realloc is typically used for this use case. It communicates that the code wants to clone the memory block while changing its size. It is left┬á...",
+      "htmlSnippet": "Oct 5, 2024 \u003cb\u003e...\u003c/b\u003e \u003cb\u003erealloc\u003c/b\u003e is typically used for this \u003cb\u003euse\u003c/b\u003e case. It communicates that the code wants to clone the memory block while changing its size. It is left&nbsp;...",
+      "formattedUrl": "https://www.reddit.com/r/C.../using_realloc_vs_malloc_and_free/",
+      "htmlFormattedUrl": "https://www.reddit.com/r/C.../using_\u003cb\u003erealloc\u003c/b\u003e_vs_malloc_and_free/",
+      "pagemap": {
+        "metatags": [
+          {
+            "og:image": "https://share.redd.it/preview/post/1fx03h1",
+            "theme-color": "#000000",
+            "og:image:width": "1200",
+            "og:type": "website",
+            "og:image:alt": "An image containing a preview of the post",
+            "twitter:card": "summary_large_image",
+            "twitter:title": "r/C_Programming on Reddit: Using realloc vs malloc and free",
+            "og:site_name": "Reddit",
+            "og:title": "r/C_Programming on Reddit: Using realloc vs malloc and free",
+            "og:image:height": "630",
+            "msapplication-navbutton-color": "#000000",
+            "og:description": "Posted by u/DIXERION - 24 votes and 18 comments",
+            "twitter:image": "https://share.redd.it/preview/post/1fx03h1",
+            "apple-mobile-web-app-status-bar-style": "black",
+            "twitter:site": "@reddit",
+            "viewport": "width=device-width, initial-scale=1, viewport-fit=cover",
+            "apple-mobile-web-app-capable": "yes",
+            "og:ttl": "600",
+            "og:url": "https://www.reddit.com/r/C_Programming/comments/1fx03h1/using_realloc_vs_malloc_and_free/?seeker-session=true"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Proper usage of realloc() - Stack Overflow",
+      "htmlTitle": "Proper \u003cb\u003eusage\u003c/b\u003e of \u003cb\u003erealloc\u003c/b\u003e() - Stack Overflow",
+      "link": "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc",
+      "displayLink": "stackoverflow.com",
+      "snippet": "Jan 8, 2014 ... 1 Comment ┬À 2 The realloc function deallocates the old object pointed to by ptr and returns a pointer to a new object that has the size speci´¼üed┬á...",
+      "htmlSnippet": "Jan 8, 2014 \u003cb\u003e...\u003c/b\u003e 1 Comment &middot; 2 The \u003cb\u003erealloc\u003c/b\u003e function deallocates the old object pointed to by ptr and returns a pointer to a new object that has the size speci´¼üed&nbsp;...",
+      "formattedUrl": "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc",
+      "htmlFormattedUrl": "https://stackoverflow.com/questions/21006707/proper-usage-of-\u003cb\u003erealloc\u003c/b\u003e",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyuYKf6qiOvVBT_-FVj82Pe9J02kFCrdYhAD7sxPbWhucsGPO1LbWiQmU&s",
+            "width": "225",
+            "height": "225"
+          }
+        ],
+        "qapage": [
+          {
+            "image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "primaryimageofpage": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "ispartof": "https://stackoverflow.com/#website",
+            "name": "Proper usage of realloc()",
+            "description": "From man realloc:The realloc() function returns a pointer to the newly allocated memory, which is suitably aligned for any kind of variable and may be different from ptr, or NULL if the request",
+            "publisher": "https://stackoverflow.com/#organization",
+            "url": "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc"
+          }
+        ],
+        "question": [
+          {
+            "image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon.png?v=c78bd457575a",
+            "upvotecount": "30",
+            "commentcount": "0",
+            "answercount": "6",
+            "name": "Proper usage of realloc()",
+            "datecreated": "2014-01-08 21:16:42Z",
+            "text": "From man realloc:The realloc() function returns a pointer to the newly allocated memory, which is suitably aligned for any kind of variable and may be different from ptr, or NULL if the request...",
+            "url": "Share"
+          }
+        ],
+        "answer": [
+          {
+            "upvotecount": "42",
+            "text": "Just don't call free() on your original ptr in the happy path. Essentially realloc() has done that for you. Copyptr = malloc(sizeof(int)); ptr1 = realloc(ptr, count * sizeof(int)); if (ptr1...",    
+            "datecreated": "2014-01-08 21:22:06Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "5",
+            "text": "Applying fixes as edits, based on the good comments below. Reading this comp.lang.c question, reveals 3 cases: \"When it is able to, it simply gives you back the same pointer you handed it.\"...",  
+            "datecreated": "2014-01-08 21:55:57Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "2",
+            "text": "OP: ... may be different from ptr, or NULL if the request fails. A: Not always. NULL may be legitimately returned (not a failure), if count is 0. OP: Is it sufficient to just assume that the...",   
+            "datecreated": "2014-01-08 21:21:59Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "1",
+            "text": "realloc will return the same address to ptr if it have enough space to extend the actual chunk of memory pointed by ptr. Otherwise, it will move the data to the new chunk and free the old chunk....",
+            "datecreated": "2014-01-08 21:23:03Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "0",
+            "text": "If realloc moves your data, it will free the old pointer for you behind the scenes. I don't have a copy of the C11 standard, but it is guaranteed in the C99 standard.",
+            "datecreated": "2014-01-08 21:21:51Z",
+            "url": "Share"
+          },
+          {
+            "upvotecount": "0",
+            "text": "You should not free your original pointer if the realloc succeeds. Whether you free that pointer if the realloc fails depends on the needs of your particular application; if you absolutely...",     
+            "datecreated": "2014-01-08 22:39:52Z",
+            "url": "Share"
+          }
+        ],
+        "person": [
+          {
+            "name": "user3163420",
+            "url": "user3163420"
+          },
+          {
+            "name": "Aaron S. Kurland",
+            "url": "Aaron S. Kurland"
+          },
+          {
+            "name": "user3163420",
+            "url": "user3163420"
+          },
+          {
+            "name": "meaning-matters",
+            "url": "meaning-matters"
+          },
+          {
+            "name": "flogram_dev",
+            "url": "flogram_dev"
+          },
+          {
+            "name": "autistic",
+            "url": "autistic"
+          },
+          {
+            "name": "Aaron S. Kurland",
+            "url": "Aaron S. Kurland"
+          },
+          {
+            "name": "Keeler",
+            "url": "Keeler"
+          },
+          {
+            "name": "glglgl",
+            "url": "glglgl"
+          },
+          {
+            "name": "user7761803",
+            "url": "user7761803"
+          },
+          {
+            "name": "Keeler",
+            "url": "Keeler"
+          },
+          {
+            "name": "GermanNerd",
+            "url": "GermanNerd"
+          },
+          {
+            "name": "siride",
+            "url": "siride"
+          },
+          {
+            "name": "chux",
+            "url": "chux"
+          },
+          {
+            "name": "Paulo Bu",
+            "url": "Paulo Bu"
+          },
+          {
+            "name": "SirDarius",
+            "url": "SirDarius"
+          },
+          {
+            "name": "Paulo Bu",
+            "url": "Paulo Bu"
+          },
+          {
+            "name": "R.. GitHub STOP HELPING ICE",
+            "url": "R.. GitHub STOP HELPING ICE"
+          },
+          {
+            "name": "autistic",
+            "url": "autistic"
+          },
+          {
+            "name": "GermanNerd",
+            "url": "GermanNerd"
+          },
+          {
+            "name": "tabstop",
+            "url": "tabstop"
+          },
+          {
+            "name": "autistic",
+            "url": "autistic"
+          },
+          {
+            "name": "John Bode",
+            "url": "John Bode"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded",
+            "og:type": "website",
+            "twitter:card": "summary",
+            "twitter:title": "Proper usage of realloc()",
+            "og:site_name": "Stack Overflow",
+            "twitter:domain": "stackoverflow.com",
+            "viewport": "width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0",
+            "twitter:description": "From man realloc:The realloc() function returns a pointer to the newly allocated memory, which is suitably aligned for any kind of variable  and may be different  from  ptr,  or  NULL if the request",
+            "og:url": "https://stackoverflow.com/questions/21006707/proper-usage-of-realloc"
+          }
+        ],
+        "comment": [
+          {
+            "text": "In the man page of realloc i couldnt find the info that it would itself call upon free()...thnx anyway",
+            "datepublished": "2014-01-08T21:32:05.27Z+00:00"
+          },
+          {
+            "text": "@user3163420 Really? On my Mac man realloc: \"... If there is not enough room to enlarge the memory allocation pointed to by ptr, realloc() creates a new allocation, copies as much of the old...",  
+            "datepublished": "2014-01-08T21:34:05.423Z+00:00"
+          },
+          {
+            "text": "Don't cast the result of malloc and realloc.",
+            "datepublished": "2015-09-28T10:39:04.777Z+00:00"
+          },
+          {
+            "text": "heh... the typecasts aren't just an eyesore, but could cause issues on some obscure systems and serve no purpose... but you kept them to keep the code original. Now spaces have been introduced...", 
+            "datepublished": "2018-04-29T15:22:55.703Z+00:00"
+          },
+          {
+            "text": "/me cries \"Uncle!\". Casts removed.",
+            "datepublished": "2018-08-08T15:32:06.387Z+00:00"
+          },
+          {
+            "text": "You didn't obey the \"and the previous pointer value will become unusable\" part. In the ptr != tmp case, the free(ptr) is wrong.",
+            "datepublished": "2017-06-19T15:28:08.423Z+00:00"
+          },
+          {
+            "text": "Agree with @glglgl that this answer is dangerous, since you must not call free(ptr) in case 2.",
+            "datepublished": "2017-09-05T13:35:58.027Z+00:00"
+          },
+          {
+            "text": "Good call, applied as an edit, and comment upvotes for the both of you.",
+            "datepublished": "2017-09-05T22:14:19.427Z+00:00"
+          },
+          {
+            "text": "@Keeler +1 for setting the tmp pointer to NULL. I just have been badly bitten when I changed a realloc'd pointer within a function to static. That caused a later segfault with subsequent realloc...",
+            "datepublished": "2019-03-21T09:26:32.237Z+00:00"
+          },
+          {
+            "text": "I think exit(1) would be more appropriate here.",
+            "datepublished": "2022-04-23T15:28:49.513Z+00:00"
+          },
+          {
+            "text": "There is a problem there: if ptr is NULL, free(ptr) does not make sense.",
+            "datepublished": "2014-01-08T21:26:33.343Z+00:00"
+          },
+          {
+            "text": "Well, that actually make sense. Besides, the program is about to exit so no problem not freeing it :) Fixing it :)",
+            "datepublished": "2014-01-08T21:27:49.81Z+00:00"
+          },
+          {
+            "text": "This is an implementation detail and not true in general: \"realloc will return the same address to ptr if it have enough space to extend the actual chunk of memory pointed by ptr.\" Implementations...",
+            "datepublished": "2014-01-08T22:15:11.54Z+00:00"
+          },
+          {
+            "text": "ptr=realloc(ptr,count*sizeof(int)); is broken; when realloc returns NULL (which is not an address because it doesn't point to an object), you leak the memory that is the old object. The OpenGroup...",
+            "datepublished": "2016-01-02T22:35:20.21Z+00:00"
+          },
+          {
+            "text": "@autistic Not broken. If the failure to get memory (realloc returns NULL) is cause for program termination (as in the example by Paulo Bu), there will be no memory leak. When failure to obtain...", 
+            "datepublished": "2019-03-21T09:34:55.387Z+00:00"
+          },
+          {
+            "text": "The C11 standard draft is n1570.pdf, which you can find by googling. I find it helpful to cite using links (e.g. clicking this link will take you to the realloc section of n1570.html, which...",    
+            "datepublished": "2016-01-02T22:39:28.76Z+00:00"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://stackoverflow.com/Content/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Use of realloc() - GeeksforGeeks",
+      "htmlTitle": "\u003cb\u003eUse\u003c/b\u003e of \u003cb\u003erealloc()\u003c/b\u003e - GeeksforGeeks",
+      "link": "https://www.geeksforgeeks.org/c/g-fact-66/",
+      "displayLink": "www.geeksforgeeks.org",
+      "snippet": "May 28, 2017 ... For example, program 1 demonstrates incorrect use of realloc() and program 2 demonstrates correct use of realloc(). Program 1: C. Loading┬á...",
+      "htmlSnippet": "May 28, 2017 \u003cb\u003e...\u003c/b\u003e For example, program 1 demonstrates incorrect \u003cb\u003euse\u003c/b\u003e of \u003cb\u003erealloc()\u003c/b\u003e and program 2 demonstrates correct \u003cb\u003euse\u003c/b\u003e of \u003cb\u003erealloc()\u003c/b\u003e. Program 1: C. Loading&nbsp;...",
+      "formattedUrl": "https://www.geeksforgeeks.org/c/g-fact-66/",
+      "htmlFormattedUrl": "https://www.geeksforgeeks.org/c/g-fact-66/",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYparGEmgiynJvvKFEhvIkD2mF_5dcDxzVau8PNTwpaWYajRB5Os1ZC7E&s",
+            "width": "200",
+            "height": "200"
+          }
+        ],
+        "metatags": [
+          {
+            "image": "https://media.geeksforgeeks.org/wp-content/cdn-uploads/gfg_200x200-min.png",
+            "og:image": "http://www.geeksforgeeks.org/wp-content/uploads/gfg_200X200-1.png",
+            "theme-color": "#308D46",
+            "og:image:width": "200",
+            "article:section": "C Language",
+            "og:type": "article",
+            "article:published_time": "2010-12-19 12:52:43+00:00",
+            "og:site_name": "GeeksforGeeks",
+            "og:title": "Use of realloc() - GeeksforGeeks",
+            "og:image:height": "200",
+            "og:image:type": "image/png",
+            "og:updated_time": "2017-05-28 18:29:44+00:00",
+            "msapplication-tileimage": "https://www.geeksforgeeks.org/wp-content/uploads/gfg_200X200.png",
+            "og:description": "Your All-in-One Learning Portal: GeeksforGeeks is a comprehensive educational platform that empowers learners across domains-spanning computer science and programming, school education, upskilling, commerce, software tools, competitive exams, and more.",
+            "og:image:secure_url": "http://www.geeksforgeeks.org/wp-content/uploads/gfg_200X200-1.png",
+            "facebook-domain-verification": "xo7t4ve2wn3ywfkjdvwbrk01pvdond",
+            "article:tag": "C-Dynamic Memory Allocation",
+            "next-head-count": "40",
+            "article:modified_time": "2017-05-28 18:29:44+00:00",
+            "viewport": "width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0",
+            "og:locale": "en_US",
+            "og:url": "https://www.geeksforgeeks.org/c/g-fact-66/"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "http://www.geeksforgeeks.org/wp-content/uploads/gfg_200X200-1.png"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "C Reallocate Memory - W3Schools",
+      "htmlTitle": "C Reallocate Memory - W3Schools",
+      "link": "https://www.w3schools.com/c/c_memory_reallocate.php",
+      "displayLink": "www.w3schools.com",
+      "snippet": "The realloc() function tries to resize the memory at ptr1 and return the same memory address. If it cannot resize the memory at the current address then it will┬á...",
+      "htmlSnippet": "The \u003cb\u003erealloc()\u003c/b\u003e function tries to resize the memory at ptr1 and return the same memory address. If it cannot resize the memory at the current address then it will&nbsp;...",
+      "formattedUrl": "https://www.w3schools.com/c/c_memory_reallocate.php",
+      "htmlFormattedUrl": "https://www.w3schools.com/c/c_memory_\u003cb\u003erealloc\u003c/b\u003eate.php",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSK28hevOmBJFWCrR_j9haYslGiDqoHd8JVz9UagOLfERG6u8LzMER5mGo&s",
+            "width": "169",
+            "height": "193"
+          }
+        ],
+        "metatags": [
+          {
+            "msapplication-tilecolor": "#00a300",
+            "og:image": "https://www.w3schools.com/images/w3schools_logo_436_2.png",
+            "og:image:width": "436",
+            "theme-color": "#ffffff",
+            "viewport": "width=device-width, initial-scale=1",
+            "og:image:height": "228",
+            "og:image:type": "image/png",
+            "title": "W3Schools.com",
+            "og:description": "W3Schools offers free online tutorials, references and exercises in all the major languages of the web. Covering popular subjects like HTML, CSS, JavaScript, Python, SQL, Java, and many, many more.",
+            "format-detection": "telephone=no"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://www.w3schools.com/signup/lynxlogo.svg"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "realloc in c example - Log2Base2",
+      "htmlTitle": "\u003cb\u003erealloc\u003c/b\u003e in c example - Log2Base2",
+      "link": "https://www.log2base2.com/C/pointer/realloc-in-c.html",
+      "displayLink": "www.log2base2.com",
+      "snippet": "Using realloc function, we can resize the memory area which is already created by malloc or calloc. It's is also declared in stdlib.h library.",
+      "htmlSnippet": "\u003cb\u003eUsing realloc\u003c/b\u003e function, we \u003cb\u003ecan resize the memory area which is already created by malloc or calloc\u003c/b\u003e. It&#39;s is also declared in stdlib.h library.",
+      "formattedUrl": "https://www.log2base2.com/C/pointer/realloc-in-c.html",
+      "htmlFormattedUrl": "https://www.log2base2.com/C/pointer/\u003cb\u003erealloc\u003c/b\u003e-in-c.html",
+      "pagemap": {
+        "metatags": [
+          {
+            "viewport": "width=device-width, initial-scale=1.0"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "C library - realloc() function - TutorialsPoint",
+      "htmlTitle": "C library - \u003cb\u003erealloc()\u003c/b\u003e function - TutorialsPoint",
+      "link": "https://www.tutorialspoint.com/c_standard_library/c_function_realloc.htm",
+      "displayLink": "www.tutorialspoint.com",
+      "snippet": "The function realloc() is used for optimizing the memory uses. If we find that allocated memory is too large or too small. We can use the realloc() to adjust┬á...",
+      "htmlSnippet": "The function \u003cb\u003erealloc()\u003c/b\u003e is used for optimizing the memory \u003cb\u003euses\u003c/b\u003e. If we find that allocated memory is too large or too small. We can \u003cb\u003euse\u003c/b\u003e the \u003cb\u003erealloc()\u003c/b\u003e to adjust&nbsp;...",
+      "formattedUrl": "https://www.tutorialspoint.com/c_standard_library/c_function_realloc.htm",
+      "htmlFormattedUrl": "https://www.tutorialspoint.com/c_standard_library/c_function_\u003cb\u003erealloc\u003c/b\u003e.htm",
+      "pagemap": {
+        "metatags": [
+          {
+            "viewport": "viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "malloc(), realloc().. the dark side powerful it is - Arduino Forum",
+      "htmlTitle": "malloc(), \u003cb\u003erealloc\u003c/b\u003e().. the dark side powerful it is - Arduino Forum",
+      "link": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful-it-is/93878",
+      "displayLink": "forum.arduino.cc",
+      "snippet": "Mar 10, 2012 ... As far as I understood the problem is that malloc(), realloc() and ... So I removed use of malloc, calloc and realloc and instead implement my own┬á...",
+      "htmlSnippet": "Mar 10, 2012 \u003cb\u003e...\u003c/b\u003e As far as I understood the problem is that malloc(), \u003cb\u003erealloc()\u003c/b\u003e and ... So I removed \u003cb\u003euse\u003c/b\u003e of malloc, calloc and realloc and instead implement my own&nbsp;...",
+      "formattedUrl": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful.../93878",
+      "htmlFormattedUrl": "https://forum.arduino.cc/t/malloc-\u003cb\u003erealloc\u003c/b\u003e-the-dark-side-powerful.../93878",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7MTssePEuEs9fRVEw02x9sG9TZoO43dPgX4Ma-vTv27lgq4udh-pFTQ&s",
+            "width": "140",
+            "height": "25"
+          }
+        ],
+        "imageobject": [
+          {
+            "url": "https://europe1.discourse-cdn.com/arduino/original/3X/1/f/1f6eb1c9b79d9518d1688c15fe9a4b7cdd5636ae.svg"
+          }
+        ],
+        "person": [
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "system",
+            "url": "system"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "pYro_65",
+            "url": "pYro_65"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "pYro_65",
+            "url": "pYro_65"
+          },
+          {
+            "name": "SPlatten",
+            "url": "SPlatten"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "SPlatten",
+            "url": "SPlatten"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          },
+          {
+            "name": "nickgammon",
+            "url": "nickgammon"
+          },
+          {
+            "name": "jbrazio",
+            "url": "jbrazio"
+          }
+        ],
+        "organization": [
+          {
+            "name": "Arduino Forum"
+          }
+        ],
+        "interactioncounter": [
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          },
+          {
+            "userinteractioncount": "0",
+            "interactiontype": "http://schema.org/LikeAction"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://europe1.discourse-cdn.com/arduino/original/3X/1/f/1f6eb1c9b79d9518d1688c15fe9a4b7cdd5636ae.svg",
+            "theme-color": "#008184",
+            "og:type": "website",
+            "twitter:card": "summary",
+            "twitter:title": "malloc(), realloc().. the dark side powerful it is",
+            "article:published_time": "2012-03-10T01:51:19+00:00",
+            "og:site_name": "Arduino Forum",
+            "twitter:url": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful-it-is/93878",
+            "og:title": "malloc(), realloc().. the dark side powerful it is",
+            "color-scheme": "light",
+            "og:description": "A simple Google search by \"arduino malloc\" will return all sorts of warnings. I understand that on a uC system where minimal resources are available it's hard/overkill to implement a proper memory management system. So memory fragmentation can (and will occur) if you start running multiple realloc() at every cycle.. for instance (pseudo-code):  uint8_t* p; uin8_t p_size = 0;  for(;;) { \tif( Wire.available() ) { \t\t// Increase pointer memory \t\tuint8_t* np = (uint8_t *) realloc( p, sizeof(uint8_t) ...",
+            "og:ignore_canonical": "true",
+            "viewport": "width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover",
+            "twitter:description": "A simple Google search by \"arduino malloc\" will return all sorts of warnings. I understand that on a uC system where minimal resources are available it's hard/overkill to implement a proper memory management system. So memory fragmentation can (and will occur) if you start running multiple realloc() at every cycle.. for instance (pseudo-code):  uint8_t* p; uin8_t p_size = 0;  for(;;) { \tif( Wire.available() ) { \t\t// Increase pointer memory \t\tuint8_t* np = (uint8_t *) realloc( p, sizeof(uint8_t) ...",
+            "og:article:section": "Projects",
+            "og:url": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful-it-is/93878",
+            "og:article:section:color": "0088CC"
+          }
+        ],
+        "discussionforumposting": [
+          {
+            "datemodified": "2012-03-10T01:51:19Z",
+            "articlesection": "Programming",
+            "position": "1",
+            "text": "A simple Google search by \"arduino malloc\" will return all sorts of warnings. I understand that on a uC system where minimal resources are available it's hard/overkill to implement a proper...",  
+            "headline": "malloc(), realloc().. the dark side powerful it is",
+            "url": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful-it-is/93878",
+            "datepublished": "2012-03-10T01:51:19Z",
+            "mainentityofpage": "https://forum.arduino.cc/t/malloc-realloc-the-dark-side-powerful-it-is/93878"
+          }
+        ],
+        "comment": [
+          {
+            "datemodified": "2012-03-10T02:14:12Z",
+            "position": "2",
+            "text": "fuh: My question is what if we do not try to shrink memory ? Increase *p to store more data when needed but never decrease it, instead just clear (NULL or 0x00) the bytes that were processed,...",  
+            "datepublished": "2012-03-10T02:14:12Z"
+          },
+          {
+            "datemodified": "2012-03-10T02:23:06Z",
+            "position": "3",
+            "text": "Haven't you noticed this part ? // Increase pointer memory uint8_t* np = (uint8_t *) realloc( p, sizeof(uint8_t) * (p_size + wire.available()) ); if( np != NULL ) { p = np; } PeterH: What was...",  
+            "datepublished": "2012-03-10T02:23:06Z"
+          },
+          {
+            "datemodified": "2012-03-10T06:58:18Z",
+            "position": "4",
+            "text": "fuh: My question is what if we do not try to shrink memory ? Increase *p to store more data when needed but never decrease it, instead just clear (NULL or 0x00) the bytes that were processed,...",  
+            "datepublished": "2012-03-10T06:58:18Z"
+          },
+          {
+            "datemodified": "2012-03-10T08:18:55Z",
+            "position": "5",
+            "text": "If you can allocate more memory while running, you need that space available. So rather than fragmenting your ram, just create a buffer as big as you need to begin with. then create/move/modify/des...",
+            "datepublished": "2012-03-10T08:18:55Z"
+          },
+          {
+            "datemodified": "2012-03-10T16:14:12Z",
+            "position": "6",
+            "text": "Well, because say you allocate 5 lots of 20 bytes, and then free the first one. The allocator doesn't try to \"shrink\" that per se. But it also can't make it larger because the first block will...",
+            "datepublished": "2012-03-10T16:14:12Z"
+          },
+          {
+            "datemodified": "2012-03-10T20:36:18Z",
+            "position": "7",
+            "text": "Your lack of faith in the designers of memory allocation is ... disturbing. The fact is that existing malloc systems are carefully designed to minimize fragmentation, re-use and combine freed...",  
+            "datepublished": "2012-03-10T20:36:18Z"
+          },
+          {
+            "datemodified": "2012-03-10T21:03:41Z",
+            "position": "8",
+            "text": "I already did a lot of research.. I ended up reading Memory Areas and Using malloc which I quote: A call to realloc() first determines whether the operation is about to grow or shrink the current...",
+            "datepublished": "2012-03-10T21:03:41Z"
+          },
+          {
+            "datemodified": "2012-03-10T21:47:04Z",
+            "position": "9",
+            "text": "What grow/shrink procedures? The ones in malloc or your own ones?",
+            "datepublished": "2012-03-10T21:47:04Z"
+          },
+          {
+            "datemodified": "2012-03-10T22:10:40Z",
+            "position": "10",
+            "text": "This is all getting a bit hypothetical for me. Are you saying there is a bug in the library, or a bug in your code? Or you aren't sure? Instead of pseudo-code how about posting actual code...",     
+            "datepublished": "2012-03-10T22:10:40Z"
+          },
+          {
+            "datemodified": "2012-03-11T00:29:38Z",
+            "position": "11",
+            "text": "As far as I can tell Arduino still uses avr-libc 1.6.4 (my arduino's libc.a is dated from 2008, and avr-libc-user-manual.pdf states 1.6.4), there is a documented bug related with malloc() and...",  
+            "datepublished": "2012-03-11T00:29:38Z"
+          },
+          {
+            "datemodified": "2012-03-11T01:43:21Z",
+            "position": "12",
+            "text": "OK, so the real point is that there is the bug in malloc. I seem to recall this being discussed before, and you are right, the library appears to be quite old. The logical thing to do, it would...",
+            "datepublished": "2012-03-11T01:43:21Z"
+          },
+          {
+            "datemodified": "2012-03-11T08:49:59Z",
+            "position": "13",
+            "text": "Is it a \"easy way\" to know the number of values stored at o_Array without doing accounting ? CurrentPointer - StartPointer ( not void pointers, but type cast pointers )",
+            "datepublished": "2012-03-11T08:49:59Z"
+          },
+          {
+            "datemodified": "2012-03-11T09:12:31Z",
+            "position": "14",
+            "text": "A common problem with dynamic memory allocation is fragmentation, for example when your application starts, the system has say 8K available....you then allocated 1K for your own uses, after...",    
+            "datepublished": "2012-03-11T09:12:31Z"
+          },
+          {
+            "datemodified": "2012-03-11T11:49:25Z",
+            "position": "15",
+            "text": "The logical thing to do, it would seem, would be to fix the bug, then everything else should flow from that. I'm not sure how to rebuild libc.a, perhaps someone else can comment on that, or...",    
+            "datepublished": "2012-03-11T11:49:25Z"
+          },
+          {
+            "datemodified": "2012-03-11T13:01:31Z",
+            "position": "16",
+            "text": "I'm not sure why, I always thought it was something odd about Microsofts C compiler on the PC...but I've since encountered the same problem with gcc on Linux and also with C compilers on QNX.",     
+            "datepublished": "2012-03-11T13:01:31Z"
+          },
+          {
+            "datemodified": "2012-03-11T21:10:19Z",
+            "position": "17",
+            "text": "fuh: But what's the reason behind the 8K block not the be freed as a continuous block, is it due to the malloc's internals ? So if it's possible to write a wrapper around malloc() to better...",    
+            "datepublished": "2012-03-11T21:10:19Z"
+          },
+          {
+            "datemodified": "2012-03-11T21:29:28Z",
+            "position": "18",
+            "text": "Nick, how could this be tested under the current arduino's avr-libc ?",
+            "datepublished": "2012-03-11T21:29:28Z"
+          },
+          {
+            "datemodified": "2012-03-11T21:39:55Z",
+            "position": "19",
+            "text": "Here: Andys Workshop ÔÇô 1 Jan 11 Debugging AVR dynamic memory allocation The avr-libc port of the standard C library for gcc supports dynamic memory allocation through malloc() and free()....",    
+            "datepublished": "2012-03-11T21:39:55Z"
+          },
+          {
+            "datemodified": "2012-03-11T22:34:57Z",
+            "position": "20",
+            "text": "Great link ! I've adapted the sketch to compile under arduino my results are: allocating 0000 1584 1588 : used/free/large 0022 1562 1566 : used/free/large 0044 1540 1544 : used/free/large 0066...", 
+            "datepublished": "2012-03-11T22:34:57Z"
+          }
+        ],
+        "itemlist": [
+          {
+            "itemlistorder": "http://schema.org/ItemListOrderDescending"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://europe1.discourse-cdn.com/arduino/original/3X/1/f/1f6eb1c9b79d9518d1688c15fe9a4b7cdd5636ae.svg"
+          }
+        ],
+        "sitenavigationelement": [
+          {
+            "name": "next page ÔåÆ",
+            "url": "next page ÔåÆ"
+          },
+          {
+            "name": "Home",
+            "url": "Home"
+          },
+          {
+            "name": "Categories",
+            "url": "Categories"
+          },
+          {
+            "name": "Guidelines",
+            "url": "Guidelines"
+          },
+          {
+            "name": "Terms of Service",
+            "url": "Terms of Service"
+          },
+          {
+            "name": "Privacy Policy",
+            "url": "Privacy Policy"
+          }
+        ],
+        "listitem": [
+          {
+            "item": "Projects",
+            "name": "Projects",
+            "position": "1"
+          },
+          {
+            "item": "Programming",
+            "name": "Programming",
+            "position": "2"
+          },
+          {
+            "position": "1",
+            "url": "How to create and free dynamic arrays with Arduino"
+          },
+          {
+            "position": "2",
+            "url": "modify freeRam() to find fragmentation"
+          },
+          {
+            "position": "3",
+            "url": "Trying to better understand memory usage"
+          },
+          {
+            "position": "4",
+            "url": "Dynamic memory allocation - how is it supported?"
+          },
+          {
+            "position": "5",
+            "url": "Malloc/free issues"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "How to use realloc to increase account space in Anchor?",
+      "htmlTitle": "\u003cb\u003eHow to use realloc\u003c/b\u003e to increase account space in Anchor?",
+      "link": "https://solana.stackexchange.com/questions/13142/how-to-use-realloc-to-increase-account-space-in-anchor",
+      "displayLink": "solana.stackexchange.com",
+      "snippet": "Apr 19, 2024 ... You will always need to keep 8 bytes added to the account size, which I have already added at the beginning in the get_size() function. Note: I'┬á...",
+      "htmlSnippet": "Apr 19, 2024 \u003cb\u003e...\u003c/b\u003e You will always need to keep 8 bytes added to the account size, which I have already added at the beginning in the get_size\u003cb\u003e()\u003c/b\u003e function. Note: I&#39;&nbsp;...",
+      "formattedUrl": "https://solana.stackexchange.com/.../how-to-use-realloc-to-increase-account...",
+      "htmlFormattedUrl": "https://solana.stackexchange.com/.../\u003cb\u003ehow-to-use\u003c/b\u003e-\u003cb\u003erealloc\u003c/b\u003e-to-increase-account...",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAdC9eWEoawnHneZ-9ijyDFDTS3Sz4JLRANB6IyPE7Oez-dS2-Nf9bwcfN&s",
+            "width": "225",
+            "height": "225"
+          }
+        ],
+        "qapage": [
+          {
+            "image": "https://solana.stackexchange.com/Content/Sites/solana/Img/apple-touch-icon@2.png?v=c643c1393c66",
+            "primaryimageofpage": "https://solana.stackexchange.com/Content/Sites/solana/Img/apple-touch-icon@2.png?v=c643c1393c66",
+            "ispartof": "https://solana.stackexchange.com/#website",
+            "name": "How to use realloc to increase account space in Anchor?",
+            "description": "Lets say that I have the following account struct for my instruction: #[derive(Accounts)] pub struct IncreaseDataSize\u003c'info\u003e { #[account( mut, seeds = [signer.key().as_ref...",     
+            "publisher": "https://stackoverflow.com/#organization",
+            "url": "https://solana.stackexchange.com/questions/13142/how-to-use-realloc-to-increase-account-space-in-anchor"
+          }
+        ],
+        "question": [
+          {
+            "image": "https://solana.stackexchange.com/Content/Sites/solana/Img/apple-touch-icon.png?v=7c879e349978",
+            "upvotecount": "4",
+            "answercount": "1",
+            "name": "How to use realloc to increase account space in Anchor?",
+            "datecreated": "2024-04-19 16:57:16Z",
+            "text": "Lets say that I have the following account struct for my instruction: #[derive(Accounts)] pub struct IncreaseDataSize\u003c'info\u003e { #[account( mut, seeds = [signer.key().as_ref()], bump, realloc...",
+            "url": "Share"
+          }
+        ],
+        "answer": [
+          {
+            "upvotecount": "5",
+            "commentcount": "2",
+            "text": "It depends on your implementation. Keep in mind that a vector of pubkeys has a maximum length, as each account has a maximum size. However, if you are only adding one pubkey at a time, I would...", 
+            "datecreated": "2024-04-19 23:17:32Z",
+            "url": "Share"
+          }
+        ],
+        "person": [
+          {
+            "name": "Matheus Baptistella"
+          },
+          {
+            "name": "Matheus Baptistella",
+            "url": "Matheus Baptistella"
+          },
+          {
+            "name": "Varun Siva",
+            "url": "Varun Siva"
+          },
+          {
+            "name": "Varun Siva",
+            "url": "Varun Siva"
+          },
+          {
+            "name": "Matheus Baptistella",
+            "url": "Matheus Baptistella"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://solana.stackexchange.com/Content/Sites/solana/Img/apple-touch-icon@2.png?v=c643c1393c66",
+            "og:type": "website",
+            "twitter:card": "summary",
+            "twitter:title": "How to use realloc to increase account space in Anchor?",
+            "og:site_name": "Solana Stack Exchange",
+            "twitter:domain": "solana.stackexchange.com",
+            "viewport": "width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0",
+            "twitter:description": "Lets say that I have the following account struct for my instruction:\n#[derive(Accounts)]\npub struct IncreaseDataSize&lt;'info&gt; {\n    #[account(\n        mut,\n        seeds = [signer.key().as_ref...",
+            "og:url": "https://solana.stackexchange.com/questions/13142/how-to-use-realloc-to-increase-account-space-in-anchor"
+          }
+        ],
+        "comment": [
+          {
+            "text": "Note on 1: If you will always, at some point, add a fixed number of pubkeys, of course, used a fixed vector size.",
+            "datepublished": "2024-04-19 23:18:43 +00:00"
+          },
+          {
+            "text": "I added #[max_len(0)] because I'm using InitSpace to calculate the allocated space for the account instead of doing this manually and so I need to specify the initial space for the vec.",
+            "datepublished": "2024-04-22 18:25:50 +00:00"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://solana.stackexchange.com/Content/Sites/solana/Img/apple-touch-icon@2.png?v=c643c1393c66"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Why do I lose my data when I use realloc() to increase the size of the ...",
+      "htmlTitle": "Why do I lose my data when I \u003cb\u003euse realloc()\u003c/b\u003e to increase the size of the ...",
+      "link": "https://forums.ni.com/t5/LabWindows-CVI/Why-do-I-lose-my-data-when-I-use-realloc-to-increase-the-size-of/td-p/25657",
+      "displayLink": "forums.ni.com",
+      "snippet": "Oct 6, 2001 ... When I use realloc() to increase the size by one \"double\", to make room for the next data item, the array size is increased, but the old data is┬á...",
+      "htmlSnippet": "Oct 6, 2001 \u003cb\u003e...\u003c/b\u003e When I \u003cb\u003euse realloc()\u003c/b\u003e to increase the size by one &quot;double&quot;, to make room for the next data item, the array size is increased, but the old data is&nbsp;...",
+      "formattedUrl": "https://forums.ni.com/t5/LabWindows-CVI/...use-realloc.../25657",
+      "htmlFormattedUrl": "https://forums.ni.com/t5/LabWindows-CVI/...\u003cb\u003euse\u003c/b\u003e-\u003cb\u003erealloc\u003c/b\u003e.../25657",
+      "pagemap": {
+        "metatags": [
+          {
+            "pagetype": "leaf",
+            "date": "2001-10-06T06:27:31+00:00",
+            "theme-color": "#f4f4f4",
+            "twitter:card": "summary",
+            "article:published_time": "2001-10-06T06:27:31.188Z",
+            "wrapper": "yes",
+            "section": "community",
+            "subcatid": "MostActiveSoftwareBoards",
+            "og:description": "Problem: My data is not moved to the new memory block created by realloc(). As I read my streaming data from a file or serial port. I want to store a part of the data in a dynamic array of doubles, to be graphed on a strip chart real time. When I use realloc() to increase the size by one \"double\", t...",
+            "catid": "discussion-forums",
+            "twitter:site": "@NI",
+            "article:modified_time": "2001-10-07T18:44:53-07:00",
+            "updatedate": "2001-10-06T06:27:31+00:00",
+            "nodeid": "180+board",
+            "msapplication-tilecolor": "#f4f4f4",
+            "og:type": "article",
+            "article:section": "LabWindows/CVI",
+            "deliveredby": "community",
+            "wrapperid": "default-nia-with-absolute-urls",
+            "og:title": "Why do I lose my data when I use realloc() to increase the size of the array ?",
+            "article:author": "https://forums.ni.com/t5/user/viewprofilepage/user-id/910",
+            "contenttype": "forum",
+            "cf-search-bot": "true",
+            "viewport": "width=device-width",
+            "cf:country": "US",
+            "traffictype": "bot",
+            "og:url": "https://forums.ni.com/t5/LabWindows-CVI/Why-do-I-lose-my-data-when-I-use-realloc-to-increase-the-size-of/td-p/25657"
+          }
+        ]
+      }
+    }
+  ]
+}
