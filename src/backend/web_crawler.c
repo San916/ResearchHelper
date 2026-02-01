@@ -18,7 +18,7 @@ GetContentListHandle* get_content_list_handle(size_t max_content_length, size_t 
     handle->env_path = "..\\.env";
     handle->create_curl_handle = create_curl_handle;
     handle->load_env = load_env;
-    handle->get_search_url = get_google_search_url;
+    handle->get_google_search_url = get_google_search_url;
     handle->fetch_webpage_content = fetch_webpage_content;
     handle->structure_google_query_response = structure_google_query_response;
     handle->destroy_curl_handle = destroy_curl_handle;
@@ -53,7 +53,7 @@ char* get_content_list(const char* query, int* status_code, GetContentListHandle
     }
 
     handle->load_env(handle->env_path);
-    char* search_url = handle->get_search_url(query);
+    char* search_url = handle->get_google_search_url(query);
     if (!search_url) {
         goto destroy_curl_return;
     }

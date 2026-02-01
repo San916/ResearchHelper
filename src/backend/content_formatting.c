@@ -149,7 +149,7 @@ char* stringify_content_response(ContentList* comments, ContentItem* original_po
 
     size_t current_position = 0;
     size_t remaining = max_length;
-    current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"original_post\":");\
+    current_position += snprintf(response_msg + current_position, remaining - current_position, "{\"original_post\":");
     current_position += snprintf(response_msg + current_position, remaining - current_position, 
         "{\"content_body\":%s,\"score\":%d}", 
         original_post->content_body,
@@ -186,7 +186,7 @@ char* stringify_content_response(ContentList* comments, ContentItem* original_po
     return response_msg;
 }
 
-char* structure_webpage_content_response(char** content, size_t num_urls, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {\
+char* structure_webpage_content_response(char** content, size_t num_urls, WebsiteType website_type, size_t max_length, size_t max_num_comments, int min_score) {
     ContentList* comments = calloc(1, sizeof(ContentList));
     if (!comments) {
         return NULL;

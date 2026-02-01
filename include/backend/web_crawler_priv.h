@@ -10,7 +10,7 @@ struct GetContentListHandle {
     const char* env_path;
     CURL* (*create_curl_handle)();
     void (*load_env)(const char*);
-    char* (*get_search_url)(const char*);
+    char* (*get_google_search_url)(const char*);
     char* (*fetch_webpage_content)(const char*, int*, CURL*, struct curl_slist*);
     char* (*structure_google_query_response)(const char*, size_t, size_t);
     void (*destroy_curl_handle)(CURL*);
