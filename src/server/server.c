@@ -136,7 +136,12 @@ void pollServer(Server *server, int timeout) {
             }
 
             bool keep_alive = (req ? !req->keep_alive : false) || resp.close_connection || build_http_request_failure;
-            if (req) free(req);
+            if (req) {
+                if (req->body) {
+                    free(req->body);
+                }
+                free(req);
+            }
             free_http_response(&resp);
             
             if (keep_alive) {
