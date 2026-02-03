@@ -18,6 +18,7 @@ static const char working_request_body[] =
         "Host: www.example.com\r\n"
         "User-Agent: Mozilla/5.0\r\n"
         "Connection: keep-alive\r\n"
+        "Content-Length: 12\r\n"
         "\r\n"
         "Hello world!";
 
@@ -54,8 +55,14 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    if (req) free(req);
-    req = NULL;
+    if (req && req->body) {
+        free(req->body);
+        req->body = NULL;
+    }
+    if (req) {
+        free(req);
+        req = NULL;
+    }
 }
 
 // ==================================
@@ -235,16 +242,130 @@ void test_parse_headers_no_hosts(void) {
     TEST_ASSERT_EQUAL_INT(parse_headers(req), PARSE_NO_HOST_HEADERS);
 }
 
+void test_parse_headers_has_transfer_encoding_and_content_length(void) {
+    char line[] =         
+        "Transfer-Encoding: chunked\r\n"
+        "Content-length: 0\r\n"
+        "\r\n";
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(set_headers(req, &context), SET_HEADERS_OK);
+    TEST_ASSERT_EQUAL_INT(parse_headers(req), PARSE_HEADERS_CONTENT_LENGTH_EXISTS_WHILE_CHUNK_ENCODED);
+
+    char line_2[] =     
+        "Content-length: 0\r\n"    
+        "Transfer-Encoding: chunked\r\n"
+        "\r\n";
+
+    context = line_2;
+    TEST_ASSERT_EQUAL_INT(set_headers(req, &context), SET_HEADERS_OK);
+    TEST_ASSERT_EQUAL_INT(parse_headers(req), PARSE_HEADERS_CONTENT_LENGTH_EXISTS_WHILE_CHUNK_ENCODED);
+}
+
+void test_parse_headers_post_request_has_no_transfer_encoding_or_content_length(void) {
+    char line[] =         
+        "User-Agent: Mozilla/5.0\r\n"
+        "Connection: keep-alive\r\n"
+        "\r\n";
+    strcpy(req->method, "POST");
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(set_headers(req, &context), SET_HEADERS_OK);
+    TEST_ASSERT_EQUAL_INT(parse_headers(req), PARSE_HEADERS_INVALID_POST_HEADERS);
+}
+
+// ==================================
+// parse_body
+// ==================================
+void test_parse_chunked_body_working(void) {
+    char line[] =         
+        "5\r\n"
+        "Hello\r\n"
+        "10\r\n"
+        " world, it's me!\r\n"
+        "0\r\n"
+        "\r\n";
+    req->transfer_encoded = true;
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_chunked_body(req, &context), PARSE_BODY_OK);
+    TEST_ASSERT_EQUAL_INT(strcmp(req->body, "Hello world, it's me!"), 0);
+}
+
+void test_parse_chunked_body_missing_crlf(void) {
+    char line[] =         
+        "5\r\n"
+        "Hello\r\n"
+        "10\r\n"
+        " world, it's me!\r\n"
+        "0\r\n";
+    req->transfer_encoded = true;
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_chunked_body(req, &context), PARSE_CHUNKED_BODY_MISSING_CRLF);
+
+    char line_2[] =         
+        "5\r\n"
+        "Hello\r\n"
+        "10\r\n"
+        " world, it's me!\r\n"
+        "0"
+        "\r\n";
+
+    context = line_2;
+    TEST_ASSERT_EQUAL_INT(parse_chunked_body(req, &context), PARSE_CHUNKED_BODY_MISSING_CRLF);
+
+    char line_3[] =         
+        "5\r\n"
+        "Hello\r\n"
+        "10\r\n"
+        " world, it's me!"
+        "0\r\n"
+        "\r\n";
+
+    context = line_3;
+    TEST_ASSERT_EQUAL_INT(parse_chunked_body(req, &context), PARSE_CHUNKED_BODY_MISSING_CRLF);
+}
+
+void test_parse_chunked_invalid_chunk_size(void) {
+    char line[] =         
+        "gg\r\n"
+        "Hello\r\n"
+        "10\r\n"
+        " world, it's me!\r\n"
+        "0\r\n"
+        "\r\n";
+    req->transfer_encoded = true;
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_chunked_body(req, &context), PARSE_CHUNKED_BODY_INVALID_CHUNK_SIZE);
+}
+
 // ==================================
 // parse_body
 // ==================================
 void test_parse_body_working(void) {
     char line[] =         
         "ASDF\r\nQWERTY";
+    req->content_length = strlen(line);
 
     char* context = line;
     TEST_ASSERT_EQUAL_INT(parse_body(req, &context), PARSE_BODY_OK);
     TEST_ASSERT_EQUAL_INT(strcmp(req->body, "ASDF\r\nQWERTY"), 0);
+}
+
+void test_parse_body_length_mismatch(void) {
+    char line[] =         
+        "ASDF\r\nQWERTY";
+    req->content_length = strlen(line) + 1;
+
+    char* context = line;
+    TEST_ASSERT_EQUAL_INT(parse_body(req, &context), PARSE_BODY_LENGTH_CONTENT_LENGTH_MISMATCH);
+
+    req->content_length = strlen(line) - 1;
+
+    context = line;
+    TEST_ASSERT_EQUAL_INT(parse_body(req, &context), PARSE_BODY_LENGTH_CONTENT_LENGTH_MISMATCH);
 }
 
 // ==================================
@@ -274,7 +395,6 @@ void test_parse_http_request_body(void) {
     int status_code = 0;
 
     req = parse_http_request(working_request_body, strlen(working_request_body), &status_code);
-    display_http_request(req);
     TEST_ASSERT_EQUAL_INT(strcmp(req->method, "GET"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->path, "/index.html"), 0);
     TEST_ASSERT_EQUAL_INT(strcmp(req->version, "HTTP/1.1"), 0);
@@ -340,9 +460,17 @@ int main() {
     RUN_TEST(test_parse_headers_connection_not_properly_defined);
     RUN_TEST(test_parse_headers_two_hosts);
     RUN_TEST(test_parse_headers_no_hosts);
+    RUN_TEST(test_parse_headers_has_transfer_encoding_and_content_length);
+    RUN_TEST(test_parse_headers_post_request_has_no_transfer_encoding_or_content_length);
+
+    // parse_chunked_body
+    RUN_TEST(test_parse_chunked_body_working);
+    RUN_TEST(test_parse_chunked_body_missing_crlf);
+    RUN_TEST(test_parse_chunked_invalid_chunk_size);
 
     // parse_body
     RUN_TEST(test_parse_body_working);
+    RUN_TEST(test_parse_body_length_mismatch);
 
     // parse_http_request
     RUN_TEST(test_parse_http_request);

@@ -119,8 +119,11 @@ HttpRequestError parse_headers(HttpRequest* req) {
         char* value = req->headers[i].value;
 
         if (str_equals(key, "Connection", false)) {
-            if (str_equals(value, "keep-alive", false)) keep_alive = true;
-            else if (str_equals(value, "close", false)) keep_alive = false;
+            if (str_equals(value, "keep-alive", false))  {
+                keep_alive = true;
+            } else if (str_equals(value, "close", false)) {
+                keep_alive = false;
+            }
         } else if (str_equals(key, "Host", false)) {
             if (contains_host) return PARSE_MULTIPLE_HOST_HEADERS;
             contains_host = true;
@@ -132,21 +135,105 @@ HttpRequestError parse_headers(HttpRequest* req) {
             req->max_num_comments = strtoull(value, &end_ptr, 10);
         } else if (str_equals(key, "Min-Score", false)) {
             req->min_score = atoi(value);
+        } else if (str_equals(key, "Transfer-Encoding", false)) {
+            if (str_equals(value, "chunked", false)) {
+                req->transfer_encoded = true;
+                if (req->content_length) {
+                    return PARSE_HEADERS_CONTENT_LENGTH_EXISTS_WHILE_CHUNK_ENCODED;
+                }
+            } else {
+                req->transfer_encoded = false;
+            }
+        } else if (str_equals(key, "Content-Length", false)) {
+            req->content_length = atoi(value);
+            if (req->transfer_encoded) {
+                return PARSE_HEADERS_CONTENT_LENGTH_EXISTS_WHILE_CHUNK_ENCODED;
+            }
         }
     }
 
-    if (!contains_host) return PARSE_NO_HOST_HEADERS;
+    if (!strcmp(req->method, "POST") && !(req->content_length || req->transfer_encoded)) {
+        return PARSE_HEADERS_INVALID_POST_HEADERS;
+    }
+    if (!contains_host) {
+        return PARSE_NO_HOST_HEADERS;
+    }
     req->keep_alive = keep_alive;
     return PARSE_HEADERS_OK;
+}
+
+// REQUIRES: HttpRequest, char** context pointing to the start of a chunked body in the request
+// EFFECTS: Parses through body and adds it into the HttpRequest. Returns status code
+HttpRequestError parse_chunked_body(HttpRequest* req, char** context) {
+    char* current = *context;
+    size_t body_len = 0;
+    req->body = calloc(1, 1);
+    if (!req->body) {
+        return MALLOC_ERROR;
+    }
+
+    #define FREE_BODY_RETURN_STATUS_CODE(code) { if (req->body) { free(req->body); req->body = NULL; }; return code; }
+    while (1) {
+        char *start_ptr = current;
+        size_t chunk_size = strtoul(start_ptr, &current, 16);
+
+        if (current == start_ptr || chunk_size < 0) {
+            FREE_BODY_RETURN_STATUS_CODE(PARSE_CHUNKED_BODY_INVALID_CHUNK_SIZE);
+        }
+
+        if (current[0] != '\r' || current[1] != '\n') {
+            FREE_BODY_RETURN_STATUS_CODE(PARSE_CHUNKED_BODY_MISSING_CRLF);
+        }
+        current += 2;
+
+        if (chunk_size == 0) {
+            if (current[0] != '\r' || current[1] != '\n') {
+                FREE_BODY_RETURN_STATUS_CODE(PARSE_CHUNKED_BODY_MISSING_CRLF);
+            }
+            break;
+        }
+
+        char* new_body = realloc(req->body, body_len + chunk_size + 1);
+        if (!new_body) {
+            FREE_BODY_RETURN_STATUS_CODE(MALLOC_ERROR);
+        }
+        req->body = new_body;
+
+        memcpy(req->body + body_len, current, chunk_size);
+        body_len += chunk_size;
+        current += chunk_size;
+
+        if (current[0] != '\r' || current[1] != '\n') {
+            FREE_BODY_RETURN_STATUS_CODE(PARSE_CHUNKED_BODY_MISSING_CRLF);
+        }
+        current += 2;
+    }
+    req->body[body_len] = '\0';
+
+    return PARSE_BODY_OK;
 }
 
 // REQUIRES: HttpRequest, char** context pointing to the start of the body section in the request
 // EFFECTS: Parses through body and adds it into the HttpRequest. Returns status code
 HttpRequestError parse_body(HttpRequest* req, char** context) {
-    if (context == NULL || *context == NULL || **context == '\0') return PARSE_BODY_OK;
+    if (context == NULL || *context == NULL || **context == '\0') {
+        return PARSE_BODY_OK;
+    }
+
+    if (req->transfer_encoded) {
+        return parse_chunked_body(req, context);
+    }
+
+    if (strlen(*context) != req->content_length) {
+        return PARSE_BODY_LENGTH_CONTENT_LENGTH_MISMATCH;
+    }
+
     req->body = calloc(1, strlen(*context) + 1);
-    if (!req->body) return MALLOC_ERROR;
-    strcpy(req->body, *context);
+    if (!req->body) {
+        return MALLOC_ERROR;
+    }
+
+    strncpy(req->body, *context, strlen(*context));
     return PARSE_BODY_OK;
 }
 
@@ -175,7 +262,7 @@ HttpRequest* parse_http_request(const char* buffer, size_t buffer_len, int* stat
     memcpy(temp, buffer, buffer_len);
     temp[buffer_len] = '\0';
 
-    #define SET_STATUS_CODE_RETURN(code)  { *status_code = code; free(req); free(temp); return NULL; }
+    #define SET_STATUS_CODE_RETURN(code)  { *status_code = code; if(req && req->body) free(req->body); if (req) free(req); return NULL; }
 
     char* context = NULL;
     char* first_line = strtok_s(temp, "\r\n", &context);
