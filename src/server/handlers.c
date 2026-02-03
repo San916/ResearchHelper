@@ -20,6 +20,11 @@ static HttpRequestError add_content_length(HttpResponse* resp) {
 
 HttpResponse handle_home_html(HttpRequest* req) {
     HttpResponse resp = {0};
+
+    if (strcmp(req->method, "GET") != 0 && strcmp(req->method, "HEAD") != 0) {
+        return handle_405(req);
+    }
+
     resp.status_code = 200;
     resp.status_text = "OK";
 
@@ -38,7 +43,19 @@ HttpResponse handle_home_html(HttpRequest* req) {
         return handle_500();
     }
 
-    resp.body = malloc((int)file_len + 1);
+    resp.body_length = (size_t)file_len;
+    if (add_content_length(&resp) != 0) { 
+        fclose(fp);
+        return handle_500();
+    }
+    resp.close_connection = !req->keep_alive;
+
+    if (strcmp(req->method, "HEAD") == 0) {
+        fclose(fp);
+        return resp;
+    }
+
+    resp.body = malloc((size_t)file_len + 1);
     if (!resp.body) {
         fclose(fp);
         return handle_500();
@@ -49,19 +66,18 @@ HttpResponse handle_home_html(HttpRequest* req) {
         free(resp.body);
         return handle_500();
     }
-
     resp.body[bytes_read] = '\0';
-    resp.body_length = bytes_read;
-    if (add_content_length(&resp) != 0) { 
-        free(resp.body);
-        return handle_500();
-    }
-    resp.close_connection = !req->keep_alive;
+
     return resp;
 }
 
 HttpResponse handle_home_css(HttpRequest* req) {
     HttpResponse resp = {0};
+
+    if (strcmp(req->method, "GET") != 0 && strcmp(req->method, "HEAD") != 0) {
+        return handle_405(req);
+    }
+
     resp.status_code = 200;
     resp.status_text = "OK";
 
@@ -80,7 +96,19 @@ HttpResponse handle_home_css(HttpRequest* req) {
         return handle_500();
     }
 
-    resp.body = malloc((int)file_len + 1);
+    resp.body_length = (size_t)file_len;
+    if (add_content_length(&resp) != 0) { 
+        fclose(fp);
+        return handle_500();
+    }
+    resp.close_connection = !req->keep_alive;
+
+    if (strcmp(req->method, "HEAD") == 0) {
+        fclose(fp);
+        return resp;
+    }
+
+    resp.body = malloc((size_t)file_len + 1);
     if (!resp.body) {
         fclose(fp);
         return handle_500();
@@ -91,19 +119,18 @@ HttpResponse handle_home_css(HttpRequest* req) {
         free(resp.body);
         return handle_500();
     }
-
     resp.body[bytes_read] = '\0';
-    resp.body_length = bytes_read;
-    if (add_content_length(&resp) != 0) { 
-        free(resp.body);
-        return handle_500();
-    }
-    resp.close_connection = !req->keep_alive;
+
     return resp;
 }
 
 HttpResponse handle_home_js(HttpRequest* req) {
     HttpResponse resp = {0};
+
+    if (strcmp(req->method, "GET") != 0 && strcmp(req->method, "HEAD") != 0) {
+        return handle_405(req);
+    }
+
     resp.status_code = 200;
     resp.status_text = "OK";
 
@@ -122,7 +149,19 @@ HttpResponse handle_home_js(HttpRequest* req) {
         return handle_500();
     }
 
-    resp.body = malloc((int)file_len + 1);
+    resp.body_length = (size_t)file_len;
+    if (add_content_length(&resp) != 0) { 
+        fclose(fp);
+        return handle_500();
+    }
+    resp.close_connection = !req->keep_alive;
+
+    if (strcmp(req->method, "HEAD") == 0) {
+        fclose(fp);
+        return resp;
+    }
+
+    resp.body = malloc((size_t)file_len + 1);
     if (!resp.body) {
         fclose(fp);
         return handle_500();
@@ -133,14 +172,8 @@ HttpResponse handle_home_js(HttpRequest* req) {
         free(resp.body);
         return handle_500();
     }
-
     resp.body[bytes_read] = '\0';
-    resp.body_length = bytes_read;
-    if (add_content_length(&resp) != 0) { 
-        free(resp.body);
-        return handle_500();
-    }
-    resp.close_connection = !req->keep_alive;
+
     return resp;
 }
 
@@ -198,7 +231,7 @@ HttpResponse handle_submit(HttpRequest* req) {
 HttpResponse handle_content_request(HttpRequest* req) {
     HttpResponse resp = {0};
     
-    if (strcmp(req->method, "GET") != 0) {
+    if (strcmp(req->method, "GET") != 0 && strcmp(req->method, "HEAD") != 0) {
         return handle_405(req);
     }
     
@@ -233,62 +266,25 @@ HttpResponse handle_content_request(HttpRequest* req) {
         return handle_500();
     }
 
+    resp.body_length = (int)strlen(response_msg);
+    if (add_content_length(&resp) != 0) {
+        return handle_500();
+    }
+
+    resp.close_connection = !req->keep_alive;
+
+    if (strcmp(req->method, "HEAD") == 0) {
+        free(response_msg);
+        return resp;
+    }
+
     resp.body = malloc(strlen(response_msg) + 1);
     if (!resp.body) {
         free(response_msg);
         return handle_500();
     } 
     strcpy(resp.body, response_msg);
-    resp.body_length = (int)strlen(response_msg);
     free(response_msg);
 
-    if (add_content_length(&resp) != 0) {
-        free(resp.body);
-        return handle_500();
-    }
-
-    resp.close_connection = !req->keep_alive;
-    return resp;
-}
-
-HttpResponse handle_about(HttpRequest* req) {
-    HttpResponse resp = {0};
-    resp.status_code = 200;
-    resp.status_text = "OK";
-
-    if (set_header(resp.headers, &resp.num_headers, "Content-Type", "text/html; charset=utf-8") != 0) {
-        return handle_500();
-    }
-
-    FILE *fp = fopen("./../frontend/about.html", "rb");
-    if (!fp) return handle_500();
-
-    fseek(fp, 0, SEEK_END);
-    long file_len = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    if (file_len <= 0 || file_len > MAX_RESPONSE_BODY_LEN - 1) {
-        fclose(fp);
-        return handle_500();
-    }
-
-    resp.body = malloc((int)file_len + 1);
-    if (!resp.body) {
-        fclose(fp);
-        return handle_500();
-    }
-    size_t bytes_read = fread(resp.body, 1, file_len, fp);
-    fclose(fp);
-    if ((long)bytes_read != file_len) {
-        free(resp.body);
-        return handle_500();
-    }
-
-    resp.body[bytes_read] = '\0';
-    resp.body_length = bytes_read;
-    if (add_content_length(&resp) != 0) { 
-        free(resp.body);
-        return handle_500();
-    }
-    resp.close_connection = !req->keep_alive;
     return resp;
 }
