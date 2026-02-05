@@ -1,7 +1,8 @@
 #ifndef HANDLERS_H
 #define HANDLERS_H
 
-#include "http.h"
+typedef struct HttpRequest HttpRequest;
+typedef struct HttpResponse HttpResponse;
 
 HttpResponse handle_home_html(HttpRequest* req);
 HttpResponse handle_home_css(HttpRequest* req);

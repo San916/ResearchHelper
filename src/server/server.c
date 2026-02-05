@@ -1,12 +1,11 @@
 #include "server.h"
-#include "http.h"
-#include "http_errors.h"
+#include "http_orchestrator.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <winsock2.h>
 
-Server* createServer(int port, size_t initial_capacity, Route* routes, size_t num_routes) {
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, size_t num_routes) {
     Server *server = malloc(sizeof(Server));
     if (!server) return NULL;
     server->running = false;
@@ -15,16 +14,23 @@ Server* createServer(int port, size_t initial_capacity, Route* routes, size_t nu
     server->capacity = initial_capacity;
     server->socket = INVALID_SOCKET;
     server->clients = malloc(sizeof(SOCKET) * initial_capacity);
-    server->routes = routes;
-    server->num_routes = num_routes;
     if (!server->clients) {
         free(server);
         return NULL;
     }
+    if (http_handle) {
+        server->http_handle = http_handle;
+    } else {
+        server->http_handle = get_http_handle();
+    }
+    if (routes) {
+        set_http_handle_routes(server->http_handle, routes, num_routes);
+    }
+
     return server;
 }
 
-bool startServer(Server *server) {
+bool start_server(Server *server) {
     // Validate everything
     if (!server) return false;
 	WSADATA wsadata;
@@ -66,7 +72,7 @@ bool startServer(Server *server) {
     return true;
 }
 
-void pollServer(Server *server, int timeout) {
+void poll_server(Server *server, int timeout) {
     if (!server->running) return;
 
     // Add our socket and client sockets to the set
@@ -106,7 +112,7 @@ void pollServer(Server *server, int timeout) {
         if (client_socket == 0) continue; // FD_ISSET can't be called with 0 so skip
         if (!FD_ISSET(client_socket, &readfds)) continue;
 
-        char buffer[1024];
+        char buffer[MAX_REQUEST_SIZE];
         int bytes = recv(client_socket, buffer, sizeof(buffer)-1, 0);
 
         if (bytes <= 0) {
@@ -116,34 +122,13 @@ void pollServer(Server *server, int timeout) {
             i--;
             printf("Client socket closed (now %zu total clients)\n", server->num_clients);
         } else {
-            bool build_http_request_failure = false;
             buffer[bytes] = '\0';
-            int status_code = 0;
-
-            HttpRequest* req = parse_http_request(buffer, bytes, &status_code);
-            HttpResponse resp = {0};
-
-            if (!req) resp = handle_400(req);
-            else find_route(server->routes, server->num_routes, req, &resp);
-
-            char* response = build_http_response(&resp);
-            if (!response) {
-                build_http_request_failure = true;
-                send(client_socket, MINIMAL_500_RESPONSE, (int)strlen(MINIMAL_500_RESPONSE), 0);
-            } else {
-                send(client_socket, response, (int)strlen(response), 0);
-                free(response);
-            }
-
-            bool keep_alive = (req ? !req->keep_alive : false) || resp.close_connection || build_http_request_failure;
-            if (req) {
-                if (req->body) {
-                    free(req->body);
-                }
-                free(req);
-            }
-            free_http_response(&resp);
+            bool keep_alive = false;
+            char* response = handle_request(server->http_handle, buffer, bytes, &keep_alive);
             
+            send(client_socket, response, (int)strlen(response), 0);
+            free(response);
+
             if (keep_alive) {
                 closesocket(client_socket);
                 server->clients[i] = server->clients[server->num_clients - 1];
@@ -157,7 +142,7 @@ void pollServer(Server *server, int timeout) {
     }
 }
 
-void stopServer(Server *server) {
+void stop_server(Server *server) {
     if (!server || !server->running) return;
     server->running = false;
 
@@ -175,7 +160,7 @@ void stopServer(Server *server) {
     printf("Server stopping...\n");
 }
 
-void destroyServer(Server *server) {
+void destroy_server(Server *server) {
     if (!server) return;
     if (server->clients) free(server->clients);
     free(server);

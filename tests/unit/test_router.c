@@ -1,14 +1,12 @@
 #include "unity.h"
 #include "http.h"
 #include "http_errors.h"
-#include "handlers.h"
 #include "router.h"
 #include <string.h>
 #include <stdlib.h>
 
 // Define all variables here
 
-// We're not testing our handler functions in router, simply use a stub to verify the routing works
 static HttpResponse test_handle_home(HttpRequest* req) {
     HttpResponse resp = {0};
     resp.status_code = 200;

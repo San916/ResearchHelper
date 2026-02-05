@@ -1,5 +1,21 @@
 #include "http_errors.h"
+#include "http.h"
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+char* handle_build_http_response_error(HttpResponse* resp) {
+    char* response = calloc(1, 1 + strlen(MINIMAL_500_RESPONSE));
+    strcpy(response, MINIMAL_500_RESPONSE);
+    return response;
+}
+
+// Handles the different status codes during parse_http_request()
+// TODO: Add different responses depending on status code
+HttpResponse handle_parse_http_request_error(HttpRequest* req, int status_code) {
+    // For now, just return 400 Bad Request
+    return handle_400(req);
+}
 
 // Bad request
 HttpResponse handle_400(HttpRequest* req) {

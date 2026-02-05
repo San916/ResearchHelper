@@ -25,6 +25,7 @@ set(SOURCES
     ${SOURCE_DIR}/main.c
     ${SOURCE_DIR}/server/handlers.c
     ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/http_orchestrator.c
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/server.c
@@ -78,7 +79,6 @@ add_executable(test_http
     ${TEST_DIR}/unit/test_http.c
     ${TEST_UTILS_DIR}/src/test_http_utils.c
     ${SOURCE_DIR}/server/http.c
-    ${SOURCE_DIR}/server/http_errors.c
     ${SOURCE_DIR}/utils/utils.c
 )
 target_include_directories(test_http PRIVATE 
@@ -87,6 +87,24 @@ target_include_directories(test_http PRIVATE
     ${UNITY_DIR}/src
 )
 target_link_libraries(test_http unity)
+
+# ========== Unit test http orchestrator ==========
+add_executable(test_http_orchestrator
+    ${TEST_DIR}/unit/test_http_orchestrator.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/http_orchestrator.c
+    ${SOURCE_DIR}/server/router.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_http_orchestrator PRIVATE 
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_http_orchestrator unity)
+
 
 # ========== Unit test json ==========
 add_executable(test_json
@@ -103,15 +121,9 @@ target_link_libraries(test_json unity)
 # ========== Unit test router ==========
 add_executable(test_router
     ${TEST_DIR}/unit/test_router.c
-    ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/server/http.c
     ${SOURCE_DIR}/server/http_errors.c
-    ${SOURCE_DIR}/server/handlers.c
-    ${SOURCE_DIR}/backend/content_formatting.c
-    ${SOURCE_DIR}/backend/web_crawler_config.c
-    ${SOURCE_DIR}/backend/web_crawler.c
-    ${SOURCE_DIR}/backend/web_utils.c
-    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/server/router.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
@@ -119,7 +131,7 @@ target_include_directories(test_router PRIVATE
     ${INCLUDES}
     ${UNITY_DIR}/src
 )
-target_link_libraries(test_router unity Ws2_32 CURL::libcurl)
+target_link_libraries(test_router unity)
 
 # ========== Unit test utils ==========
 add_executable(test_utils
@@ -246,6 +258,7 @@ enable_testing()
 
 add_test(NAME test_content_formatting COMMAND test_content_formatting)
 add_test(NAME test_http COMMAND test_http)
+add_test(NAME test_http_orchestrator COMMAND test_http_orchestrator)
 add_test(NAME test_json COMMAND test_json)
 add_test(NAME test_router COMMAND test_router)
 add_test(NAME test_web_crawler_config COMMAND test_web_crawler_config)
