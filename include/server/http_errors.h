@@ -1,10 +1,15 @@
 #ifndef HTTP_ERRORS_H
 #define HTTP_ERRORS_H
 
-#include "http.h"
+#include <stdbool.h>
+
+typedef struct HttpRequest HttpRequest;
+typedef struct HttpResponse HttpResponse;
 
 #define MINIMAL_500_RESPONSE "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\nContent-Length: 21\r\n\r\n500 Internal Error"
 
+char* handle_build_http_response_error(HttpResponse* resp);
+HttpResponse handle_parse_http_request_error(HttpRequest* req, int status_code);
 HttpResponse handle_400(HttpRequest* req);
 HttpResponse handle_404(HttpRequest* req);
 HttpResponse handle_405(HttpRequest* req);

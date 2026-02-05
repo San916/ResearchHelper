@@ -11,6 +11,8 @@
 #include <windows.h>
 #include <curl/curl.h>
 
+// REQUIRES: get content list params
+// EFFECTS: Returns handle containg all functions relevant for get content list, for DI
 GetContentListHandle* get_content_list_handle(size_t max_content_length, size_t max_num_responses) {
     GetContentListHandle* handle = malloc(sizeof(GetContentListHandle));
     handle->max_content_length = max_content_length;
@@ -25,6 +27,8 @@ GetContentListHandle* get_content_list_handle(size_t max_content_length, size_t 
     return handle;
 }
 
+// REQUIRES: get content item params
+// EFFECTS: Returns handle containg all functions relevant for get content item, for DI
 GetContentItemHandle* get_content_item_handle(size_t max_content_length, size_t max_num_comments, int min_score) {
     GetContentItemHandle* handle = malloc(sizeof(GetContentItemHandle));
     handle->max_content_length = max_content_length;

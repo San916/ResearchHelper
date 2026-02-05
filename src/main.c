@@ -11,42 +11,41 @@
 volatile sig_atomic_t keep_running = 1;
 Server *server = NULL;
 
-void signalHandler(int signum) {
+Route ROUTES[] = {
+    {"/", handle_home_html},
+    {"/css/main.css", handle_home_css},
+    {"/js/main.js", handle_home_js},
+    {"/submit", handle_submit},
+    {"/content", handle_content_request},
+};
+
+void signal_handler(int signum) {
     keep_running = 0;
     printf("\nSignal received, shutting down...\n");
 }
 
 int main() {
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
 
-    Route routes[] = {
-        {"/", handle_home_html},
-        {"/css/main.css", handle_home_css},
-        {"/js/main.js", handle_home_js},
-        {"/submit", handle_submit},
-        {"/content", handle_content_request},
-    };
-    size_t num_routes = sizeof(routes) / sizeof(Route);
-
-    server = createServer(8080, NUM_INITIAL_CLIENTS, routes, num_routes);
+    server = create_server(8080, NUM_INITIAL_CLIENTS, NULL, ROUTES, 5);
     if (!server) {
         fprintf(stderr, "Failed to create server!\n");
         return 1;
     }
 
-    if (!startServer(server)) {
+    if (!start_server(server)) {
         fprintf(stderr, "Failed to start server!\n");
-        destroyServer(server);
+        destroy_server(server);
         return 1;
     }
 
     while (keep_running) {
-        pollServer(server, TIMEOUT_SECS);
+        poll_server(server, TIMEOUT_SECS);
     }
 
-    stopServer(server);
-    destroyServer(server);
+    stop_server(server);
+    destroy_server(server);
 
     return 0;
 }

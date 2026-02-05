@@ -1,9 +1,12 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <winsock2.h>
-#include "router.h"
+
+typedef struct HttpHandle HttpHandle;
+typedef struct Route Route;
 
 typedef struct Server {
     bool running;
@@ -12,14 +15,13 @@ typedef struct Server {
     size_t capacity;
     SOCKET socket;
     SOCKET *clients;
-    Route* routes;
-    size_t num_routes;
+    HttpHandle* http_handle;
 } Server;
 
-Server* createServer(int port, size_t initial_capacity, Route* routes, size_t num_routes);
-bool startServer(Server *server);
-void pollServer(Server *server, int timeout);
-void stopServer(Server *server);
-void destroyServer(Server *server);
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, size_t num_routes);
+bool start_server(Server *server);
+void poll_server(Server *server, int timeout);
+void stop_server(Server *server);
+void destroy_server(Server *server);
 
 #endif

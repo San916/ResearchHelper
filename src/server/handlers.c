@@ -10,7 +10,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <curl/curl.h>
 
 static HttpRequestError add_content_length(HttpResponse* resp) {
     char body_length_str[32];

@@ -2,6 +2,7 @@
 #define ROUTER_H
 
 #include "http.h"
+#include <stdlib.h>
 
 typedef HttpResponse (*HttpHandler)(HttpRequest*);
 
