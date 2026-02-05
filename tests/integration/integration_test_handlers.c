@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "http.h"
+#include "test_utils.h"
 #include "test_http_utils.h"
 #include "router.h"
 #include "handlers.h"
@@ -10,6 +11,10 @@
 #include <stdbool.h>
 
 // Define all variables here
+static const char HOME_HTML[] = "..\\frontend\\index.html";
+static const char HOME_CSS[] = "..\\frontend\\css\\main.css";
+static const char HOME_JS[] = "..\\frontend\\js\\main.js";
+
 static HttpResponse resp = {0};
 static HttpRequest* req = NULL;
 
@@ -19,6 +24,10 @@ void setUp(void) {
 }
 
 void tearDown(void) {
+    if (resp.body) {
+        free(resp.body);
+        resp.body = NULL;
+    }
     if (req && req->body) {
         free(req->body);
         req->body = NULL;
@@ -30,15 +39,54 @@ void tearDown(void) {
 }
 
 // ==================================
+// handle_home_html
+// ==================================
+void test_handle_home_html(void) {
+    strcpy(req->method, "GET");
+    resp = handle_home_html(req);
+    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
+
+    char* expected = read_file(HOME_HTML);
+    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
+    free(expected);
+}
+
+// ==================================
+// handle_home_css
+// ==================================
+void test_handle_home_css(void) {
+    strcpy(req->method, "GET");
+    resp = handle_home_css(req);
+    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
+
+    char* expected = read_file(HOME_CSS);
+    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
+    free(expected);
+}
+
+// ==================================
+// handle_home_js
+// ==================================
+void test_handle_home_js(void) {
+    strcpy(req->method, "GET");
+    resp = handle_home_js(req);
+    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
+
+    char* expected = read_file(HOME_JS);
+    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
+    free(expected);
+}
+
+// ==================================
 // handle_submit
 // ==================================
-test_handle_submit(void) {
+void test_handle_submit(void) {
     strcpy(req->method, "POST");
     req->body = calloc(1, strlen("user_input=How%20to%20use%20realloc()") + 1);
     strcpy(req->body, "user_input=How%20to%20use%20realloc()");
     req->max_num_responses = 3;
 
-    HttpResponse resp = handle_submit(req);
+    resp = handle_submit(req);
     TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
     
     char* results = get_json_value(resp.body, "results");
@@ -61,19 +109,18 @@ test_handle_submit(void) {
     }
     free(results);
     free(results_array);
-    free(resp.body);
 }
 
 // ==================================
 // handle_content_request
 // ==================================
-test_handle_content_request(void) {
+void test_handle_content_request(void) {
     strcpy(req->method, "GET");
     strcpy(req->path, "/content?url=https%3A%2F%2Fstackoverflow.com%2Fquestions%2F13748338%2Fhow-to-use-realloc-in-a-function-in-c");
     req->max_num_comments = 3;
     req->min_score = 0;
     
-    HttpResponse resp = handle_content_request(req);
+    resp = handle_content_request(req);
     TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
 
     char* original_post = get_json_value(resp.body, "original_post");
@@ -116,13 +163,21 @@ test_handle_content_request(void) {
 
     free(comments);
     free(comments_array);
-    free(resp.body);
 }
 
 int main() {
     UNITY_BEGIN();
 
     // Tests
+    // handle_home_html
+    RUN_TEST(test_handle_home_html);
+
+    // handle_home_css
+    RUN_TEST(test_handle_home_css);
+
+    // handle_home_js
+    RUN_TEST(test_handle_home_js);
+
     // handle_submit
     RUN_TEST(test_handle_submit);
 
