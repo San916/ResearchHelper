@@ -216,7 +216,7 @@ HttpResponse handle_submit(HttpRequest* req) {
         return handle_500();   
     } 
     strcpy(resp.body, response_msg);
-    resp.body_length = (int)strlen(response_msg);
+    resp.body_length = strlen(response_msg);
     free(response_msg);
 
     if (add_content_length(&resp) != 0) {
@@ -266,7 +266,7 @@ HttpResponse handle_content_request(HttpRequest* req) {
         return handle_500();
     }
 
-    resp.body_length = (int)strlen(response_msg);
+    resp.body_length = strlen(response_msg);
     if (add_content_length(&resp) != 0) {
         return handle_500();
     }

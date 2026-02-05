@@ -6,7 +6,7 @@
 #include "content_formatting.h"
 #include "web_crawler_priv.h"
 
-#include "test_webpage_parsing_utils.h"
+#include "test_utils.h"
 
 #include <curl/curl.h>
 

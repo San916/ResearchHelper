@@ -175,7 +175,7 @@ HttpRequestError parse_chunked_body(HttpRequest* req, char** context) {
     #define FREE_BODY_RETURN_STATUS_CODE(code) { if (req->body) { free(req->body); req->body = NULL; }; return code; }
     while (1) {
         char *start_ptr = current;
-        size_t chunk_size = strtoul(start_ptr, &current, 16);
+        size_t chunk_size = strtoull(start_ptr, &current, 16);
 
         if (current == start_ptr || chunk_size < 0) {
             FREE_BODY_RETURN_STATUS_CODE(PARSE_CHUNKED_BODY_INVALID_CHUNK_SIZE);
