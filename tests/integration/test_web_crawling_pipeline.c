@@ -1,7 +1,5 @@
 #include "unity.h"
 #include "http.h"
-#include "test_utils.h"
-#include "test_http_utils.h"
 #include "router.h"
 #include "handlers.h"
 #include "web_crawler.h"
@@ -11,10 +9,6 @@
 #include <stdbool.h>
 
 // Define all variables here
-static const char HOME_HTML[] = "..\\frontend\\index.html";
-static const char HOME_CSS[] = "..\\frontend\\css\\main.css";
-static const char HOME_JS[] = "..\\frontend\\js\\main.js";
-
 static HttpResponse resp = {0};
 static HttpRequest* req = NULL;
 
@@ -36,45 +30,6 @@ void tearDown(void) {
         free(req);
         req = NULL;
     }
-}
-
-// ==================================
-// handle_home_html
-// ==================================
-void test_handle_home_html(void) {
-    strcpy(req->method, "GET");
-    resp = handle_home_html(req);
-    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
-
-    char* expected = read_file(HOME_HTML);
-    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
-    free(expected);
-}
-
-// ==================================
-// handle_home_css
-// ==================================
-void test_handle_home_css(void) {
-    strcpy(req->method, "GET");
-    resp = handle_home_css(req);
-    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
-
-    char* expected = read_file(HOME_CSS);
-    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
-    free(expected);
-}
-
-// ==================================
-// handle_home_js
-// ==================================
-void test_handle_home_js(void) {
-    strcpy(req->method, "GET");
-    resp = handle_home_js(req);
-    TEST_ASSERT_EQUAL_INT(resp.status_code, 200);
-
-    char* expected = read_file(HOME_JS);
-    TEST_ASSERT_EQUAL_INT(strcmp(expected, resp.body), 0);
-    free(expected);
 }
 
 // ==================================
@@ -169,15 +124,6 @@ int main() {
     UNITY_BEGIN();
 
     // Tests
-    // handle_home_html
-    RUN_TEST(test_handle_home_html);
-
-    // handle_home_css
-    RUN_TEST(test_handle_home_css);
-
-    // handle_home_js
-    RUN_TEST(test_handle_home_js);
-
     // handle_submit
     RUN_TEST(test_handle_submit);
 

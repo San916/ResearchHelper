@@ -198,9 +198,9 @@ target_link_libraries(test_webpage_parsing unity CURL::libcurl)
 # ============= INTEGRATION TESTS ==============
 # ==============================================
 
-# ========== Integration test handlers.c ==========
-add_executable(integration_test_handlers
-    ${TEST_DIR}/integration/integration_test_handlers.c
+# ========== Integration file serving ==========
+add_executable(test_file_serving
+    ${TEST_DIR}/integration/test_file_serving.c
     ${TEST_UTILS_DIR}/src/test_utils.c
     ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_crawler_config.c
@@ -213,12 +213,33 @@ add_executable(integration_test_handlers
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
 )
-target_include_directories(integration_test_handlers PRIVATE
+target_include_directories(test_file_serving PRIVATE
     ${INCLUDES}
     ${TEST_UTILS_DIR}/include
     ${UNITY_DIR}/src
 )
-target_link_libraries(integration_test_handlers unity CURL::libcurl)
+target_link_libraries(test_file_serving unity CURL::libcurl)
+
+
+# ========== Integration test web crawling pipeline ==========
+add_executable(test_web_crawling_pipeline
+    ${TEST_DIR}/integration/test_web_crawling_pipeline.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_web_crawling_pipeline PRIVATE
+    ${INCLUDES}
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_web_crawling_pipeline unity CURL::libcurl)
 
 # ========== Add tests ==========
 enable_testing()
@@ -233,4 +254,5 @@ add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_web_utils COMMAND test_web_utils)
 add_test(NAME test_webpage_parsing COMMAND test_webpage_parsing)
 
-add_test(NAME integration_test_handlers COMMAND integration_test_handlers)
+add_test(NAME test_file_serving COMMAND test_file_serving)
+add_test(NAME test_web_crawling_pipeline COMMAND test_web_crawling_pipeline)
