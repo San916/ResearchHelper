@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "test_webpage_parsing_utils.h"
+#include "test_utils.h"
 #include "webpage_parsing.h"
 
 #include <stdlib.h>

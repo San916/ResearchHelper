@@ -55,6 +55,10 @@ add_compile_definitions(
     UNITY_OUTPUT_COLOR
 )
 
+# ==============================================
+# ================ UNIT TESTS ==================
+# ==============================================
+
 # ========== Unit test content formatting ==========
 add_executable(test_content_formatting
     ${TEST_DIR}/unit/test_content_formatting.c
@@ -147,7 +151,7 @@ target_link_libraries(test_web_crawler_config unity CURL::libcurl)
 # ========== Unit test web crawler ==========
 add_executable(test_web_crawler
     ${TEST_DIR}/unit/test_web_crawler.c
-    ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
+    ${TEST_UTILS_DIR}/src/test_utils.c
     ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_crawler_config.c
     ${SOURCE_DIR}/backend/web_crawler.c
@@ -178,7 +182,7 @@ target_link_libraries(test_web_utils unity CURL::libcurl)
 # ========== Unit test webpage parsing ==========
 add_executable(test_webpage_parsing
     ${TEST_DIR}/unit/test_webpage_parsing.c
-    ${TEST_UTILS_DIR}/src/test_webpage_parsing_utils.c
+    ${TEST_UTILS_DIR}/src/test_utils.c
     ${SOURCE_DIR}/backend/webpage_parsing.c
     ${SOURCE_DIR}/utils/json.c
     ${SOURCE_DIR}/utils/utils.c
@@ -189,6 +193,32 @@ target_include_directories(test_webpage_parsing PRIVATE
     ${UNITY_DIR}/src
 )
 target_link_libraries(test_webpage_parsing unity CURL::libcurl)
+
+# ==============================================
+# ============= INTEGRATION TESTS ==============
+# ==============================================
+
+# ========== Integration test handlers.c ==========
+add_executable(integration_test_handlers
+    ${TEST_DIR}/integration/integration_test_handlers.c
+    ${TEST_UTILS_DIR}/src/test_utils.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(integration_test_handlers PRIVATE
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(integration_test_handlers unity CURL::libcurl)
 
 # ========== Add tests ==========
 enable_testing()
@@ -202,3 +232,5 @@ add_test(NAME test_web_crawler COMMAND test_web_crawler)
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_web_utils COMMAND test_web_utils)
 add_test(NAME test_webpage_parsing COMMAND test_webpage_parsing)
+
+add_test(NAME integration_test_handlers COMMAND integration_test_handlers)
