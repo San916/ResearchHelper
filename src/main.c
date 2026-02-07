@@ -28,7 +28,7 @@ int main() {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    server = create_server(8080, NUM_INITIAL_CLIENTS, NULL, ROUTES, 5);
+    server = create_server(8080, NUM_INITIAL_CLIENTS, NULL, ROUTES, NULL, 5);
     if (!server) {
         fprintf(stderr, "Failed to create server!\n");
         return 1;

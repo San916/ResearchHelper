@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+// Define all variables here
 static const char HOME_HTML[] = "..\\frontend\\index.html";
 static const char HOME_CSS[] = "..\\frontend\\css\\main.css";
 static const char HOME_JS[] = "..\\frontend\\js\\main.js";

@@ -47,7 +47,7 @@ static char* mock_build_http_response_doesnt_work(HttpResponse* resp) {
     return NULL;
 }
 
-char* mock_handle_build_http_response_error(HttpResponse* resp) {
+static char* mock_handle_build_http_response_error(HttpResponse* resp) {
     char* response = calloc(1, 1 + strlen("Bad build http response"));
     strcpy(response, "Bad build http response");
     return response;

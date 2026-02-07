@@ -8,6 +8,8 @@
 typedef struct HttpHandle HttpHandle;
 typedef struct Route Route;
 
+typedef char* (*HandleRequest)(HttpHandle*, const char*, size_t, bool*);
+
 typedef struct Server {
     bool running;
     int port;
@@ -16,9 +18,11 @@ typedef struct Server {
     SOCKET socket;
     SOCKET *clients;
     HttpHandle* http_handle;
+    HandleRequest handle_request;
 } Server;
 
-Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, size_t num_routes);
+
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest handle_request, size_t num_routes);
 bool start_server(Server *server);
 void poll_server(Server *server, int timeout);
 void stop_server(Server *server);

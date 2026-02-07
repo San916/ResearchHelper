@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <winsock2.h>
 
-Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, size_t num_routes) {
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest handle_request, size_t num_routes) {
     Server *server = malloc(sizeof(Server));
     if (!server) return NULL;
     server->running = false;
@@ -26,6 +26,9 @@ Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle
     if (routes) {
         set_http_handle_routes(server->http_handle, routes, num_routes);
     }
+    if (handle_request) {
+        server->handle_request = handle_request;
+    }
 
     return server;
 }
@@ -35,12 +38,14 @@ bool start_server(Server *server) {
     if (!server) return false;
 	WSADATA wsadata;
     if (WSAStartup(MAKEWORD(2,2), &wsadata) != 0) {
+        WSACleanup();
         printf("WSAStartup failed!\n");
         return false;
     }
 
     server->socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (server->socket == INVALID_SOCKET) {
+        WSACleanup();
         printf("Socket creation failed!\n");
         return false;
     }
@@ -48,6 +53,7 @@ bool start_server(Server *server) {
     // Allow port reuse
     const char opt = 1;
     if (setsockopt(server->socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR) {
+        WSACleanup();
         printf("Setsockopt() failed!\n");
         return false;
     }
@@ -58,11 +64,13 @@ bool start_server(Server *server) {
     addr.sin_port = htons(server->port);
 
     if (bind(server->socket, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
+        WSACleanup();
         printf("Bind() failed!\n");
         return false;
     }
 
     if (listen(server->socket, SOMAXCONN) == SOCKET_ERROR) {
+        WSACleanup();
         printf("Listen() failed!\n");
         return false;
     }
@@ -124,7 +132,7 @@ void poll_server(Server *server, int timeout) {
         } else {
             buffer[bytes] = '\0';
             bool keep_alive = false;
-            char* response = handle_request(server->http_handle, buffer, bytes, &keep_alive);
+            char* response = server->handle_request(server->http_handle, buffer, bytes, &keep_alive);
             
             send(client_socket, response, (int)strlen(response), 0);
             free(response);
@@ -161,8 +169,15 @@ void stop_server(Server *server) {
 }
 
 void destroy_server(Server *server) {
-    if (!server) return;
-    if (server->clients) free(server->clients);
+    if (!server) {
+        return;
+    }
+    if (server->clients) {
+        free(server->clients);
+    }
+    if (server->http_handle) {
+        destroy_http_handle(server->http_handle);
+    }
     free(server);
     printf("Server destroyed\n");
 }
