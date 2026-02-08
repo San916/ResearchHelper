@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <winsock2.h>
 
-Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest handle_request, size_t num_routes) {
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest other_handle_request, size_t num_routes) {
     Server *server = malloc(sizeof(Server));
     if (!server) return NULL;
     server->running = false;
@@ -26,7 +26,9 @@ Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle
     if (routes) {
         set_http_handle_routes(server->http_handle, routes, num_routes);
     }
-    if (handle_request) {
+    if (other_handle_request) {
+        server->handle_request = other_handle_request;
+    } else {
         server->handle_request = handle_request;
     }
 
@@ -137,7 +139,7 @@ void poll_server(Server *server, int timeout) {
             send(client_socket, response, (int)strlen(response), 0);
             free(response);
 
-            if (keep_alive) {
+            if (!keep_alive) {
                 closesocket(client_socket);
                 server->clients[i] = server->clients[server->num_clients - 1];
                 server->num_clients--;
@@ -168,6 +170,9 @@ void stop_server(Server *server) {
     printf("Server stopping...\n");
 }
 
+// REQUIRES: Server reference
+// MODIFIES: server
+// EFFECTS: Frees server and its' contents, assumes routes isn't malloced
 void destroy_server(Server *server) {
     if (!server) {
         return;

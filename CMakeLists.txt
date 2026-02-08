@@ -210,9 +210,36 @@ target_link_libraries(test_webpage_parsing unity CURL::libcurl)
 # ============= INTEGRATION TESTS ==============
 # ==============================================
 
+# ========== Advanced server response ==========
+add_executable(test_advanced_server_response
+    ${TEST_DIR}/integration/test_advanced_server_response.c
+    ${TEST_UTILS_DIR}/src/test_server_utils.c
+    ${TEST_UTILS_DIR}/src/test_utils.c
+    ${SOURCE_DIR}/backend/content_formatting.c
+    ${SOURCE_DIR}/backend/web_crawler_config.c
+    ${SOURCE_DIR}/backend/web_crawler.c
+    ${SOURCE_DIR}/backend/web_utils.c
+    ${SOURCE_DIR}/backend/webpage_parsing.c
+    ${SOURCE_DIR}/server/handlers.c
+    ${SOURCE_DIR}/server/http.c
+    ${SOURCE_DIR}/server/http_errors.c
+    ${SOURCE_DIR}/server/http_orchestrator.c
+    ${SOURCE_DIR}/server/router.c
+    ${SOURCE_DIR}/server/server.c
+    ${SOURCE_DIR}/utils/json.c
+    ${SOURCE_DIR}/utils/utils.c
+)
+target_include_directories(test_advanced_server_response PRIVATE
+    ${INCLUDES}
+    ${TEST_UTILS_DIR}/include
+    ${UNITY_DIR}/src
+)
+target_link_libraries(test_advanced_server_response Ws2_32 unity CURL::libcurl)
+
 # ========== Basic server response ==========
 add_executable(test_basic_server_response
     ${TEST_DIR}/integration/test_basic_server_response.c
+    ${TEST_UTILS_DIR}/src/test_server_utils.c
     ${TEST_UTILS_DIR}/src/test_utils.c
     ${SOURCE_DIR}/backend/content_formatting.c
     ${SOURCE_DIR}/backend/web_crawler_config.c
@@ -292,6 +319,7 @@ add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_web_utils COMMAND test_web_utils)
 add_test(NAME test_webpage_parsing COMMAND test_webpage_parsing)
 
+add_test(NAME test_advanced_server_response COMMAND test_advanced_server_response)
 add_test(NAME test_basic_server_response COMMAND test_basic_server_response)
 add_test(NAME test_file_serving COMMAND test_file_serving)
 add_test(NAME test_web_crawling_pipeline COMMAND test_web_crawling_pipeline)

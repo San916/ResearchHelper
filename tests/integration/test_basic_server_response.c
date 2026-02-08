@@ -4,10 +4,12 @@
 #include "http_orchestrator.h"
 #include "http_orchestrator_priv.h"
 #include "router.h"
+#include "test_server_utils.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <winsock2.h>
 #include <windows.h>
 
 // Define all variables here
@@ -26,33 +28,12 @@ static char* mock_handle_request(HttpHandle* handle, const char* buffer, size_t 
     return response; 
 }
 
-typedef struct ServerContext {
-    Server* server;
-    int stop_flag;
-} ServerContext;
-
-static DWORD WINAPI run_server_for_testing(void* arg) {
-    ServerContext* context = (ServerContext*)arg;
-    Server* server = context->server;
-
-    if (!start_server(server)) {
-        destroy_server(server);
-        return 1;
-    }
-    
-    for (int i = 0; i < 10 && !context->stop_flag; i++) {
-        poll_server(server, 100);
-    }
-
-    stop_server(server);
-
-    return 0;
-}
-
 static ServerContext* server_context = NULL;
 static HANDLE server_thread = NULL;
+static SOCKET test_client;
 
 void setUp(void) {
+    // Setup server thread
     HttpHandle* handle = malloc(sizeof(HttpHandle));
     Route routes[] = {};
 
@@ -70,6 +51,28 @@ void setUp(void) {
     server_context->stop_flag = 0;
 
     server_thread = CreateThread(NULL, 0, run_server_for_testing, server_context, 0, NULL);
+
+    // Create test client socket
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
+        return;
+    }
+
+    test_client = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (test_client == INVALID_SOCKET) {
+        WSACleanup();
+        return;
+    }
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_port = htons(TEST_PORT_NUM);
+
+    if (connect(test_client, (const struct sockaddr*)&server_addr, (int)sizeof(server_addr)) == SOCKET_ERROR) {
+        WSACleanup();
+        return;
+    }
 }
 
 void tearDown(void) {
@@ -90,27 +93,12 @@ void tearDown(void) {
         free(server_context);
         server_context = NULL;
     }
+
+    closesocket(test_client);
+    WSACleanup();
 }
 
 void basic_server_polling_test(void) {
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
-        return;
-    }
-    
-    SOCKET test_client = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (test_client == INVALID_SOCKET) {
-        WSACleanup();
-        return;
-    }
-    
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server_addr.sin_port = htons(TEST_PORT_NUM);
-    
-    TEST_ASSERT_NOT_EQUAL_INT(connect(test_client, (const struct sockaddr*)&server_addr, (int)sizeof(server_addr)), SOCKET_ERROR);
-
     TEST_ASSERT_NOT_EQUAL_INT(send(test_client, CLIENT_MESSAGE, (int)strlen(CLIENT_MESSAGE), 0), -1);
 
     char buffer[1024];
@@ -119,9 +107,6 @@ void basic_server_polling_test(void) {
     buffer[bytes] = '\0';
 
     TEST_ASSERT_EQUAL_INT(strcmp(buffer, SERVER_MESSAGE), 0);
-
-    closesocket(test_client);
-    WSACleanup();
 }
 
 int main() {
