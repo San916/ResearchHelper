@@ -30,12 +30,16 @@ void destroy_http_handle(HttpHandle* handle) {
     free(handle);
 }
 
+// REQUIRES: routes should not be made via malloc
 // MODIFIES: sets handle->routes and num_routes
 void set_http_handle_routes(HttpHandle* handle, Route* routes, size_t num_routes) {
     handle->routes = routes;
     handle->num_routes = num_routes;
 }
 
+// REQUIRES: HttpHandle, request buffer, keep alive reference
+// MODIFIES: keep_alive
+// EFFECTS: Uses handle to process request and return response, sets keep_alive
 char* handle_request(HttpHandle* handle, const char* buffer, size_t bytes, bool* keep_alive) {
     bool force_close_connection = false;
     int status_code = 0;

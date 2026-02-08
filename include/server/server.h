@@ -22,7 +22,7 @@ typedef struct Server {
 } Server;
 
 
-Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest handle_request, size_t num_routes);
+Server* create_server(int port, size_t initial_capacity, HttpHandle* http_handle, Route* routes, HandleRequest other_handle_request, size_t num_routes);
 bool start_server(Server *server);
 void poll_server(Server *server, int timeout);
 void stop_server(Server *server);
